@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="javadoc">
+<target name="javadoc">
+<javadoc access="public" additionalparam="-link http://java.sun.com/j2se/1.5.0/docs/api/ " author="true" classpath="E:\Program Files\eclipse\plugins\org.junit_3.8.1\junit.jar" destdir="doc" doctitle="JonClark.Info Libraries" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="info.jonclark.print,info.jonclark.stat,info.jonclark.media,info.jonclark.lang,info.jonclark.util,info.jonclark.sourcecode,info.jonclark.gui" source="1.5" sourcepath="." splitindex="true" use="true" version="true"/>
+</target>
+</project>

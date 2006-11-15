@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jardesc>
+<jar path="e:/My Documents/Eclipse Workspace/JonsTools/bin/NumberTranslationApplet.jar"/>
+<options buildIfNeeded="true" compress="false" descriptionLocation="/JonsTools/conf/NumberTranslationApplet.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="true" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+<storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+<selectedProjects/>
+<manifest generateManifest="true" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+<sealing sealJar="false">
+<packagesToSeal/>
+<packagesToUnSeal/>
+</sealing>
+</manifest>
+<selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.gujarati"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.kannada"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.korean"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.english"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.bengali"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.framework.scribe"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.util"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.tamil"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.telugu"/>
+<file path="/JonsTools/.project"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.malayalam"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.gurumukhi"/>
+<file path="/JonsTools/javadoc.xml"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.ui"/>
+<file path="/JonsTools/.classpath"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.thai"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.oriya"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.framework.parser"/>
+<file path="/JonsTools/java.policy.applet"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.framework.base"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.tibetan"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.chinese"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.translation.languages.arabic"/>
+</selectedElements>
+</jardesc>

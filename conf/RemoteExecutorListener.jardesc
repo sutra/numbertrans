@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jardesc>
+<jar path="C:/Documents and Settings/Jonathan/Desktop/RemoteExecutorListener.jar"/>
+<options buildIfNeeded="true" compress="false" descriptionLocation="/JonsTools/conf/RemoteExecutorListener.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+<storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+<selectedProjects/>
+<manifest generateManifest="true" mainClassHandleIdentifier="=JonsTools/&lt;info.jonclark.clientserver{RemoteExecutorListener.java[RemoteExecutorListener" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+<sealing sealJar="true">
+<packagesToSeal/>
+<packagesToUnSeal/>
+</sealing>
+</manifest>
+<selectedElements exportClassFiles="false" exportJavaFiles="false" exportOutputFolder="true">
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.clientserver{RemoteExecutorListener.java"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.clientserver{SimpleServer.java"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.util{ProcessUtils.java"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.util{StringUtils.java"/>
+</selectedElements>
+</jardesc>
