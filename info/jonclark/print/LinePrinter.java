@@ -37,6 +37,7 @@ import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.List;
 
 // see http://www.javaworld.com/javaworld/jw-12-2000/print/listing2_code.html for printing info
 
@@ -208,11 +209,11 @@ public class LinePrinter implements Printable {
      */
     public static void main(String [] args) {
         BufferedReader br;
-        java.util.List lines;
+        List<String> lines;
         
         LinePrinter tp;
         tp = new LinePrinter();
-        lines = new java.util.ArrayList();
+        lines = new java.util.ArrayList<String>();
         try {
             InputStreamReader isr;
             isr = new InputStreamReader(System.in);

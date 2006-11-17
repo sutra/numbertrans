@@ -38,7 +38,8 @@ import java.awt.Image;
  * NOTE: Constructor takes image path RELATIVE TO CODEBASE as argument
  ******************************************************************************/
 // TODO: Rewrite this class without the Applet parameter
-class ImageCanvas extends Canvas {
+public class ImageCanvas extends Canvas {
+    private static final long serialVersionUID = 6629458079129220667L;
     private Image someImage;
 
     public ImageCanvas(String path, int width, int height, Applet referrer) {

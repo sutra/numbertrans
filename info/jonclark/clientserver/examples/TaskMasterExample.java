@@ -25,15 +25,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.util;
+package info.jonclark.clientserver.examples;
 
-/**
- * An exception resulting from a Properties object
- */
-public class PropertiesException extends Exception {
-    private static final long serialVersionUID = -6128594114385212663L;
+import java.util.Properties;
 
-    public PropertiesException(String message) {
-        super(message);
+import info.jonclark.clientserver.TaskMaster;
+import info.jonclark.util.PropertyUtils;
+
+public class TaskMasterExample {
+
+    /**
+         * @param args
+         * @throws Exception
+         */
+    public static void main(String[] args) throws Exception {
+	Properties props = PropertyUtils.getProperties("conf/taskMasterExample.properties");
+	TaskMaster master = new TaskMaster("EXAMPLE", props);
+	master.performTask("something productive1");
+	master.performTask("something productive2");
+	master.performTask("something productive3");
+	master.performTask("something productive4");
+	master.waitForAllTasks(true);
+	System.out.println("All tasks completed.");
     }
+
 }

@@ -25,15 +25,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.util;
+package info.jonclark.clientserver;
 
 /**
- * An exception resulting from a Properties object
+ * Monitor the status of a TaskMaster including:
+ * <li>How many workers are connected
+ * <li>How many tasks remain
+ * <li>How many tasks have been processed
+ * <li>The average rate of service
+ * <li>Overall progress toward finishing the task
  */
-public class PropertiesException extends Exception {
-    private static final long serialVersionUID = -6128594114385212663L;
+public abstract class TaskMasterMonitor extends SimpleServer {
 
-    public PropertiesException(String message) {
-        super(message);
+    public TaskMasterMonitor(int port) {
+	super(port);
+	// TODO Auto-generated constructor stub
     }
+    // Basically, we're implementing a listener over a network
 }

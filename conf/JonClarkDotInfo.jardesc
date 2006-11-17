@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jardesc>
-<jar path="e:/My Documents/Eclipse Workspace/CrescentSmartHome/lib/JonClarkDotInfo.jar"/>
+<jar path="e:/My Documents/Eclipse Workspace/JonsTools/JonClarkDotInfo.jar"/>
 <options buildIfNeeded="true" compress="false" descriptionLocation="/JonsTools/conf/JonClarkDotInfo.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
 <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
 <selectedProjects/>

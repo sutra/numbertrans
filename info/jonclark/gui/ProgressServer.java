@@ -38,168 +38,171 @@ import info.jonclark.clientserver.*;
 import info.jonclark.util.*;
 
 /**
- * A progress server (monitor) accepts connections from
- * various progress clients that are currently working on
- * tasks. This provides the user of the server a central
- * way to keep track of several ongoing tasks
+ * A progress server (monitor) accepts connections from various progress clients
+ * that are currently working on tasks. This provides the user of the server a
+ * central way to keep track of several ongoing tasks
  */
 public class ProgressServer extends SimpleServer {
     private BasicSwingApp frame = new BasicSwingApp("Progress Server");
     private JPanel contentPanel = new JPanel();
     private int nStallTimeoutSec = -1;
     private final Logger log = Logger.getLogger("info.jonclark.gui.ProgressServer");
-    private Hashtable<String,ProgressPanel> pans = new Hashtable<String,ProgressPanel>();
-    private Hashtable<Socket,String> sockets = new Hashtable<Socket,String>();
-    
+    private Hashtable<String, ProgressPanel> pans = new Hashtable<String, ProgressPanel>();
+    private Hashtable<Socket, String> sockets = new Hashtable<Socket, String>();
+
     public ProgressServer(Properties props, Logger parent) throws IOException {
-        super(Integer.parseInt(props.getProperty("notifyServer.port", "4242")));
-        log.setParent(parent);
-        frame.setSize(250,100);
-        frame.getContentPane().add(contentPanel);
-        int port =  Integer.parseInt(props.getProperty("notifyServer.port", "4242"));
-        runServer();
+	super(Integer.parseInt(props.getProperty("notifyServer.port", "4242")));
+	log.setParent(parent);
+	frame.setSize(250, 100);
+	frame.getContentPane().add(contentPanel);
+	runServer();
     }
 
-    /* (non-Javadoc)
-     * @see info.jonclark.clientserver.SimpleServer#handleClientRequest(java.net.Socket)
-     */
+    /*
+         * (non-Javadoc)
+         * 
+         * @see info.jonclark.clientserver.SimpleServer#handleClientRequest(java.net.Socket)
+         */
     public void handleClientRequest(Socket sock) {
-        BufferedReader in = null;
-        try {
-            in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-        	//PrintWriter out = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
-        	
-        	log.info("Got new connection from: " + sock.getInetAddress().getHostName());
-        	
-        	// determine if we already have a client with this name
-        	
-        	String line = null;
-        	while( (line = in.readLine()) != null) {
-        	    String[] tokens = StringUtils.tokenize(line); 
-        	    StringUtils.internTokens(tokens);
-        	    if(tokens.length < 2) {
-        	        log.warning("Received less than 2 tokens: " + line);
-        	        continue;
-        	    }
-        	    
-        	    String command = tokens[0];
-	            String name = tokens[1];
-	            
-	            // make sure we don't get multiple clients
-	            // with the same name (this is necessary because
-	            // we allow reconnections)
-	            if(sockets.containsKey(sock)) {
-	                if(sockets.get(sock) != name) {
-	                    JOptionPane.showInternalMessageDialog(frame,
-	                            "Duplicate task name from incoming client. Ignoring connection.",
-	                            "Duplicate Name",
-	                            JOptionPane.ERROR_MESSAGE);
-	                    // trap this connection since it will persistently
-	                    // try to reconnect otherwise
-	                    while(true) {
-	                        // FIXME: This could have undesirable results
-	                        Thread.sleep(Long.MAX_VALUE);
-	                    }
-	                }
-	            } else {
-	                sockets.put(sock,name);
-	            }
-	            
-	            ProgressPanel pan = getProgressPanel(name);
-        	    
-        	    // NOTE: Intern has been used so that equalities may
-        	    // be expressed as ==
-//        	    if(command == "NAME") {
-//        	        if(tokens.length == 2) {
-//        	            getProgressPanel(name);
-//        	        } else {
-//        	            log.warning("Wrong number of arguments: " + line);
-//        	        }
-//        	    } else
-        	    if(command == "MAX"){
-        	        if(tokens.length == 3) {
-        	            String value = tokens[2];
-       	                pan.setMaxValue(Integer.parseInt(value));
-        	        } else {
-        	            log.warning("Wrong number of arguments: " + line);
-        	        }
-        	    } else if(command == "STAT"){
-        	        if(tokens.length == 3) {
-        	            String stat = tokens[2];
-       	                pan.setProgress(Integer.parseInt(stat));
-        	            log.finest("Status is now: " + stat);
-        	        } else {
-        	            log.warning("Wrong number of arguments: " + line);
-        	        }
-        	    } else if(command == "DONE") {
-        	        if(tokens.length == 3) {
-        	            String strSuccess = tokens[2];
-        	            pan.setDone(Boolean.parseBoolean(strSuccess));
-        	            log.finer("Task is done. Success: " + strSuccess);
-        	        } else {
-        	            log.warning("Wrong number of arguments: " + line);
-        	        }
-        	    } else if(command == "STALL") {
-        	        if(tokens.length == 3) {
-        	            String timeout = tokens[2];
-        	            pan.setStallTimeout(Integer.parseInt(timeout));
-        	            log.fine("Setting stall timeout to " + timeout + " seconds"); 
-        	        } else {
-        	            log.warning("Wrong number of arguments: " + line);
-        	        }
-        	    } else {
-        	        log.warning("Unknown message: " + line);
-        	    }
-        	}
-        } catch(IOException ioe) {
-            log.warning(StringUtils.getStackTrace(ioe));
-        } catch(Exception e) {
-            // TODO: Set status as terminated here. (leave progress bar as is)
-            log.warning(StringUtils.getStackTrace(e));         
-        }
-        try {
-	        if(in != null)
-	            in.close();
-        } catch(IOException ioe) {
-            log.warning(StringUtils.getStackTrace(ioe));
-        }
-        sockets.remove(sock);
+	BufferedReader in = null;
+	try {
+	    in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+	    // PrintWriter out = new PrintWriter(new
+                // OutputStreamWriter(sock.getOutputStream()));
+
+	    log.info("Got new connection from: " + sock.getInetAddress().getHostName());
+
+	    // determine if we already have a client with this name
+
+	    String line = null;
+	    while ((line = in.readLine()) != null) {
+		String[] tokens = StringUtils.tokenize(line);
+		StringUtils.internTokens(tokens);
+		if (tokens.length < 2) {
+		    log.warning("Received less than 2 tokens: " + line);
+		    continue;
+		}
+
+		String command = tokens[0];
+		String name = tokens[1];
+
+		// make sure we don't get multiple clients
+		// with the same name (this is necessary because
+		// we allow reconnections)
+		if (sockets.containsKey(sock)) {
+		    if (sockets.get(sock) != name) {
+			JOptionPane.showInternalMessageDialog(frame,
+				"Duplicate task name from incoming client. Ignoring connection.",
+				"Duplicate Name", JOptionPane.ERROR_MESSAGE);
+			// trap this connection since it will persistently
+			// try to reconnect otherwise
+			while (true) {
+			    // FIXME: This could have undesirable results
+			    Thread.sleep(Long.MAX_VALUE);
+			}
+		    }
+		} else {
+		    sockets.put(sock, name);
+		}
+
+		ProgressPanel pan = getProgressPanel(name);
+
+		// NOTE: Intern has been used so that equalities may
+		// be expressed as ==
+		// if(command == "NAME") {
+		// if(tokens.length == 2) {
+		// getProgressPanel(name);
+		// } else {
+		// log.warning("Wrong number of arguments: " + line);
+		// }
+		// } else
+		if (command == "MAX") {
+		    if (tokens.length == 3) {
+			String value = tokens[2];
+			pan.setMaxValue(Integer.parseInt(value));
+		    } else {
+			log.warning("Wrong number of arguments: " + line);
+		    }
+		} else if (command == "STAT") {
+		    if (tokens.length == 3) {
+			String stat = tokens[2];
+			pan.setProgress(Integer.parseInt(stat));
+			log.finest("Status is now: " + stat);
+		    } else {
+			log.warning("Wrong number of arguments: " + line);
+		    }
+		} else if (command == "DONE") {
+		    if (tokens.length == 3) {
+			String strSuccess = tokens[2];
+			pan.setDone(Boolean.parseBoolean(strSuccess));
+			log.finer("Task is done. Success: " + strSuccess);
+		    } else {
+			log.warning("Wrong number of arguments: " + line);
+		    }
+		} else if (command == "STALL") {
+		    if (tokens.length == 3) {
+			String timeout = tokens[2];
+			pan.setStallTimeout(Integer.parseInt(timeout));
+			log.fine("Setting stall timeout to " + timeout + " seconds");
+		    } else {
+			log.warning("Wrong number of arguments: " + line);
+		    }
+		} else {
+		    log.warning("Unknown message: " + line);
+		}
+	    }
+	} catch (IOException ioe) {
+	    log.warning(StringUtils.getStackTrace(ioe));
+	} catch (Exception e) {
+	    // TODO: Set status as terminated here. (leave progress bar as
+                // is)
+	    log.warning(StringUtils.getStackTrace(e));
+	}
+	try {
+	    if (in != null)
+		in.close();
+	} catch (IOException ioe) {
+	    log.warning(StringUtils.getStackTrace(ioe));
+	}
+	sockets.remove(sock);
     }
-    
+
     /**
-     * Finds a progress panel in a Hashtable of ProgressPanels. If the panel
-     * does not yet exist, it is created.
-     * 
-     * @param pans Hashtable of ProgressPanels, keyed by name
-     * @param name The name of the ProgressPanel to be returned
-     * @return
-     */
+         * Finds a progress panel in a Hashtable of ProgressPanels. If the panel
+         * does not yet exist, it is created.
+         * 
+         * @param pans
+         *                Hashtable of ProgressPanels, keyed by name
+         * @param name
+         *                The name of the ProgressPanel to be returned
+         * @return
+         */
     protected ProgressPanel getProgressPanel(String name) {
-        synchronized(pans) {
-	        ProgressPanel pan = pans.get(name);
-	        if(pan == null) {
-	            log.fine("Creating new panel with name: " + name);
-	            pan = new ProgressPanel(name, log);
-	            pans.put(name,pan);
-	            contentPanel.add(pan);
-	            frame.pack();
-	            frame.validate();
-	        } else {
-	            pan.setName(name);
-	        }
-	        return pan;
-        }
+	synchronized (pans) {
+	    ProgressPanel pan = pans.get(name);
+	    if (pan == null) {
+		log.fine("Creating new panel with name: " + name);
+		pan = new ProgressPanel(name, log);
+		pans.put(name, pan);
+		contentPanel.add(pan);
+		frame.pack();
+		frame.validate();
+	    } else {
+		pan.setName(name);
+	    }
+	    return pan;
+	}
     }
 
     public static void main(String[] args) throws Exception {
-        //GuiUtils.setNativeLookAndFeel();
-        Logger log = Logger.getAnonymousLogger();
-        Handler hand = new ConsoleHandler();
-        hand.setLevel(Level.ALL);
-        log.addHandler(hand);
-        log.setLevel(Level.ALL);
-        
-        Properties props = PropertyUtils.getProperties("conf/notifyServer.properties");        
-        ProgressServer prog = new ProgressServer(props, log);
+	// GuiUtils.setNativeLookAndFeel();
+	Logger log = Logger.getAnonymousLogger();
+	Handler hand = new ConsoleHandler();
+	hand.setLevel(Level.ALL);
+	log.addHandler(hand);
+	log.setLevel(Level.ALL);
+
+	Properties props = PropertyUtils.getProperties("conf/notifyServer.properties");
+	ProgressServer prog = new ProgressServer(props, log);
     }
 }

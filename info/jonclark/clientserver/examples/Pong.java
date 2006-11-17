@@ -25,15 +25,53 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.util;
+package info.jonclark.clientserver.examples;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+
+import info.jonclark.clientserver.SimpleServer;
 
 /**
- * An exception resulting from a Properties object
+ * Waits to be "pinged" by the Ping class
  */
-public class PropertiesException extends Exception {
-    private static final long serialVersionUID = -6128594114385212663L;
+public class Pong extends SimpleServer {
 
-    public PropertiesException(String message) {
-        super(message);
+    public Pong(int port) {
+	super(port);
     }
+
+    /**
+         * @param args
+         */
+    public static void main(String[] args) throws Exception {
+	if (args.length != 1) {
+	    System.err.println("Usage: <program> host:port");
+	    System.exit(1);
+	}
+	Pong pong = new Pong(Integer.parseInt(args[0]));
+	pong.runServer();
+    }
+
+    @Override
+    public void handleClientRequest(Socket sock) {
+	try {
+	    BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+	    PrintWriter out = new PrintWriter(sock.getOutputStream());
+
+	    String line = in.readLine();
+	    System.out.println("received message: " + line);
+	    System.out.println("source: " + sock.getInetAddress().getHostName());
+	    out.println("pong");
+	    out.flush();
+	    System.out.println("sent message: pong");
+	    System.out.println();
+	} catch (IOException e) {
+	    e.printStackTrace();
+	}
+    }
+
 }

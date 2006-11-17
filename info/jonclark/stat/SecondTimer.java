@@ -76,6 +76,22 @@ public class SecondTimer {
     }
     
     /**
+     * Calculates the number of seconds elapsed per event
+     * on average, during the time this timer was accumulating.
+     * 
+     * @param nEvents The number of events that occurred
+     * 			while this SecondTimer has been accumulating
+     * 			time.
+     * @return
+     */
+    public String getSecondsPerEvent(long nEvents) {
+	if(nEvents > 0)
+            return format.format(getSeconds() / nEvents);
+        else
+            return "Undefined";
+    }
+    
+    /**
      * Gets the number of seconds accumulated by this
      * SecondTimer so far
      * 

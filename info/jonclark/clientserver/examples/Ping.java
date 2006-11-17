@@ -25,15 +25,33 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.util;
+package info.jonclark.clientserver.examples;
+
+import info.jonclark.clientserver.SimpleClient;
+import info.jonclark.util.StringUtils;
 
 /**
- * An exception resulting from a Properties object
+ * "Pings" a client running "Pong"
  */
-public class PropertiesException extends Exception {
-    private static final long serialVersionUID = -6128594114385212663L;
+public class Ping {
 
-    public PropertiesException(String message) {
-        super(message);
+    /**
+         * @param args
+     * @throws Exception 
+         */
+    public static void main(String[] args) throws Exception {
+	if (args.length != 1) {
+	    System.err.println("Usage: <program> port");
+	    System.exit(1);
+	}
+	
+	String[] tokens = StringUtils.tokenize(args[0]);
+	SimpleClient client = new SimpleClient(tokens[0], Integer.parseInt(tokens[1]));
+	client.connect();
+	client.sendMessage("ping");
+	System.out.println("sent message: ping");
+	System.out.println("got message: " + client.getMessage());
+	client.disconnect();
     }
+
 }

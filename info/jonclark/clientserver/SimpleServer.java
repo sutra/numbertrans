@@ -38,46 +38,81 @@ import java.util.concurrent.*;
  */
 public abstract class SimpleServer {
     private boolean shutdownRequested = false;
-    private final int port; 
-    
+    private final int port;
+    private final int nMaxConnections;
+    private int nCurrentConnections = 0;
+
     public static final int SHUTDOWN_TIMEOUT_SECS = 10;
-  
+    private static final long ACCEPT_CONNECTION_WAIT = 500;
+
     /**
-     * Create a new SimpleServer object.
-     * 
-     * @param port The port on which this server will listen.
-     */
+         * Create a new SimpleServer object.
+         * 
+         * @param port
+         *                The port on which this server will listen.
+         */
     public SimpleServer(final int port) {
+	this(port, Integer.MAX_VALUE);
+    }
+
+    /**
+         * Create a new SimpleServer object.
+         * 
+         * @param port
+         *                The port on which this server will listen.
+         * @param nMaxConnections
+         *                The maximum number of simultaneous connections this
+         *                server will accept.
+         */
+    public SimpleServer(final int port, final int nMaxConnections) {
 	this.port = port;
+	this.nMaxConnections = nMaxConnections;
     }
-    
+
     public void stopServer() {
-        shutdownRequested = true;
+	shutdownRequested = true;
     }
-    
+
     public void runServer() throws IOException {
-        ExecutorService executor = Executors.newCachedThreadPool();
-        ServerSocket socket = new ServerSocket(port);
-        while (!shutdownRequested) {
-            final Socket connection = socket.accept();
-            Runnable r = new Runnable() {
-                public void run() {
-                    handleClientRequest(connection);
-                }
-            };
-            executor.execute(r);
-        }
-        // Complete outstanding 
-        // requests before exiting
-        executor.shutdown();
-        try {
-            executor.awaitTermination(SHUTDOWN_TIMEOUT_SECS, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            System.err.println("Interrupted while shutting down.");
-        }
+	final ExecutorService executor = Executors.newCachedThreadPool();
+	final ServerSocket socket = new ServerSocket(port);
+	final SimpleServer synchronizable = this;
+	
+	while (!shutdownRequested) {
+	    if (nCurrentConnections < nMaxConnections) {
+
+		final Socket connection = socket.accept();
+		nCurrentConnections++;
+		Runnable r = new Runnable() {
+		    public void run() {
+			handleClientRequest(connection);
+			synchronized (synchronizable) {
+			    nCurrentConnections--;
+			}
+		    }
+		};
+		executor.execute(r);
+
+	    } else {
+
+		try {
+		    Thread.sleep(ACCEPT_CONNECTION_WAIT);
+		} catch (InterruptedException e) {
+		    ; // TODO: something?
+		}
+
+	    } // end if max connections reached
+	}
+	// Complete outstanding
+	// requests before exiting
+	executor.shutdown();
+	try {
+	    executor.awaitTermination(SHUTDOWN_TIMEOUT_SECS, TimeUnit.SECONDS);
+	} catch (InterruptedException e) {
+	    System.err.println("Interrupted while shutting down.");
+	}
     }
-    
+
     public abstract void handleClientRequest(Socket sock);
 
 }
-

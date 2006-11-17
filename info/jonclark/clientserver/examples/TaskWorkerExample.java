@@ -25,15 +25,42 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.util;
+package info.jonclark.clientserver.examples;
 
-/**
- * An exception resulting from a Properties object
- */
-public class PropertiesException extends Exception {
-    private static final long serialVersionUID = -6128594114385212663L;
+import java.util.logging.Logger;
 
-    public PropertiesException(String message) {
-        super(message);
+import info.jonclark.clientserver.TaskWorker;
+
+public class TaskWorkerExample extends TaskWorker {
+
+    public TaskWorkerExample(int port) {
+	super("EXAMPLE", port, 1, Logger.getAnonymousLogger());
     }
+
+    /**
+     * @param args
+     * @throws Exception 
+     */
+    public static void main(String[] args) throws Exception {
+	if (args.length != 1) {
+	    System.err.println("Usage: <program> port");
+	    System.exit(1);
+	}
+	
+	TaskWorkerExample example = new TaskWorkerExample(Integer.parseInt(args[0]));
+	System.out.println("Running...");
+	example.runServer();
+	System.out.println("Stopping...");
+    }
+
+    @Override
+    public void dieAndRespawn() {
+	System.out.println("Dying and respawning.");
+    }
+
+    @Override
+    public void performTask(String task) {
+	System.out.println("Performing task: " + task);
+    }
+
 }

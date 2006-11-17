@@ -58,8 +58,8 @@ public class SimpleClient implements ClientInterface {
     }
 
     /**
-         * Create a new SimpleClient object with the specified encoding. This does
-         * NOT connect the client.
+         * Create a new SimpleClient object with the specified encoding. This
+         * does NOT connect the client.
          * 
          * @param host
          *                The server to which we want to connect
@@ -93,8 +93,12 @@ public class SimpleClient implements ClientInterface {
          * Close our connection to the server
          */
     public void disconnect() {
-	if (out != null)
+	if (out != null) {
+	    out.flush();
 	    out.close();
+	}
+	in = null;
+	out = null;
     }
 
     /**
@@ -108,8 +112,14 @@ public class SimpleClient implements ClientInterface {
 
 	try {
 	    Socket sock = new Socket(host, port);
-	    out = new PrintWriter(new OutputStreamWriter(sock.getOutputStream(), encodingName));
-	    in = new BufferedReader(new InputStreamReader(sock.getInputStream(), encodingName));
+
+	    if (encodingName == null) {
+		out = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
+		in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+	    } else {
+		out = new PrintWriter(new OutputStreamWriter(sock.getOutputStream(), encodingName));
+		in = new BufferedReader(new InputStreamReader(sock.getInputStream(), encodingName));
+	    }
 	} catch (IOException ioe) {
 	    throw new ConnectionException("Could not connect to host.", ioe);
 	}
@@ -131,5 +141,17 @@ public class SimpleClient implements ClientInterface {
 	} catch (IOException ioe) {
 	    throw new ConnectionException("Could not get message.", ioe);
 	}
+    }
+
+    public String getHost() {
+	return host;
+    }
+
+    public int getPort() {
+	return port;
+    }
+
+    public String toString() {
+	return host + ":" + port;
     }
 }
