@@ -31,154 +31,176 @@ import java.util.*;
 
 /**
  * Utilities for working with arrays
- * 
  */
 public class ArrayUtils {
-  
+
     /**
-     * Convert an array into a string of the form
-     * {element1, element2, element3... }
-     * 
-     * @param <T> The type of the array
-     * @param arr The array to be converted into string form
-     * @return A string representation of the array
-     */
-    public static<T> String arrayToString(T[] arr) {
-        final StringBuilder builder = new StringBuilder("{");
-        
-        for(int i=0; i<arr.length-1; i++)
-            builder.append(arr[i] + ", ");
-        
-        builder.append(arr[arr.length-1] + "}");
-        return builder.toString();
-    }
-    
-    /**
-     * Convert an array into a string of the form
-     * {element1, element2, element3... }
-     * 
-     * @param <T> The type of the array
-     * @param arr The array to be converted into string form
-     * @return A string representation of the array
-     */
-    public static<T> String arrayToString(int[] arr) {
-        final StringBuilder builder = new StringBuilder("{");
-        
-        for(int i=0; i<arr.length-1; i++)
-            builder.append(arr[i] + ", ");
-        
-        builder.append(arr[arr.length-1] + "}");
-        return builder.toString();
-    }
-    
-    /**
-     * Convert an array into a string of the form
-     * {element1, element2, element3... }
-     * 
-     * @param <T> The type of the array
-     * @param arr The array to be converted into string form
-     * @return A string representation of the array
-     */
-    public static<T> String arrayToString(long[] arr) {
-        final StringBuilder builder = new StringBuilder("{");
-        
-        for(int i=0; i<arr.length-1; i++)
-            builder.append(arr[i] + ", ");
-        
-        builder.append(arr[arr.length-1] + "}");
-        return builder.toString();
-    }
-    
-    /**
-     * Convert an array into a string of the form
-     * {element1, element2, element3... }
-     * 
-     * @param <T> The type of the array
-     * @param arr The array to be converted into string form
-     * @return A string representation of the array
-     */
-    public static<T> String arrayToString(float[] arr) {
-        final StringBuilder builder = new StringBuilder("{");
-        
-        for(int i=0; i<arr.length-1; i++)
-            builder.append(arr[i] + ", ");
-        
-        builder.append(arr[arr.length-1] + "}");
-        return builder.toString();
-    }
-    
-    /**
-     * Convert an array into a string of the form
-     * {element1, element2, element3... }
-     * 
-     * @param <T> The type of the array
-     * @param arr The array to be converted into string form
-     * @return A string representation of the array
-     */
-    public static<T> String arrayToString(double[] arr) {
-        final StringBuilder builder = new StringBuilder("{");
-        
-        for(int i=0; i<arr.length-1; i++)
-            builder.append(arr[i] + ", ");
-        
-        builder.append(arr[arr.length-1] + "}");
-        return builder.toString();
-    }
-    
-    /**
-     * Convert an array into a string of the form
-     * {element1, element2, element3... }
-     * 
-     * @param <T> The type of the array
-     * @param arr The array to be converted into string form
-     * @return A string representation of the array
-     */
-    public static<T> String arrayToString(boolean[] arr) {
-        final StringBuilder builder = new StringBuilder("{");
-        
-        for(int i=0; i<arr.length-1; i++)
-            builder.append(arr[i] + ", ");
-        
-        builder.append(arr[arr.length-1] + "}");
-        return builder.toString();
-    }
-    
-    /**
-     * (Somewhat) efficiently convert an array into a vector
-     * (requires a full copy of the array to the vector).
-     * 
-     * @param arr The array to be converted into a vector
-     * @return A vector containing all the elements of arr
-     */
-    public static<T> Vector<T> arrayToVector(T[] arr) {
-        Vector<T> v = new Vector<T>(arr.length);
-        for(final T obj : arr)
-            v.add(obj);
-        return v;
+         * Convert an array into a string of the form {element1, element2,
+         * element3... }
+         * 
+         * @param <T>
+         *                The type of the array
+         * @param arr
+         *                The array to be converted into string form
+         * @return A string representation of the array
+         */
+    public static <T> String arrayToString(T[] arr) {
+	if(arr == null) {
+	    return "null";
+	} else if (arr.length != 0) {
+	    final StringBuilder builder = new StringBuilder("{\"");
+
+	    for (int i = 0; i < arr.length - 1; i++)
+		builder.append(arr[i] + "\",\"");
+
+	    builder.append(arr[arr.length - 1] + "\"}");
+	    return builder.toString();
+	} else {
+	    return "{empty}";
+	}
     }
 
     /**
-     * Find out if a sorted array contains a value
-     * 
-     * @param arr The array to be searched
-     * @param key The value to find in the array
-     * @return True if the value is found in the array
-     */
-    public static boolean sortedArrayContains(int[] arr, int key) {
-        return Arrays.binarySearch(arr, key) != -1;
+         * Convert an array into a string of the form {element1, element2,
+         * element3... }
+         * 
+         * @param <T>
+         *                The type of the array
+         * @param arr
+         *                The array to be converted into string form
+         * @return A string representation of the array
+         */
+    public static <T> String arrayToString(int[] arr) {
+	final StringBuilder builder = new StringBuilder("{");
+
+	for (int i = 0; i < arr.length - 1; i++)
+	    builder.append(arr[i] + ", ");
+
+	builder.append(arr[arr.length - 1] + "}");
+	return builder.toString();
     }
-    
+
     /**
-     * Find out if an unsorted array contains a value
-     * 
-     * @param arr The array to be searched
-     * @param key The value to find in the array
-     * @return True if the value is found in the array
-     */
+         * Convert an array into a string of the form {element1, element2,
+         * element3... }
+         * 
+         * @param <T>
+         *                The type of the array
+         * @param arr
+         *                The array to be converted into string form
+         * @return A string representation of the array
+         */
+    public static <T> String arrayToString(long[] arr) {
+	final StringBuilder builder = new StringBuilder("{");
+
+	for (int i = 0; i < arr.length - 1; i++)
+	    builder.append(arr[i] + ", ");
+
+	builder.append(arr[arr.length - 1] + "}");
+	return builder.toString();
+    }
+
+    /**
+         * Convert an array into a string of the form {element1, element2,
+         * element3... }
+         * 
+         * @param <T>
+         *                The type of the array
+         * @param arr
+         *                The array to be converted into string form
+         * @return A string representation of the array
+         */
+    public static <T> String arrayToString(float[] arr) {
+	final StringBuilder builder = new StringBuilder("{");
+
+	for (int i = 0; i < arr.length - 1; i++)
+	    builder.append(arr[i] + ", ");
+
+	builder.append(arr[arr.length - 1] + "}");
+	return builder.toString();
+    }
+
+    /**
+         * Convert an array into a string of the form {element1, element2,
+         * element3... }
+         * 
+         * @param <T>
+         *                The type of the array
+         * @param arr
+         *                The array to be converted into string form
+         * @return A string representation of the array
+         */
+    public static <T> String arrayToString(double[] arr) {
+	final StringBuilder builder = new StringBuilder("{");
+
+	for (int i = 0; i < arr.length - 1; i++)
+	    builder.append(arr[i] + ", ");
+
+	builder.append(arr[arr.length - 1] + "}");
+	return builder.toString();
+    }
+
+    /**
+         * Convert an array into a string of the form {element1, element2,
+         * element3... }
+         * 
+         * @param <T>
+         *                The type of the array
+         * @param arr
+         *                The array to be converted into string form
+         * @return A string representation of the array
+         */
+    public static <T> String arrayToString(boolean[] arr) {
+	final StringBuilder builder = new StringBuilder("{");
+
+	for (int i = 0; i < arr.length - 1; i++)
+	    builder.append(arr[i] + ", ");
+
+	builder.append(arr[arr.length - 1] + "}");
+	return builder.toString();
+    }
+
+    /**
+         * (Somewhat) efficiently convert an array into a vector (requires a
+         * full copy of the array to the vector).
+         * 
+         * @param arr
+         *                The array to be converted into a vector
+         * @return A vector containing all the elements of arr
+         */
+    public static <T> Vector<T> arrayToVector(T[] arr) {
+	Vector<T> v = new Vector<T>(arr.length);
+	for (final T obj : arr)
+	    v.add(obj);
+	return v;
+    }
+
+    /**
+         * Find out if a sorted array contains a value
+         * 
+         * @param arr
+         *                The array to be searched
+         * @param key
+         *                The value to find in the array
+         * @return True if the value is found in the array
+         */
+    public static boolean sortedArrayContains(int[] arr, int key) {
+	return Arrays.binarySearch(arr, key) != -1;
+    }
+
+    /**
+         * Find out if an unsorted array contains a value
+         * 
+         * @param arr
+         *                The array to be searched
+         * @param key
+         *                The value to find in the array
+         * @return True if the value is found in the array
+         */
     public static boolean unsortedArrayContains(int[] arr, int key) {
-        for(int i=0; i<arr.length; i++)
-            if(arr[i] == key)
-                return true;
-        return false;
+	for (int i = 0; i < arr.length; i++)
+	    if (arr[i] == key)
+		return true;
+	return false;
     }
 }

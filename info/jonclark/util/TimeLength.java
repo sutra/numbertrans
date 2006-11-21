@@ -39,8 +39,8 @@ import java.util.Date;
 // FIXME: This floating point math could potentially cause problems
 // FIXME: Create documentation
 // TODO: Fix accuracy of "month"
-// TODO: Create some JUnit test cases for cases such as "10 years 29 days, 100 seconds, 9 milliseconds"
-
+// TODO: Create some JUnit test cases for cases such as "10 years 29 days, 100
+// seconds, 9 milliseconds"
 
 public class TimeLength {
     private final long length;
@@ -91,7 +91,7 @@ public class TimeLength {
     }
 
     public double getInSeconds() {
-	return length / (1000);
+	return (double) length / (double) (1000);
     }
 
     /**
@@ -187,11 +187,7 @@ public class TimeLength {
 	    throw new IllegalArgumentException("Unknown time length format: " + strInput);
 	}
     }
-
-    // TODO: method that will find biggest unit possible with a whole number
-    // and
-    // honor that. e.g. 12.3 days or 2.5 minutes
-
+    
     /**
          * Finds the biggest unit possible that can be represented with a whole
          * number and outputs a String in that unit of time length as a
@@ -214,7 +210,7 @@ public class TimeLength {
 	    return format.format(getInMillis()) + " milliseconds";
 	}
     }
-    
+
     public String toStringMultipleUnits(final int nMaxUnits) {
 	// this algorithm might already exist elsewhere
 	long millis = length;
@@ -228,38 +224,56 @@ public class TimeLength {
 	hours %= 24;
 	long years = days / 365; // FIXME: not exactly...
 	days %= 365;
-	
+
 	final StringBuilder builder = new StringBuilder();
 	int nActualUnits = 0;
-	
-	if(years > 0 && nActualUnits < nMaxUnits) {
+
+	if (years > 0 && nActualUnits < nMaxUnits) {
 	    nActualUnits++;
-	    builder.append(years + " years, ");
+	    if (years == 1)
+		builder.append(years + " years, ");
+	    else
+		builder.append(years + " year, ");
 	}
-	if(days > 0 && nActualUnits < nMaxUnits) {
+	if (days > 0 && nActualUnits < nMaxUnits) {
 	    nActualUnits++;
-	    builder.append(days + " days, ");
+	    if (days == 1)
+		builder.append(days + " day, ");
+	    else
+		builder.append(days + " days, ");
 	}
-	if(hours > 0 && nActualUnits < nMaxUnits) {
+	if (hours > 0 && nActualUnits < nMaxUnits) {
 	    nActualUnits++;
-	    builder.append(hours + " hours, ");
+	    if (hours == 1)
+		builder.append(hours + " hour, ");
+	    else
+		builder.append(hours + " hours, ");
 	}
-	if(minutes > 0 && nActualUnits < nMaxUnits) {
+	if (minutes > 0 && nActualUnits < nMaxUnits) {
 	    nActualUnits++;
-	    builder.append(hours + " minutes, ");
+	    if (minutes == 1)
+		builder.append(hours + " minute, ");
+	    else
+		builder.append(hours + " minutes, ");
 	}
-	if(seconds > 0 && nActualUnits < nMaxUnits) {
+	if (seconds > 0 && nActualUnits < nMaxUnits) {
 	    nActualUnits++;
-	    builder.append(seconds + " seconds, ");
+	    if (seconds == 1)
+		builder.append(seconds + " second, ");
+	    else
+		builder.append(seconds + " seconds, ");
 	}
-	if(millis > 0 && nActualUnits < nMaxUnits) {
+	if (millis > 0 && nActualUnits < nMaxUnits) {
 	    nActualUnits++;
-	    builder.append(millis + " milliseconds, ");
+	    if (millis == 1)
+		builder.append(millis + " millisecond, ");
+	    else
+		builder.append(millis + " milliseconds, ");
 	}
 
 	final String strResult = StringUtils.cutCharsFromEnd(builder.toString(), 2);
 	return strResult;
-    }    
+    }
 
     /**
          * Returns all unit components of the time length (including zero
@@ -270,8 +284,7 @@ public class TimeLength {
          * @return A string of the above format containing all <code>long</code>
          *         values.
          */
-    public String toString() {
-	// this algorithm might already exist elsewhere
+    public String toStringAllUnits() {
 	long millis = length;
 	millis %= 1000;
 	long seconds = (length / 1000);
@@ -286,6 +299,10 @@ public class TimeLength {
 
 	return years + " years, " + days + " days, " + hours + " hours, " + minutes + " minutes, "
 		+ seconds + " seconds";
+    }
+    
+    public String toString() {
+	return toStringSingleUnit();
     }
 
     public static void main(String args[]) throws Exception {

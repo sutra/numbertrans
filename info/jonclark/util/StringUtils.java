@@ -419,6 +419,17 @@ public class StringUtils {
     }
 
     /**
+         * Counts the tokens in a string as delimited by a single character
+         * 
+         * @param str
+         * @param delims
+         * @return
+         */
+    public static int countTokens(final String str, final char delim) {
+	return countOccurances(str, delim) + 1;
+    }
+
+    /**
          * Counts the space-delimited tokens in a string
          * 
          * @param str
@@ -624,9 +635,9 @@ public class StringUtils {
 	    return false;
 	}
     }
-    
+
     public static String nullToEmpty(String str) {
-	if(str == null)
+	if (str == null)
 	    return "";
 	else
 	    return str;

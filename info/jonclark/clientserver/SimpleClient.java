@@ -39,6 +39,7 @@ import java.net.*;
 public class SimpleClient implements ClientInterface {
     private final String host;
     private final int port;
+    private Socket sock;
     private PrintWriter out;
     private BufferedReader in;
     private final String encodingName;
@@ -76,6 +77,39 @@ public class SimpleClient implements ClientInterface {
     }
 
     /**
+         * Create a new SimpleClient object. <code>connect()</code> must still
+         * be called before performing IO.
+         * 
+         * @param sock
+         *                An already connected socket to be used for this
+         *                SimpleClient.
+         */
+    public SimpleClient(Socket sock) {
+	this.host = sock.getInetAddress().getHostName();
+	this.port = sock.getPort();
+	this.encodingName = null;
+	this.sock = sock;
+    }
+
+    /**
+         * Create a new SimpleClient object with the specified encoding.
+         * <code>connect()</code> must still be called before performing IO.
+         * 
+         * @param sock
+         *                An already connected socket to be used for this
+         *                SimpleClient.
+         * @param encodingName
+         *                The name of the encoding to be used over the socket
+         *                connection.
+         */
+    public SimpleClient(Socket sock, String encodingName) {
+	this.host = sock.getInetAddress().getHostName();
+	this.port = sock.getPort();
+	this.encodingName = encodingName;
+	this.sock = sock;
+    }
+
+    /**
          * Send a message to the server.
          * 
          * @param str
@@ -102,8 +136,8 @@ public class SimpleClient implements ClientInterface {
     }
 
     /**
-         * Connect to the server; this must be called before attempting to send
-         * a message.
+         * Connect to the server and create I/O streams; this MUST be called
+         * before attempting to send a message.
          * 
          * @throws ConnectionException
          */
@@ -111,7 +145,9 @@ public class SimpleClient implements ClientInterface {
 	assert in == null && out == null : "Already connected.";
 
 	try {
-	    Socket sock = new Socket(host, port);
+	    if (sock == null) {
+		sock = new Socket(host, port);
+	    }
 
 	    if (encodingName == null) {
 		out = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));

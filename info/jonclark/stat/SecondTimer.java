@@ -38,7 +38,7 @@ public class SecondTimer {
     private long startDate = 0;
     
     private final boolean catchOverlappingGo;
-    private static final DecimalFormat format = new DecimalFormat("#,###.##");
+    public static final DecimalFormat format = new DecimalFormat("#,###.##");
     
     /**
      * Does not catch "overlapping go" by default.

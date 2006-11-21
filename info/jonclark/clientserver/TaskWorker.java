@@ -35,6 +35,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URLEncoder;
 import java.util.logging.Logger;
 
 public abstract class TaskWorker extends SimpleServer {
@@ -53,6 +54,8 @@ public abstract class TaskWorker extends SimpleServer {
     @Override
     public void handleClientRequest(Socket sock) {
 	try {
+	    log.info("New connection from " + sock.getInetAddress().getHostName());
+
 	    final BufferedReader in = new BufferedReader(new InputStreamReader(sock
 		    .getInputStream()));
 	    final PrintWriter out = new PrintWriter(sock.getOutputStream());
@@ -64,46 +67,77 @@ public abstract class TaskWorker extends SimpleServer {
 	    String line = null;
 	    while (running && (line = in.readLine()) != null) {
 		log.finer("Got line: " + line);
-		
+
 		try {
 		    // get task and do it
-		    String[] tokens = StringUtils.tokenize(line, " ", 2);
-		    if (tokens[0].equals("TASK:")) {
-			log.finer("Performing task: " + tokens[0]);
-			this.performTask(tokens[1]);
+		    String[] tokens = StringUtils.tokenize(line, TaskMaster.GROUP_DELIM, 3);
+		    final String command = tokens[0];
+		    final String task = tokens[1];
+		    if (command.equals("TASK:")) {
+			log.finer("Performing task: " + task);
+			String[] args;
+			if (tokens.length == 3) {
+			    args = StringUtils.tokenize(tokens[2], TaskMaster.ARG_DELIM);
+			} else {
+			    args = new String[0];
+			}
 
-			// reply with success
-			out.println("RESULT: TRUE");
+			String[] arrResults = this.performTask(task, args);
+			String results;
+			if (arrResults == null) {
+			    results = "";
+			} else {
+			    results = StringUtils.untokenize(arrResults, TaskMaster.ARG_DELIM);
+			}
+
+			// convert into a safe representation by escaping some
+                        // characters
+			// and reply with success
+			String reply = URLEncoder.encode("RESULT: TRUE " + results, "UTF-8");
+			out.println(reply);
 			out.flush();
 		    } else {
-			log.info("Unknown message type: " + tokens[0]);
+			log.info("Unknown message type: " + command);
 		    }
 
 		} catch (Throwable t) {
 		    // CATCH **ANYTHING** THAT COMES OUT OF THIS LOOP SO
 		    // THAT OUR WORKER DOESN'T DIE
-		    out.println("RESULT: FALSE");
+		    log.severe("Error while performing task:");
+		    log.severe(StringUtils.getStackTrace(t));
+
+		    String reply = URLEncoder.encode("RESULT: FALSE "
+			    + StringUtils.getStackTrace(t), "UTF-8");
+		    out.println(reply);
 		    out.flush();
 		    dieAndRespawn();
 		}
 	    }
 
-	} catch(SocketException e) {
+	} catch (SocketException e) {
 	    ; // this is probably just the connection being reset
 	} catch (IOException e) {
 	    log.severe("IOException while handling task.");
 	    log.severe(StringUtils.getStackTrace(e));
 	}
-	log.finer("Ending client connection.");
+
+	try {
+	    // Make every effot to tidy up.
+	    log.finer("Ending client connection.");
+	    sock.close();
+	} catch (IOException e) {
+	    ; // we really don't care if this fails
+	    // the socket might already be closed
+	}
     }
 
     /**
          * Do the requested task.
          * 
          * @param task
-     * @throws Exception 
+         * @throws Exception
          */
-    public abstract void performTask(final String task) throws Exception;
+    public abstract String[] performTask(final String task, final String[] args) throws Exception;
 
     /**
          * Something bad happened while handling a client request. Kill ALL

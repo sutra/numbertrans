@@ -27,13 +27,16 @@
  */
 package info.jonclark.clientserver;
 
+import info.jonclark.stat.RemainingTimeEstimator;
 import info.jonclark.stat.SecondTimer;
+import info.jonclark.util.ArrayUtils;
 import info.jonclark.util.PropertiesException;
 import info.jonclark.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -51,6 +54,11 @@ public class TaskMaster {
     private static final long TASKER_THREAD_WAIT = 50;
     private static final long BLOCKER_THREAD_WAIT = 1000;
 
+    public static final String ARG_DELIM = "\u001F"; // Unit
+    // Separator
+    public static final String GROUP_DELIM = "\u001D"; // Group
+    // Separator
+
     private final ExecutorService taskExecutor = Executors.newCachedThreadPool();
     private final ExecutorService reconnectExecutor = Executors.newCachedThreadPool();
 
@@ -60,7 +68,9 @@ public class TaskMaster {
     private boolean running;
 
     private final Logger log = Logger.getLogger("TASK_MASTER");
-    private final SecondTimer timer = new SecondTimer(true);
+    private final RemainingTimeEstimator timer = new RemainingTimeEstimator(50);
+
+    private final TaskMasterIface listener;
 
     // TODO: Add a timeout so that each worker has a certain amount of time
     // to complete its task. The amount of time allowed for each task should
@@ -68,7 +78,23 @@ public class TaskMaster {
 
     // TODO: Allow multiple connections to a single host via the config file
 
-    public TaskMaster(String desiredTask, Properties props) throws PropertiesException {
+    // TODO: Add clean() method to return things to a sensible task when
+    // something failed halfway through execution. This clean task will
+    // not necessarily run on the same worker that the failed task did, BUT
+    // it will receive the same arguments.
+
+    // TODO: Assign multiple tasks to a worker at once so that they have a
+    // buffer of tasks
+
+    /**
+         * @param desiredTask
+         * @param props
+         * @param listener
+         *                The interface that will receive notification that a
+         *                task has been completed. (null is allowable)
+         */
+    public TaskMaster(String desiredTask, Properties props, TaskMasterIface listener)
+	    throws PropertiesException {
 	assert desiredTask != null : "desiredTask cannot be null";
 	assert props != null : "props cannot be null";
 
@@ -83,16 +109,28 @@ public class TaskMaster {
 	}
 
 	this.desiredTask = desiredTask;
+	this.listener = listener;
 
 	running = true;
 	connectorThread.start();
 	taskerThread.start();
-	timer.go();
     }
 
-    public void performTask(final String task) {
-	log.finest("Adding task: " + task);
-	queueTasks.add(task);
+    /**
+         * Request that a task be performed by some worker at some future time.
+         * If the task returns a result, the <code>taskCompleted()</code>
+         * method will be called and a <code>String</code> result will be
+         * passed to it.
+         * 
+         * @param task
+         *                The name of the task to be performed
+         * @param args
+         *                Zero or more string arguments to the task
+         */
+    public void performTask(final String task, final String... args) {
+	final String encodedTask = task + GROUP_DELIM + StringUtils.untokenize(args, ARG_DELIM);
+	log.finest("Adding task: " + encodedTask);
+	queueTasks.add(encodedTask);
     }
 
     /**
@@ -131,8 +169,11 @@ public class TaskMaster {
 		    boolean quitRequested = false;
 		    while (!quitRequested && (line = in.readLine()) != null) {
 			if (line.equals("help")) {
-			    System.out.println("tasksleft taskscompleted workersidle "
+			    System.out.println("time tasksleft taskscompleted workersidle "
 				    + "workersdisconnected rate loglevel quit");
+			} else if (line.equals("time")) {
+			    System.out.println("Time remaining: "
+				    + timer.getRemainingTime(queueTasks.size()));
 			} else if (line.equals("tasksleft")) {
 			    System.out.println("Tasks remaining: " + queueTasks.size());
 			} else if (line.equals("taskscompleted")) {
@@ -156,7 +197,7 @@ public class TaskMaster {
 			    try {
 				Level level = Level.parse(tokens[1]);
 				log.setLevel(level);
-				System.out.println("Log level is now "+ level);
+				System.out.println("Log level is now " + level);
 			    } catch (IllegalArgumentException e) {
 				System.out.println("Bad log level.");
 			    }
@@ -203,26 +244,31 @@ public class TaskMaster {
 		    client.connect();
 
 		    String line = client.getMessage();
-		    String[] tokens = StringUtils.tokenize(line);
+		    if (line != null) {
+			log.finest("Received message: " + line);
+			String[] tokens = StringUtils.tokenize(line);
 
-		    log.finest("Received message: " + line);
-
-		    if (tokens.length == 2 && tokens[0].equals("CAN:")
-			    && tokens[1].equals(desiredTask)) {
-			log.info("Connection to " + client.toString() + " sucessful.");
-			boolean bAdded = idleWorkers.add(client);
-			assert bAdded == true : "Unable to add worker to idleWorkers";
+			if (tokens.length == 2 && tokens[0].equals("CAN:")
+				&& tokens[1].equals(desiredTask)) {
+			    log.info("Connection to " + client.toString() + " sucessful.");
+			    boolean bAdded = idleWorkers.add(client);
+			    assert bAdded == true : "Unable to add worker to idleWorkers";
+			} else {
+			    client.sendMessage("ERROR: " + "WRONG_TASK");
+			    client.disconnect();
+			    log.warning("Worker " + client.toString()
+				    + " does not support the task " + desiredTask);
+			    disconnectedWorkers.add(client);
+			}
 		    } else {
-			client.sendMessage("ERROR: " + "WRONG_TASK");
+			log.info("Client disconnected: " + client.toString() + " (null line)");
 			client.disconnect();
-			log.warning("Worker " + client.toString() + " does not support the task "
-				+ desiredTask);
 			disconnectedWorkers.add(client);
 		    }
 		} catch (ConnectionException e) {
 		    client.disconnect();
-		    log.warning("Connection to " + client.toString() + " failed.");
-		    log.warning(StringUtils.getStackTrace(e));
+		    log.warning("Connection to " + client.toString() + " failed because "
+			    + e.getMessage());
 		    disconnectedWorkers.add(client);
 		}
 	    }
@@ -231,31 +277,62 @@ public class TaskMaster {
 
     private Runnable workerTasker = new Runnable() {
 	public void run() {
-	    final String task = queueTasks.poll();
+	    final String encodedTask = queueTasks.poll();
 
-	    if (task != null) {
+	    if (encodedTask != null) {
 		final SimpleClient client = idleWorkers.poll();
 
 		if (client != null) {
-		    log.info("Tasking " + client.toString() + " with task: " + task);
-		    client.sendMessage("TASK: " + task);
+		    log.info("Tasking " + client.toString() + " with task: " + encodedTask);
+		    client.sendMessage("TASK:" + TaskMaster.GROUP_DELIM + encodedTask);
+
 		    try {
 			String reply = client.getMessage();
-			String[] tokens = StringUtils.tokenize(reply);
-			if (tokens.length == 2 && tokens[0].equals("RESULT:")
-				&& tokens[1].equals("TRUE")) {
-			    log.info("Task sucessful: " + task);
+
+			// decode unsafe characters
+			reply = URLDecoder.decode(reply, "UTF-8");
+			String[] tokens = StringUtils.tokenize(reply, " ", 3);
+
+			if (tokens.length >= 2 && tokens[0].equals("RESULT:")
+				&& tokens[1].trim().equals("TRUE")) {
+
+			    log.info("Task sucessful: " + encodedTask);
+
+			    if (listener != null && tokens.length == 3) {
+				final String[] groups = StringUtils.tokenize(encodedTask,
+					GROUP_DELIM, 2);
+				assert groups.length == 2 : "Encoded task must have 2 groups: "
+					+ encodedTask;
+				final String[] args = StringUtils.tokenize(groups[1], ARG_DELIM);
+				final String[] results = StringUtils.tokenize(tokens[2], ARG_DELIM);
+
+				final String taskName = groups[0];
+
+				listener.taskCompleted(taskName, args, results);
+			    }
+
 			    synchronized (nTasksCompleted) {
 				nTasksCompleted.incrementAndGet();
+				timer.recordEvent();
 			    }
+
 			} else {
-			    log.info("Task failed: " + task);
+
+			    log.warning("Task failed on " + client.toString() + ": " + encodedTask);
+			    if (tokens.length == 3) {
+				final String stackTrace = tokens[2];
+				log.warning(stackTrace);
+			    }
+
 			}
 			idleWorkers.add(client);
-		    } catch (ConnectionException e) {
+
+		    } catch (Throwable t) {
+			// CATCH **ANYTHING** COMING OUT OF THIS THREAD
 			// we need to try this task over again...
-			log.info("Task requeued: " + task);
-			queueTasks.add(task);
+			log.warning("Task requeued after exception: " + encodedTask);
+			log.warning(StringUtils.getStackTrace(t));
+			queueTasks.add(encodedTask);
 
 			client.disconnect();
 			disconnectedWorkers.add(client);

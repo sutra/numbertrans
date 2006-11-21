@@ -41,11 +41,11 @@ public class Ping {
          */
     public static void main(String[] args) throws Exception {
 	if (args.length != 1) {
-	    System.err.println("Usage: <program> port");
+	    System.err.println("Usage: <program> host:port");
 	    System.exit(1);
 	}
 	
-	String[] tokens = StringUtils.tokenize(args[0]);
+	String[] tokens = StringUtils.tokenize(args[0], ":");
 	SimpleClient client = new SimpleClient(tokens[0], Integer.parseInt(tokens[1]));
 	client.connect();
 	client.sendMessage("ping");

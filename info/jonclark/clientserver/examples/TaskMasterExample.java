@@ -40,7 +40,7 @@ public class TaskMasterExample {
          */
     public static void main(String[] args) throws Exception {
 	Properties props = PropertyUtils.getProperties("conf/taskMasterExample.properties");
-	TaskMaster master = new TaskMaster("EXAMPLE", props);
+	TaskMaster master = new TaskMaster("EXAMPLE", props, null);
 	master.performTask("something productive1");
 	master.performTask("something productive2");
 	master.performTask("something productive3");

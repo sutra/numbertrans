@@ -25,43 +25,40 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.clientserver.examples;
+package info.jonclark.util;
 
 import java.util.logging.Logger;
 
-import info.jonclark.clientserver.TaskWorker;
+public class DebugUtils {
 
-public class TaskWorkerExample extends TaskWorker {
-
-    public TaskWorkerExample(int port) {
-	super("EXAMPLE", port, 1, Logger.getAnonymousLogger());
+    /**
+         * Determine if the assert keyword is enabled for this Virtual Machine.
+         * That is, "was the -ea option passed on startup?"
+         */
+    public static boolean isAssertEnabled() {
+	try {
+	    assert false;
+	} catch (AssertionError e) {
+	    return true;
+	}
+	return false;
     }
 
     /**
-     * @param args
-     * @throws Exception 
-     */
-    public static void main(String[] args) throws Exception {
-	if (args.length != 1) {
-	    System.err.println("Usage: <program> port");
-	    System.exit(1);
+         * Logs a message giving the current status of the assert keyword and
+         * provides user with information about what this means.
+         * 
+         * @param log
+         *                The logger to which the message will be added.
+         */
+    public static void logAssertStatus(Logger log) {
+	if (isAssertEnabled()) {
+	    log.info("The assert keyword is ENABLED.\n This is good for debugging,"
+		    + "but could result in degraded program performance.");
+	} else {
+	    log.info("The assert keyword is **DISABLED**.\n This is good for distribution,"
+		    + "but could result in undetected errors. Asserts can be enabled by"
+		    + "passing the -ea option to java.");
 	}
-	
-	TaskWorkerExample example = new TaskWorkerExample(Integer.parseInt(args[0]));
-	System.out.println("Running...");
-	example.runServer();
-	System.out.println("Stopping...");
     }
-
-    @Override
-    public void dieAndRespawn() {
-	System.out.println("Dying and respawning.");
-    }
-
-    @Override
-    public String[] performTask(final String task, final String[] args) {
-	System.out.println("Performing task: " + task);
-	return null;
-    }
-
 }

@@ -30,6 +30,7 @@ package info.jonclark.clientserver;
 import java.io.*;
 import java.net.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A simple asynchronous multi-threaded server.
@@ -40,10 +41,9 @@ public abstract class SimpleServer {
     private boolean shutdownRequested = false;
     private final int port;
     private final int nMaxConnections;
-    private int nCurrentConnections = 0;
+    private AtomicInteger nCurrentConnections = new AtomicInteger(0);
 
     public static final int SHUTDOWN_TIMEOUT_SECS = 10;
-    private static final long ACCEPT_CONNECTION_WAIT = 500;
 
     /**
          * Create a new SimpleServer object.
@@ -77,30 +77,31 @@ public abstract class SimpleServer {
 	final ExecutorService executor = Executors.newCachedThreadPool();
 	final ServerSocket socket = new ServerSocket(port);
 	final SimpleServer synchronizable = this;
-	
-	while (!shutdownRequested) {
-	    if (nCurrentConnections < nMaxConnections) {
 
-		final Socket connection = socket.accept();
-		nCurrentConnections++;
+	while (!shutdownRequested) {
+	    final Socket connection = socket.accept();
+	    if (nCurrentConnections.get() < nMaxConnections) {
+		// we will accept this connection
 		Runnable r = new Runnable() {
 		    public void run() {
+			synchronized (nCurrentConnections) {
+			    nCurrentConnections.getAndIncrement();
+			}
 			handleClientRequest(connection);
 			synchronized (synchronizable) {
-			    nCurrentConnections--;
+			    nCurrentConnections.getAndDecrement();
 			}
 		    }
 		};
 		executor.execute(r);
 
 	    } else {
-
-		try {
-		    Thread.sleep(ACCEPT_CONNECTION_WAIT);
-		} catch (InterruptedException e) {
-		    ; // TODO: something?
-		}
-
+		// we will reject this connection
+		PrintWriter out = new PrintWriter(connection.getOutputStream());
+		out.println("ERROR: nMaxConnections exceeded.");
+		out.flush();
+		out.close();
+		connection.close();
 	    } // end if max connections reached
 	}
 	// Complete outstanding

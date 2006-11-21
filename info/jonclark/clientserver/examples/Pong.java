@@ -49,7 +49,7 @@ public class Pong extends SimpleServer {
          */
     public static void main(String[] args) throws Exception {
 	if (args.length != 1) {
-	    System.err.println("Usage: <program> host:port");
+	    System.err.println("Usage: <program> port");
 	    System.exit(1);
 	}
 	Pong pong = new Pong(Integer.parseInt(args[0]));

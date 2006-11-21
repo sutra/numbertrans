@@ -25,43 +25,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.clientserver.examples;
+package info.jonclark.clientserver;
 
-import java.util.logging.Logger;
-
-import info.jonclark.clientserver.TaskWorker;
-
-public class TaskWorkerExample extends TaskWorker {
-
-    public TaskWorkerExample(int port) {
-	super("EXAMPLE", port, 1, Logger.getAnonymousLogger());
-    }
-
-    /**
-     * @param args
-     * @throws Exception 
-     */
-    public static void main(String[] args) throws Exception {
-	if (args.length != 1) {
-	    System.err.println("Usage: <program> port");
-	    System.exit(1);
-	}
-	
-	TaskWorkerExample example = new TaskWorkerExample(Integer.parseInt(args[0]));
-	System.out.println("Running...");
-	example.runServer();
-	System.out.println("Stopping...");
-    }
-
-    @Override
-    public void dieAndRespawn() {
-	System.out.println("Dying and respawning.");
-    }
-
-    @Override
-    public String[] performTask(final String task, final String[] args) {
-	System.out.println("Performing task: " + task);
-	return null;
-    }
-
+/**
+ * An interface to handle to result of a task delegated by a TaskMaster.
+ */
+public interface TaskMasterIface {
+    public void taskCompleted(final String task, final String[] args, final String[] results);
 }

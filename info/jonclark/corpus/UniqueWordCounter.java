@@ -35,8 +35,8 @@ import java.util.Map.Entry;
  * provides statistics accordingly.
  */
 public class UniqueWordCounter {
-    private TreeMap<String, Long> counts = new TreeMap<String, Long>();
-    private long nonUniqueCount = 0;
+    private TreeMap<String, Integer> counts = new TreeMap<String, Integer>();
+    private int nonUniqueCount = 0;
     private final boolean alreadyInterned;
 
     /**
@@ -57,7 +57,7 @@ public class UniqueWordCounter {
          * 
          * @return
          */
-    public long getNonuniqueWordCount() {
+    public int getNonuniqueWordCount() {
 	return nonUniqueCount;
     }
 
@@ -66,7 +66,7 @@ public class UniqueWordCounter {
          * 
          * @return
          */
-    public long getUniqueWordCount() {
+    public int getUniqueWordCount() {
 	return counts.size();
     }
 
@@ -75,7 +75,7 @@ public class UniqueWordCounter {
          * 
          * @return
          */
-    public Set<Entry<String, Long>> getEntrySet() {
+    public Set<Entry<String, Integer>> getEntrySet() {
 	return counts.entrySet();
     }
 
@@ -93,9 +93,9 @@ public class UniqueWordCounter {
 
 	nonUniqueCount++;
 
-	Long count = counts.get(word);
+	Integer count = counts.get(word);
 	if (count == null)
-	    counts.put(word, 1l);
+	    counts.put(word, 1);
 	else
 	    counts.put(word, count++);
     }
