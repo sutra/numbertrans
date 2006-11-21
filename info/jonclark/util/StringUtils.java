@@ -771,6 +771,26 @@ public class StringUtils {
     }
 
     /**
+         * Reverse the given string
+         */
+    public static String reverse(final String str) {
+
+	if (str.length() == 1) {
+	    return str;
+	} else {
+	    final char[] arr = str.toCharArray();
+
+	    for (int i = 0; i < arr.length / 2; i++) {
+		final char c = arr[arr.length - i - 1];
+		arr[arr.length - i - 1] = arr[i];
+		arr[i] = c;
+	    }
+
+	    return new String(arr);
+	}
+    }
+
+    /**
          * Create a single string from an array of tokens, starting with the
          * element having index <code>nStartElement</code> and ending with
          * <code>nLastElement</code> inclusive, adding the specified string

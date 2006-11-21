@@ -57,6 +57,7 @@ import net.sourceforge.numbertrans.languages.gujarati.GujaratiCardinalParser;
 import net.sourceforge.numbertrans.languages.gujarati.GujaratiCardinalScribe;
 import net.sourceforge.numbertrans.languages.gurumukhi.GurumukhiCardinalParser;
 import net.sourceforge.numbertrans.languages.gurumukhi.GurumukhiCardinalScribe;
+import net.sourceforge.numbertrans.languages.japanese.JapaneseCardinalScribe;
 import net.sourceforge.numbertrans.languages.kannada.KannadaCardinalParser;
 import net.sourceforge.numbertrans.languages.kannada.KannadaCardinalScribe;
 import net.sourceforge.numbertrans.languages.malayalam.MalayalamCardinalParser;
@@ -92,6 +93,7 @@ public class NumberTranslationApplet extends JApplet {
     public static final String ENGLISH_CARDINAL = "English Cardinal Number";
     public static final String GUJARATI_CARDINAL = "Gujarati Cardinal Number";
     public static final String GURUMUKHI_CARDINAL = "Gurumukhi Cardinal Number";
+    public static final String JAPANESE_CARDINAL = "Japanese Cardinal Number";
     public static final String KANNADA_CARDINAL = "Kannada Cardinal Number";
     public static final String MALAYALAM_CARDINAL = "Malayalam Cardinal Number";
     public static final String ORIYA_CARDINAL = "Oriya Cardinal Number";
@@ -219,6 +221,7 @@ public class NumberTranslationApplet extends JApplet {
 	    comboOutputLanguage.addItem(ENGLISH_CARDINAL);
 	    comboOutputLanguage.addItem(GUJARATI_CARDINAL);
 	    comboOutputLanguage.addItem(GURUMUKHI_CARDINAL);
+	    comboOutputLanguage.addItem(JAPANESE_CARDINAL);
 	    comboOutputLanguage.addItem(KANNADA_CARDINAL);
 	    comboOutputLanguage.addItem(MALAYALAM_CARDINAL);
 	    comboOutputLanguage.addItem(ORIYA_CARDINAL);
@@ -298,6 +301,8 @@ public class NumberTranslationApplet extends JApplet {
 	    scribe = new GujaratiCardinalScribe(Form.SHORT);
 	} else if (selectedOutput.equals(GURUMUKHI_CARDINAL)) {
 	    scribe = new GurumukhiCardinalScribe(Form.SHORT);
+	} else if (selectedOutput.equals(JAPANESE_CARDINAL)) {
+	    scribe = new JapaneseCardinalScribe(Form.SHORT);
 	} else if (selectedOutput.equals(KANNADA_CARDINAL)) {
 	    scribe = new KannadaCardinalScribe(Form.SHORT);
 	} else if (selectedOutput.equals(MALAYALAM_CARDINAL)) {
