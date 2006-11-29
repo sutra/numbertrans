@@ -36,7 +36,7 @@ import net.sourceforge.numbertrans.framework.parser.NumberParser;
  * A class for converting out of number systems that have a 1-to-1 character
  * correspondence with the arabic numeral system.
  */
-public class CharacterMappedCardinalParser extends NumberParser {
+public class CharacterMappedCardinalParser extends NumberParser<WholeNumber> {
 
     private final char[] sourceDigits;
 
@@ -72,13 +72,13 @@ public class CharacterMappedCardinalParser extends NumberParser {
     }
 
     @Override
-    public GeneralNumber getNumberFromFind(NumberMatch find) {
+    public WholeNumber getNumberFromFind(NumberMatch find) {
 	// TODO Auto-generated method stub
 	return null;
     }
 
     @Override
-    public GeneralNumber getNumberFromString(String strNumber) throws NumberFormatException {
+    public WholeNumber getNumberFromString(String strNumber) throws NumberFormatException {
 	assert strNumber != null;
 
 	char[] buf = new char[strNumber.length()];

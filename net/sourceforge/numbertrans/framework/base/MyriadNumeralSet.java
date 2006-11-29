@@ -38,10 +38,14 @@ public class MyriadNumeralSet {
 	this.largeNumbers = largeNumbers;
     }
 
-    public String getDigit(int value) {
+    public String getDigit(int value) throws NumberFormatException {
 	assert value >= 0 && value <= 9 : "Digits have a value from 0 to 9; received value = "
 		+ value;
-	return digits[value];
+	
+	String result = digits[value];
+	if(result == null)
+	    throw new NumberFormatException("The digit " + value + " is unsupported by this numeral set.");
+	return result;
     }
 
     /**
@@ -50,12 +54,18 @@ public class MyriadNumeralSet {
          * 
          * @param magnitude
          * @return
+         * @throws NumberFormatException
+         *                 If no digit is found for the given magnitude.
          */
-    public String getLargeNumber(long magnitude) {
+    public String getLargeNumber(long magnitude) throws NumberFormatException {
 	assert magnitude % 10 == 0 : "Only powers of ten are valid for this method.";
 	int nPowerOfTen = (int) Math.log10(magnitude);
 	assert nPowerOfTen > 0 : "The power of ten " + nPowerOfTen
 		+ " is not valid (it is less than 1).";
+
+	if (nPowerOfTen - 1 >= largeNumbers.length)
+	    throw new NumberFormatException("No digit found for magnitude " + magnitude
+		    + " of power " + nPowerOfTen);
 	return largeNumbers[nPowerOfTen - 1];
     }
 }

@@ -33,7 +33,7 @@ import net.sourceforge.numbertrans.framework.base.NumberMatch;
 /**
  * Inspect an isolated number in some source language
  */
-public abstract class NumberParser {
+public abstract class NumberParser<T extends GeneralNumber> {
 
     /**
          * Get a <code>Number</code> from a string known to be a number. If
@@ -44,7 +44,7 @@ public abstract class NumberParser {
          * @return
          * @throws NumberFormatException
          */
-    public abstract GeneralNumber getNumberFromString(String strNumber) throws NumberFormatException;
+    public abstract T getNumberFromString(String strNumber) throws NumberFormatException;
 
     /**
          * Get a <code>Number</code> from a <code>NumberMatch</code>.
@@ -52,7 +52,7 @@ public abstract class NumberParser {
          * @param find
          * @return
          */
-    public abstract GeneralNumber getNumberFromFind(NumberMatch find);
+    public abstract T getNumberFromFind(NumberMatch find);
 
     /**
          * Get the value of a character known to be a digit. If the character is

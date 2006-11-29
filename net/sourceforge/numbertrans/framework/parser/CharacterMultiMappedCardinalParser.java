@@ -29,6 +29,8 @@ package net.sourceforge.numbertrans.framework.parser;
 
 import java.util.Vector;
 
+import net.sourceforge.numbertrans.framework.base.WholeNumber;
+
 /**
  * A class for converting out of number systems that have a Many-to-1 character
  * correspondence with the arabic numeral system. e.g. X and Y are both source

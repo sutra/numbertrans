@@ -45,7 +45,7 @@ public class ArrayUtils {
          * @return A string representation of the array
          */
     public static <T> String arrayToString(T[] arr) {
-	if(arr == null) {
+	if (arr == null) {
 	    return "null";
 	} else if (arr.length != 0) {
 	    final StringBuilder builder = new StringBuilder("{\"");
@@ -200,6 +200,22 @@ public class ArrayUtils {
     public static boolean unsortedArrayContains(int[] arr, int key) {
 	for (int i = 0; i < arr.length; i++)
 	    if (arr[i] == key)
+		return true;
+	return false;
+    }
+
+    /**
+         * Find out if an unsorted array contains a value
+         * 
+         * @param arr
+         *                The array to be searched
+         * @param key
+         *                The value to find in the array
+         * @return True if the value is found in the array
+         */
+    public static<T> boolean unsortedArrayContains(T[] arr, T key) {
+	for (int i = 0; i < arr.length; i++)
+	    if (arr[i].equals(key))
 		return true;
 	return false;
     }

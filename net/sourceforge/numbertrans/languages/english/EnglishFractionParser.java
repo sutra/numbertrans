@@ -27,33 +27,34 @@
  */
 package net.sourceforge.numbertrans.languages.english;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
+import info.jonclark.util.StringUtils;
+import net.sourceforge.numbertrans.framework.base.FractionalNumber;
 import net.sourceforge.numbertrans.framework.base.NumberMatch;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
+import net.sourceforge.numbertrans.framework.base.GeneralNumber.Context;
 import net.sourceforge.numbertrans.framework.parser.NumberParser;
 
-public class EnglishCardinalParser extends NumberParser<WholeNumber> {
+public class EnglishFractionParser extends NumberParser<FractionalNumber> {
+    
+    private static final EnglishCardinalParser cardinalParser = new EnglishCardinalParser();
 
     @Override
-    public long getCharacterValue(char c) {
-	if (c >= '0' && c <= '9') {
-	    return c - '0';
-	} else {
-	    throw new NumberFormatException("Character is not a digit: " + c);
-	}
+    public long getCharacterValue(char c) throws NumberFormatException {
+	return cardinalParser.getCharacterValue(c);
     }
 
     @Override
-    public WholeNumber getNumberFromFind(NumberMatch find) {
+    public FractionalNumber getNumberFromFind(NumberMatch find) {
 	// TODO Auto-generated method stub
 	return null;
     }
 
     @Override
-    public WholeNumber getNumberFromString(String strNumber) throws NumberFormatException {
-	long value = Long.parseLong(strNumber);
-	final int nLeadingZeros = countLeadingZeros(strNumber);
-	return new WholeNumber(value, nLeadingZeros, GeneralNumber.Context.CARDINAL);
+    public FractionalNumber getNumberFromString(String strNumber) throws NumberFormatException {
+	final String[] tokens = StringUtils.tokenize(strNumber, "/", 2);
+	final WholeNumber numerator = (WholeNumber) cardinalParser.getNumberFromString(tokens[0]); 
+	final WholeNumber denominator = (WholeNumber) cardinalParser.getNumberFromString(tokens[1]);
+	return new FractionalNumber(numerator, denominator, Context.FRACTION);
     }
 
 }

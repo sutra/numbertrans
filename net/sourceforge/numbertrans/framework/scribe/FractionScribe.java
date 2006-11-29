@@ -28,6 +28,8 @@
 package net.sourceforge.numbertrans.framework.scribe;
 
 import net.sourceforge.numbertrans.framework.base.FractionalNumber;
+import net.sourceforge.numbertrans.framework.base.GeneralNumber;
+import net.sourceforge.numbertrans.framework.base.WholeNumber;
 
 /**
  * An interface for classes that support the generation of fractions in some
@@ -37,6 +39,11 @@ public abstract class FractionScribe extends NumberScribe {
     
     public FractionScribe(Form form) {
 	super(form);
+    }
+    
+    public String getNumberString(GeneralNumber number) {
+	assert number instanceof FractionalNumber;
+	return getFraction((FractionalNumber)number);	
     }
 
     /**

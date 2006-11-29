@@ -25,35 +25,30 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package net.sourceforge.numbertrans.languages.english;
+package net.sourceforge.numbertrans.languages.japanese;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
-import net.sourceforge.numbertrans.framework.base.NumberMatch;
-import net.sourceforge.numbertrans.framework.base.WholeNumber;
-import net.sourceforge.numbertrans.framework.parser.NumberParser;
+import net.sourceforge.numbertrans.framework.base.FractionalNumber;
+import net.sourceforge.numbertrans.framework.scribe.FractionScribe;
 
-public class EnglishCardinalParser extends NumberParser<WholeNumber> {
+public class JapaneseFractionScribe extends FractionScribe {
 
-    @Override
-    public long getCharacterValue(char c) {
-	if (c >= '0' && c <= '9') {
-	    return c - '0';
-	} else {
-	    throw new NumberFormatException("Character is not a digit: " + c);
-	}
+    private final JapaneseCardinalScribe cardinalScribe;
+
+    public JapaneseFractionScribe(Form form) {
+	super(form);
+	this.cardinalScribe = new JapaneseCardinalScribe(form);
     }
 
     @Override
-    public WholeNumber getNumberFromFind(NumberMatch find) {
-	// TODO Auto-generated method stub
-	return null;
+    public String getFraction(FractionalNumber number) {
+	final String numerator = cardinalScribe.getCardinalString(number.getNumerator());
+	final String denominator = cardinalScribe.getCardinalString(number.getDenominator());
+	return denominator + "分の" + numerator;
     }
 
     @Override
-    public WholeNumber getNumberFromString(String strNumber) throws NumberFormatException {
-	long value = Long.parseLong(strNumber);
-	final int nLeadingZeros = countLeadingZeros(strNumber);
-	return new WholeNumber(value, nLeadingZeros, GeneralNumber.Context.CARDINAL);
+    public Form[] getSupportedForms() {
+	return new Form[] { Form.SHORT };
     }
 
 }

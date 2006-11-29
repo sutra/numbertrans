@@ -27,33 +27,22 @@
  */
 package net.sourceforge.numbertrans.languages.english;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
-import net.sourceforge.numbertrans.framework.base.NumberMatch;
-import net.sourceforge.numbertrans.framework.base.WholeNumber;
-import net.sourceforge.numbertrans.framework.parser.NumberParser;
+import net.sourceforge.numbertrans.framework.base.FractionalNumber;
+import net.sourceforge.numbertrans.framework.scribe.FractionScribe;
 
-public class EnglishCardinalParser extends NumberParser<WholeNumber> {
+public class EnglishFractionScribe extends FractionScribe {
 
-    @Override
-    public long getCharacterValue(char c) {
-	if (c >= '0' && c <= '9') {
-	    return c - '0';
-	} else {
-	    throw new NumberFormatException("Character is not a digit: " + c);
-	}
+    public EnglishFractionScribe(Form form) {
+	super(form);
     }
 
     @Override
-    public WholeNumber getNumberFromFind(NumberMatch find) {
-	// TODO Auto-generated method stub
-	return null;
+    public String getFraction(FractionalNumber number) {
+	return number.getNumerator() + "/" + number.getDenominator();
     }
 
     @Override
-    public WholeNumber getNumberFromString(String strNumber) throws NumberFormatException {
-	long value = Long.parseLong(strNumber);
-	final int nLeadingZeros = countLeadingZeros(strNumber);
-	return new WholeNumber(value, nLeadingZeros, GeneralNumber.Context.CARDINAL);
+    public Form[] getSupportedForms() {
+	return new Form[] { Form.SHORT };
     }
-
 }

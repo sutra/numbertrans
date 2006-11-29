@@ -37,7 +37,9 @@ import java.io.*;
 public class SoundUtils {
 
     /**
-         * Asynconously plays a sound file, given a path.
+         * Asynconously plays a sound file, given a path. However, if the
+         * program exits before the sound has finished playing, the sound will
+         * stop at program termination.
          * 
          * @throws IOException
          *                 If there is a problem when attempting to open or read
@@ -55,6 +57,47 @@ public class SoundUtils {
 	Clip clip = AudioSystem.getClip();
 	clip.open(in);
 	clip.loop(0);
+    }
+
+    /**
+         * Synconously plays a sound file, given a path.
+         * 
+         * @throws IOException
+         *                 If there is a problem when attempting to open or read
+         *                 the file at <code>path</code>.
+         * @throws UnsupportedAudioFileException
+         *                 If the format of the specified sound file is not
+         *                 recognized.
+         * @throws LineUnavailableException
+         *                 If there is no output line available to play the
+         *                 sound.
+         */
+    public static void playSoundSync(String path) throws UnsupportedAudioFileException,
+	    IOException, LineUnavailableException {
+	AudioInputStream in = AudioSystem.getAudioInputStream(new File(path));
+	Clip clip = AudioSystem.getClip();
+	clip.open(in);
+	clip.loop(0);
+	clip.drain();
+    }
+
+    /**
+         * Asynconously plays a sound file, given a path, but guarantees that
+         * the sound will finish playing. However, if an error occurs in playing
+         * the sound, it will fail silently.
+         */
+    public static void playSoundAsyncFinish(final String path) {
+	Thread thread = new Thread() {
+	    public void run() {
+		try {
+		    playSoundSync(path);
+		} catch (Exception e) {
+		    ;
+		}
+	    }
+	};
+	thread.setDaemon(false);
+	thread.start();
     }
 
     /**

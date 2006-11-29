@@ -25,35 +25,62 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package net.sourceforge.numbertrans.languages.english;
+package net.sourceforge.numbertrans.languages.roman;
 
 import net.sourceforge.numbertrans.framework.base.GeneralNumber;
 import net.sourceforge.numbertrans.framework.base.NumberMatch;
-import net.sourceforge.numbertrans.framework.base.WholeNumber;
 import net.sourceforge.numbertrans.framework.parser.NumberParser;
 
-public class EnglishCardinalParser extends NumberParser<WholeNumber> {
+/**
+ * Parses Roman numerals using the following values:<br>
+ * M 1000<br>
+ * D 500<br>
+ * C 100<br>
+ * L 50<br>
+ * X 10<br>
+ * V 5<br>
+ * I 1<br>
+ */
+public class RomanCardinalParser extends NumberParser {
 
     @Override
-    public long getCharacterValue(char c) {
-	if (c >= '0' && c <= '9') {
-	    return c - '0';
-	} else {
-	    throw new NumberFormatException("Character is not a digit: " + c);
+    public long getCharacterValue(char c) throws NumberFormatException {
+	switch (Character.toUpperCase(c)) {
+	case 'M':
+	    return 1000;
+	case 'D':
+	    return 500;
+	case 'C':
+	    return 100;
+	case 'L':
+	    return 50;
+	case 'X':
+	    return 10;
+	case 'V':
+	    return 5;
+	case 'I':
+	    return 1;
 	}
+	throw new NumberFormatException("Unknown character: " + c);
     }
 
     @Override
-    public WholeNumber getNumberFromFind(NumberMatch find) {
+    public GeneralNumber getNumberFromFind(NumberMatch find) {
 	// TODO Auto-generated method stub
 	return null;
     }
 
     @Override
-    public WholeNumber getNumberFromString(String strNumber) throws NumberFormatException {
-	long value = Long.parseLong(strNumber);
-	final int nLeadingZeros = countLeadingZeros(strNumber);
-	return new WholeNumber(value, nLeadingZeros, GeneralNumber.Context.CARDINAL);
+    public GeneralNumber getNumberFromString(String strNumber) throws NumberFormatException {
+	int totalValue = 0;
+	for(int i=0; i<strNumber.length(); i++) {
+	    int digit = (int) getCharacterValue(strNumber.charAt(i));
+	    
+	}
+	
+	// TODO: Finish method
+	
+	return null;
     }
 
 }

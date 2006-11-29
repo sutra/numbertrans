@@ -25,35 +25,39 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package net.sourceforge.numbertrans.languages.english;
+package net.sourceforge.numbertrans.languages.korean;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
-import net.sourceforge.numbertrans.framework.base.NumberMatch;
+import net.sourceforge.numbertrans.framework.base.MyriadNumeralSet;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
-import net.sourceforge.numbertrans.framework.parser.NumberParser;
+import net.sourceforge.numbertrans.framework.base.GeneralNumber.Context;
+import net.sourceforge.numbertrans.framework.scribe.MyriadCardinalScribe;
 
-public class EnglishCardinalParser extends NumberParser<WholeNumber> {
+/**
+ * NOTE: The Native Korean Numerals has no character for zero.
+ * 
+ * @author Jonathan
+ */
+public class KoreanCardinalScribe extends MyriadCardinalScribe {
+    
+    // TODO: Re-engineer MyriadNumeral Set to not use arrays
 
-    @Override
-    public long getCharacterValue(char c) {
-	if (c >= '0' && c <= '9') {
-	    return c - '0';
-	} else {
-	    throw new NumberFormatException("Character is not a digit: " + c);
-	}
+    public static final MyriadNumeralSet nativeKoreanNumerals = new MyriadNumeralSet(
+	    new String[] {null, "하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟", "아홉" },
+	    new String[] {"열", "온", "즈믄","드먼"}
+	    );
+    
+    public static final MyriadNumeralSet sinoHangulKoreanNumerals = new MyriadNumeralSet(
+	    new String[] {"영", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구" },
+	    new String[] {"십", "백", "천","만"}
+	    );
+    
+    // sinoHangul  = 10^8 = 억
+
+    // TODO: Add north korean alternatives
+    
+    public KoreanCardinalScribe(Form form) {
+	super(form, sinoHangulKoreanNumerals);
+	
+	// need to allow special cases for korean native 20, 30, etc.
     }
-
-    @Override
-    public WholeNumber getNumberFromFind(NumberMatch find) {
-	// TODO Auto-generated method stub
-	return null;
-    }
-
-    @Override
-    public WholeNumber getNumberFromString(String strNumber) throws NumberFormatException {
-	long value = Long.parseLong(strNumber);
-	final int nLeadingZeros = countLeadingZeros(strNumber);
-	return new WholeNumber(value, nLeadingZeros, GeneralNumber.Context.CARDINAL);
-    }
-
 }

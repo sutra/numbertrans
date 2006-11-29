@@ -40,7 +40,7 @@ import info.jonclark.lang.TokenArray;
  * A parser for numbers that use the myriad system (i.e. grouping by 10,000
  * instead of 1000). Examples include Chinese, Japanese, and Korean.
  */
-public class MyriadCardinalParser extends NumberParser {
+public class MyriadCardinalParser extends NumberParser<WholeNumber> {
 
     protected final Hashtable<Character, Long> values = new Hashtable<Character, Long>();
 
@@ -124,7 +124,7 @@ public class MyriadCardinalParser extends NumberParser {
          * unsure of the context of a number, it is recommended that you use the
          * <code>NumberFinder</code> first.
          */
-    public GeneralNumber getNumberFromString(String strNumber) throws NumberFormatException {
+    public WholeNumber getNumberFromString(String strNumber) throws NumberFormatException {
 	// TODO: Determine whether the number is a decimal, whole number, or
 	// fractional number
 
@@ -137,7 +137,7 @@ public class MyriadCardinalParser extends NumberParser {
     }
 
     @Override
-    public GeneralNumber getNumberFromFind(NumberMatch find) {
+    public WholeNumber getNumberFromFind(NumberMatch find) {
 	// We don't have to do as much checking here since we're certain of the
 	// context from the find.
 	assert find.getContext() == GeneralNumber.Context.CARDINAL;

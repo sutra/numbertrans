@@ -31,34 +31,35 @@ package net.sourceforge.numbertrans.framework.base;
  * A generic representation of a fractional number (which may be irrational).
  */
 public class FractionalNumber extends GeneralNumber {
-    private final long numerator;
-    private final long denominator;
+    private final WholeNumber numerator;
+    private final WholeNumber denominator;
 
-    protected FractionalNumber(final long numerator, final long denominator, int nLeadingZeros,
+    public FractionalNumber(final WholeNumber numerator, final WholeNumber denominator,
 	    final Context context) {
-	super(nLeadingZeros, context);
+	// TODO: Fix this by moving leading zeros to pertinant subclasses
+	super(numerator.getLeadingZeros(), context);
 	this.numerator = numerator;
 	this.denominator = denominator;
     }
 
-    public long getNumerator() {
+    public WholeNumber getNumerator() {
 	return numerator;
     }
 
-    public long getDenominator() {
+    public WholeNumber getDenominator() {
 	return denominator;
     }
 
     public boolean equals(Object o) {
 	if (o instanceof FractionalNumber) {
 	    final FractionalNumber other = (FractionalNumber) o;
-	    return this.numerator == other.numerator && this.denominator == other.denominator
-		    && super.equalsSuper(other);
+	    return this.numerator.equals(other.numerator)
+		    && this.denominator.equals(other.denominator) && super.equalsSuper(other);
 	} else {
 	    return false;
 	}
     }
-    
+
     public String toString() {
 	return numerator + "/" + denominator;
     }

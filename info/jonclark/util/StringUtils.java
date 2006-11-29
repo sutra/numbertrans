@@ -769,25 +769,51 @@ public class StringUtils {
 	    builder.append(tokens[i] + " ");
 	return builder.toString().trim();
     }
+    
+    public static String reverse(String str) {
+	final char[] arr = str.toCharArray();
+	reverse(arr, 0, arr.length);
+	return new String(arr);
+    }
+    
+    public static String reverse(String str, int first, int length) {
+	final char[] arr = str.toCharArray();
+	reverse(arr, first, length);
+	return new String(arr);
+    }
 
     /**
-         * Reverse the given string
+         * Reverse the given string. This method is based off of reverse in
+         * StringBuilder so that it will remain compatible with unicode.
          */
-    public static String reverse(final String str) {
+    public static void reverse(char[] str, int first, int length) {
 
-	if (str.length() == 1) {
-	    return str;
-	} else {
-	    final char[] arr = str.toCharArray();
-
-	    for (int i = 0; i < arr.length / 2; i++) {
-		final char c = arr[arr.length - i - 1];
-		arr[arr.length - i - 1] = arr[i];
-		arr[i] = c;
+	int endIndex = first + length;
+	boolean hasSurrogate = false;
+	int n = endIndex - 1;
+	for (int j = (n-1) >> 1; j >= first; --j) {
+	    char temp = str[j];
+	    char temp2 = str[n - j];
+	    if (!hasSurrogate) {
+		hasSurrogate = (temp >= Character.MIN_SURROGATE && temp <= Character.MAX_SURROGATE)
+		    || (temp2 >= Character.MIN_SURROGATE && temp2 <= Character.MAX_SURROGATE);
 	    }
-
-	    return new String(arr);
+	    str[j] = temp2;
+	    str[n - j] = temp;
 	}
+	if (hasSurrogate) {
+	    // Reverse back all valid surrogate pairs
+	    for (int i = first; i < endIndex - 1; i++) {
+		char c2 = str[i];
+		if (Character.isLowSurrogate(c2)) {
+		    char c1 = str[i + 1];
+		    if (Character.isHighSurrogate(c1)) {
+			str[i++] = c1;
+			str[i] = c2;
+		    }
+		}
+	    }
+	}	
     }
 
     /**

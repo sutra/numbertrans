@@ -27,7 +27,7 @@
  */
 package net.sourceforge.numbertrans.framework.scribe;
 
-import info.jonclark.util.StringUtils;
+import info.jonclark.util.PrependStringBuilder;
 import net.sourceforge.numbertrans.framework.base.MyriadNumeralSet;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
 
@@ -44,40 +44,39 @@ public class MyriadCardinalScribe extends CardinalScribe {
     public String getCardinalString(WholeNumber number) {
 	// TODO: years such as 2004
 	// TODO: leading zeros
-	
+
 	final long actualValue = number.getValue();
-	final StringBuilder builder = new StringBuilder();
-	
+	final PrependStringBuilder builder = new PrependStringBuilder();
+
 	long totalValue = actualValue;
 	long localMultiplier = 1;
 	long bigMultiplier = 1;
-	while(totalValue > 0) {
-	    
-	    // TODO: properly handle "bigMultiplier" starting with "man" character
-	    
-	    // append the large number first, since we're generating in reverse
-	    if(localMultiplier >= 10) {
-		builder.append(numerals.getLargeNumber(localMultiplier));
-	    }
-	    
+	while (totalValue > 0) {
+
+	    // TODO: properly handle "bigMultiplier" starting with "man"
+	    // character
+
 	    final int digit = (int) (totalValue % 10);
-	    builder.append(numerals.getDigit(digit));
-	    
+	    builder.prepend(numerals.getDigit(digit));
+
 	    // update values for next iteration
-	    totalValue /= 10;	    
+	    totalValue /= 10;
 	    localMultiplier *= 10;
-	    
-	    if(localMultiplier >= 10000) {
-		bigMultiplier *= 10000;
-		localMultiplier = 1;
-		builder.append(numerals.getLargeNumber(bigMultiplier));
+
+	    if (totalValue > 0) {
+		if (localMultiplier >= 10000) {
+		    bigMultiplier *= 10000;
+		    localMultiplier = 1;
+		    builder.prepend(numerals.getLargeNumber(bigMultiplier));
+		} else if (localMultiplier >= 10) {
+		    builder.prepend(numerals.getLargeNumber(localMultiplier));
+		}
 	    }
+
 	}
-	
+
 	// get the result and reverse it, since we started from the opposite end
 	String result = builder.toString();
-	result = StringUtils.reverse(result);
-
 	return result;
     }
 

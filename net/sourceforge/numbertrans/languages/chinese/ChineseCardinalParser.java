@@ -27,6 +27,7 @@
  */
 package net.sourceforge.numbertrans.languages.chinese;
 
+import net.sourceforge.numbertrans.framework.base.WholeNumber;
 import net.sourceforge.numbertrans.framework.parser.MyriadCardinalParser;
 
 /**

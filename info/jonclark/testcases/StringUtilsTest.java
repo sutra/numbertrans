@@ -133,4 +133,10 @@ public class StringUtilsTest extends TestCase {
     public void testCutCharsFromEnd() {
 	assertEquals(StringUtils.cutCharsFromEnd("abcd", 2), "ab");
     }
+    
+    public void testReverse() {
+	assertEquals(StringUtils.reverse("abcdefg"), "gfedcba");
+	assertEquals(StringUtils.reverse("abcdefg", 0, 2), "bacdefg");
+	assertEquals(StringUtils.reverse("abcdefg", 1, 3), "acbdefg");
+    }
 }

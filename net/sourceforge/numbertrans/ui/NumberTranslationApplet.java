@@ -30,7 +30,10 @@ package net.sourceforge.numbertrans.ui;
 
 
 import javax.swing.JApplet;
+
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.TextArea;
 
 import javax.swing.JPanel;
@@ -53,13 +56,16 @@ import net.sourceforge.numbertrans.languages.bengali.BengaliCardinalScribe;
 import net.sourceforge.numbertrans.languages.chinese.ChineseCardinalParser;
 import net.sourceforge.numbertrans.languages.english.EnglishCardinalParser;
 import net.sourceforge.numbertrans.languages.english.EnglishCardinalScribe;
+import net.sourceforge.numbertrans.languages.english.EnglishFractionParser;
 import net.sourceforge.numbertrans.languages.gujarati.GujaratiCardinalParser;
 import net.sourceforge.numbertrans.languages.gujarati.GujaratiCardinalScribe;
 import net.sourceforge.numbertrans.languages.gurumukhi.GurumukhiCardinalParser;
 import net.sourceforge.numbertrans.languages.gurumukhi.GurumukhiCardinalScribe;
 import net.sourceforge.numbertrans.languages.japanese.JapaneseCardinalScribe;
+import net.sourceforge.numbertrans.languages.japanese.JapaneseFractionScribe;
 import net.sourceforge.numbertrans.languages.kannada.KannadaCardinalParser;
 import net.sourceforge.numbertrans.languages.kannada.KannadaCardinalScribe;
+import net.sourceforge.numbertrans.languages.korean.KoreanCardinalScribe;
 import net.sourceforge.numbertrans.languages.malayalam.MalayalamCardinalParser;
 import net.sourceforge.numbertrans.languages.malayalam.MalayalamCardinalScribe;
 import net.sourceforge.numbertrans.languages.oriya.OriyaCardinalParser;
@@ -91,10 +97,13 @@ public class NumberTranslationApplet extends JApplet {
     public static final String BENGALI_CARDINAL = "Bengali Cardinal Number";
     public static final String CHINESE_CARDINAL = "Chinese Cardinal Number";
     public static final String ENGLISH_CARDINAL = "English Cardinal Number";
+    public static final String ENGLISH_FRACTION = "English Fraction";
     public static final String GUJARATI_CARDINAL = "Gujarati Cardinal Number";
     public static final String GURUMUKHI_CARDINAL = "Gurumukhi Cardinal Number";
     public static final String JAPANESE_CARDINAL = "Japanese Cardinal Number";
+    public static final String JAPANESE_FRACTION = "Japanese Fraction";
     public static final String KANNADA_CARDINAL = "Kannada Cardinal Number";
+    public static final String KOREAN_CARDINAL = "Korean Cardinal Number";
     public static final String MALAYALAM_CARDINAL = "Malayalam Cardinal Number";
     public static final String ORIYA_CARDINAL = "Oriya Cardinal Number";
     public static final String TAMIL_CARDINAL = "Tamil Cardinal Number";
@@ -114,7 +123,7 @@ public class NumberTranslationApplet extends JApplet {
          * This method initializes this
          */
     public void init() {
-	this.setSize(new Dimension(600, 300));
+	this.setSize(new Dimension(700, 400));
 	this.setContentPane(getJPanel());
 
     }
@@ -130,7 +139,7 @@ public class NumberTranslationApplet extends JApplet {
 	    labelSupportedTypes.setBounds(new Rectangle(181, 31, 250, 16));
 	    labelSupportedTypes.setText("Cardinals");
 	    jLabel11 = new JLabel();
-	    jLabel11.setBounds(new Rectangle(16, 199, 74, 16));
+	    jLabel11.setBounds(new Rectangle(16, 270, 74, 16));
 	    jLabel11.setText("Output:");
 	    jLabel1 = new JLabel();
 	    jLabel1.setBounds(new Rectangle(21, 81, 78, 16));
@@ -149,6 +158,7 @@ public class NumberTranslationApplet extends JApplet {
 	    jPanel.add(getComboInputLanguage(), null);
 	    jPanel.add(getComboOutputLanguage(), null);
 	    jPanel.add(getButGo(), null);
+	    jPanel.setBackground(Color.WHITE);
 	}
 	return jPanel;
     }
@@ -161,7 +171,8 @@ public class NumberTranslationApplet extends JApplet {
     private TextArea getTextInput() {
 	if (textInput == null) {
 	    textInput = new TextArea();
-	    textInput.setBounds(new Rectangle(103, 74, 245, 52));
+	    textInput.setBounds(new Rectangle(103, 74, 342, 105));
+	    textInput.setFont(new Font(null, Font.BOLD, 20));
 	}
 	return textInput;
     }
@@ -174,7 +185,8 @@ public class NumberTranslationApplet extends JApplet {
     private TextArea getTextOutput() {
 	if (textOutput == null) {
 	    textOutput = new TextArea();
-	    textOutput.setBounds(new Rectangle(104, 182, 243, 60));
+	    textOutput.setBounds(new Rectangle(104, 264, 338, 101));
+	    textOutput.setFont(new Font(null, Font.BOLD, 20));
 	}
 	return textOutput;
     }
@@ -187,12 +199,13 @@ public class NumberTranslationApplet extends JApplet {
     private JComboBox getComboInputLanguage() {
 	if (comboInputLanguage == null) {
 	    comboInputLanguage = new JComboBox();
-	    comboInputLanguage.setBounds(new Rectangle(359, 85, 225, 25));
+	    comboInputLanguage.setBounds(new Rectangle(456, 83, 225, 25));
 
 	    comboInputLanguage.addItem(HINDU_ARABIC_CARDINAL);
 	    comboInputLanguage.addItem(BENGALI_CARDINAL);
 	    comboInputLanguage.addItem(CHINESE_CARDINAL);
 	    comboInputLanguage.addItem(ENGLISH_CARDINAL);
+	    comboInputLanguage.addItem(ENGLISH_FRACTION);
 	    comboInputLanguage.addItem(GUJARATI_CARDINAL);
 	    comboInputLanguage.addItem(GURUMUKHI_CARDINAL);
 	    comboInputLanguage.addItem(KANNADA_CARDINAL);
@@ -214,7 +227,7 @@ public class NumberTranslationApplet extends JApplet {
     private JComboBox getComboOutputLanguage() {
 	if (comboOutputLanguage == null) {
 	    comboOutputLanguage = new JComboBox();
-	    comboOutputLanguage.setBounds(new Rectangle(370, 205, 225, 25));
+	    comboOutputLanguage.setBounds(new Rectangle(458, 281, 225, 25));
 
 	    comboOutputLanguage.addItem(HINDU_ARABIC_CARDINAL);
 	    comboOutputLanguage.addItem(BENGALI_CARDINAL);
@@ -222,7 +235,9 @@ public class NumberTranslationApplet extends JApplet {
 	    comboOutputLanguage.addItem(GUJARATI_CARDINAL);
 	    comboOutputLanguage.addItem(GURUMUKHI_CARDINAL);
 	    comboOutputLanguage.addItem(JAPANESE_CARDINAL);
+	    comboOutputLanguage.addItem(JAPANESE_FRACTION);
 	    comboOutputLanguage.addItem(KANNADA_CARDINAL);
+	    comboOutputLanguage.addItem(KOREAN_CARDINAL);
 	    comboOutputLanguage.addItem(MALAYALAM_CARDINAL);
 	    comboOutputLanguage.addItem(ORIYA_CARDINAL);
 	    comboOutputLanguage.addItem(TAMIL_CARDINAL);
@@ -247,7 +262,7 @@ public class NumberTranslationApplet extends JApplet {
 		    doTranslation();
 		}
 	    });
-	    butGo.setBounds(new Rectangle(169, 141, 98, 27));
+	    butGo.setBounds(new Rectangle(200, 200, 98, 27));
 	    butGo.setText("Translate");
 	}
 	return butGo;
@@ -266,6 +281,8 @@ public class NumberTranslationApplet extends JApplet {
 	    parser = new ChineseCardinalParser();
 	} else if (selectedInput.equals(ENGLISH_CARDINAL)) {
 	    parser = new EnglishCardinalParser();
+	} else if (selectedInput.equals(ENGLISH_FRACTION)) {
+	    parser = new EnglishFractionParser();
 	} else if (selectedInput.equals(GUJARATI_CARDINAL)) {
 	    parser = new GujaratiCardinalParser();
 	} else if (selectedInput.equals(GURUMUKHI_CARDINAL)) {
@@ -303,8 +320,12 @@ public class NumberTranslationApplet extends JApplet {
 	    scribe = new GurumukhiCardinalScribe(Form.SHORT);
 	} else if (selectedOutput.equals(JAPANESE_CARDINAL)) {
 	    scribe = new JapaneseCardinalScribe(Form.SHORT);
+	} else if (selectedOutput.equals(JAPANESE_FRACTION)) {
+	    scribe = new JapaneseFractionScribe(Form.SHORT);
 	} else if (selectedOutput.equals(KANNADA_CARDINAL)) {
 	    scribe = new KannadaCardinalScribe(Form.SHORT);
+	} else if (selectedOutput.equals(KOREAN_CARDINAL)) {
+	    scribe = new KoreanCardinalScribe(Form.SHORT);
 	} else if (selectedOutput.equals(MALAYALAM_CARDINAL)) {
 	    scribe = new MalayalamCardinalScribe(Form.SHORT);
 	} else if (selectedOutput.equals(ORIYA_CARDINAL)) {
