@@ -27,6 +27,7 @@
  */
 package info.jonclark.clientserver;
 
+import info.jonclark.log.LogUtils;
 import info.jonclark.util.*;
 
 import java.io.*;
@@ -50,8 +51,8 @@ public class LazyClient implements ClientInterface {
     private PrintWriter out;
     private BufferedReader in;
     private boolean connected = false;
-    private Vector<ReconnectionListener> vListeners = new Vector<ReconnectionListener>();
-    private final Logger log = Logger.getLogger("LazyClient");
+    private ArrayList<ReconnectionListener> vListeners = new ArrayList<ReconnectionListener>();
+    private final Logger log = LogUtils.getLogger();
     
     private final int nRetryTimeoutSec;
     

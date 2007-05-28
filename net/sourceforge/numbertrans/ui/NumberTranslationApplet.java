@@ -54,14 +54,18 @@ import net.sourceforge.numbertrans.languages.arabic.HinduArabicCardinalScribe;
 import net.sourceforge.numbertrans.languages.bengali.BengaliCardinalParser;
 import net.sourceforge.numbertrans.languages.bengali.BengaliCardinalScribe;
 import net.sourceforge.numbertrans.languages.chinese.ChineseCardinalParser;
+import net.sourceforge.numbertrans.languages.chinese.ChineseFractionParser;
 import net.sourceforge.numbertrans.languages.english.EnglishCardinalParser;
 import net.sourceforge.numbertrans.languages.english.EnglishCardinalScribe;
 import net.sourceforge.numbertrans.languages.english.EnglishFractionParser;
+import net.sourceforge.numbertrans.languages.english.EnglishFractionScribe;
+import net.sourceforge.numbertrans.languages.english.EnglishOrdinalScribe;
 import net.sourceforge.numbertrans.languages.gujarati.GujaratiCardinalParser;
 import net.sourceforge.numbertrans.languages.gujarati.GujaratiCardinalScribe;
 import net.sourceforge.numbertrans.languages.gurumukhi.GurumukhiCardinalParser;
 import net.sourceforge.numbertrans.languages.gurumukhi.GurumukhiCardinalScribe;
 import net.sourceforge.numbertrans.languages.japanese.JapaneseCardinalScribe;
+import net.sourceforge.numbertrans.languages.japanese.JapaneseFractionParser;
 import net.sourceforge.numbertrans.languages.japanese.JapaneseFractionScribe;
 import net.sourceforge.numbertrans.languages.kannada.KannadaCardinalParser;
 import net.sourceforge.numbertrans.languages.kannada.KannadaCardinalScribe;
@@ -70,6 +74,8 @@ import net.sourceforge.numbertrans.languages.malayalam.MalayalamCardinalParser;
 import net.sourceforge.numbertrans.languages.malayalam.MalayalamCardinalScribe;
 import net.sourceforge.numbertrans.languages.oriya.OriyaCardinalParser;
 import net.sourceforge.numbertrans.languages.oriya.OriyaCardinalScribe;
+import net.sourceforge.numbertrans.languages.roman.RomanCardinalParser;
+import net.sourceforge.numbertrans.languages.roman.RomanCardinalScribe;
 import net.sourceforge.numbertrans.languages.tamil.TamilCardinalParser;
 import net.sourceforge.numbertrans.languages.tamil.TamilCardinalScribe;
 import net.sourceforge.numbertrans.languages.telugu.TeluguCardinalParser;
@@ -96,8 +102,10 @@ public class NumberTranslationApplet extends JApplet {
     public static final String HINDU_ARABIC_CARDINAL = "Hindu-Arabic Cardinal Number";
     public static final String BENGALI_CARDINAL = "Bengali Cardinal Number";
     public static final String CHINESE_CARDINAL = "Chinese Cardinal Number";
+    public static final String CHINESE_FRACTION = "Chinese Fraction";
     public static final String ENGLISH_CARDINAL = "English Cardinal Number";
     public static final String ENGLISH_FRACTION = "English Fraction";
+    public static final String ENGLISH_ORDINAL = "English Ordinal";
     public static final String GUJARATI_CARDINAL = "Gujarati Cardinal Number";
     public static final String GURUMUKHI_CARDINAL = "Gurumukhi Cardinal Number";
     public static final String JAPANESE_CARDINAL = "Japanese Cardinal Number";
@@ -106,6 +114,7 @@ public class NumberTranslationApplet extends JApplet {
     public static final String KOREAN_CARDINAL = "Korean Cardinal Number";
     public static final String MALAYALAM_CARDINAL = "Malayalam Cardinal Number";
     public static final String ORIYA_CARDINAL = "Oriya Cardinal Number";
+    public static final String ROMAN_CARDINAL = "Roman Numeral";
     public static final String TAMIL_CARDINAL = "Tamil Cardinal Number";
     public static final String TELUGU_CARDINAL = "Telugu Cardinal Number";
     public static final String THAI_CARDINAL = "Thai Cardinal Number";
@@ -204,13 +213,16 @@ public class NumberTranslationApplet extends JApplet {
 	    comboInputLanguage.addItem(HINDU_ARABIC_CARDINAL);
 	    comboInputLanguage.addItem(BENGALI_CARDINAL);
 	    comboInputLanguage.addItem(CHINESE_CARDINAL);
+	    comboInputLanguage.addItem(CHINESE_FRACTION);
 	    comboInputLanguage.addItem(ENGLISH_CARDINAL);
 	    comboInputLanguage.addItem(ENGLISH_FRACTION);
 	    comboInputLanguage.addItem(GUJARATI_CARDINAL);
 	    comboInputLanguage.addItem(GURUMUKHI_CARDINAL);
+	    comboInputLanguage.addItem(JAPANESE_FRACTION);
 	    comboInputLanguage.addItem(KANNADA_CARDINAL);
 	    comboInputLanguage.addItem(MALAYALAM_CARDINAL);
 	    comboInputLanguage.addItem(ORIYA_CARDINAL);
+	    comboInputLanguage.addItem(ROMAN_CARDINAL);
 	    comboInputLanguage.addItem(TAMIL_CARDINAL);
 	    comboInputLanguage.addItem(TELUGU_CARDINAL);
 	    comboInputLanguage.addItem(THAI_CARDINAL);
@@ -231,7 +243,10 @@ public class NumberTranslationApplet extends JApplet {
 
 	    comboOutputLanguage.addItem(HINDU_ARABIC_CARDINAL);
 	    comboOutputLanguage.addItem(BENGALI_CARDINAL);
+	    comboOutputLanguage.addItem(CHINESE_FRACTION);
 	    comboOutputLanguage.addItem(ENGLISH_CARDINAL);
+	    comboOutputLanguage.addItem(ENGLISH_FRACTION);
+	    comboOutputLanguage.addItem(ENGLISH_ORDINAL);
 	    comboOutputLanguage.addItem(GUJARATI_CARDINAL);
 	    comboOutputLanguage.addItem(GURUMUKHI_CARDINAL);
 	    comboOutputLanguage.addItem(JAPANESE_CARDINAL);
@@ -240,6 +255,7 @@ public class NumberTranslationApplet extends JApplet {
 	    comboOutputLanguage.addItem(KOREAN_CARDINAL);
 	    comboOutputLanguage.addItem(MALAYALAM_CARDINAL);
 	    comboOutputLanguage.addItem(ORIYA_CARDINAL);
+	    comboOutputLanguage.addItem(ROMAN_CARDINAL);
 	    comboOutputLanguage.addItem(TAMIL_CARDINAL);
 	    comboOutputLanguage.addItem(TELUGU_CARDINAL);
 	    comboOutputLanguage.addItem(THAI_CARDINAL);
@@ -279,7 +295,9 @@ public class NumberTranslationApplet extends JApplet {
 	    parser = new BengaliCardinalParser();
 	} else if (selectedInput.equals(CHINESE_CARDINAL)) {
 	    parser = new ChineseCardinalParser();
-	} else if (selectedInput.equals(ENGLISH_CARDINAL)) {
+	} else if (selectedInput.equals(CHINESE_FRACTION)) {
+	    parser = new ChineseFractionParser();
+	}  else if (selectedInput.equals(ENGLISH_CARDINAL)) {
 	    parser = new EnglishCardinalParser();
 	} else if (selectedInput.equals(ENGLISH_FRACTION)) {
 	    parser = new EnglishFractionParser();
@@ -287,12 +305,16 @@ public class NumberTranslationApplet extends JApplet {
 	    parser = new GujaratiCardinalParser();
 	} else if (selectedInput.equals(GURUMUKHI_CARDINAL)) {
 	    parser = new GurumukhiCardinalParser();
+	} else if (selectedInput.equals(JAPANESE_FRACTION)) {
+	    parser = new JapaneseFractionParser();
 	} else if (selectedInput.equals(KANNADA_CARDINAL)) {
 	    parser = new KannadaCardinalParser();
 	} else if (selectedInput.equals(MALAYALAM_CARDINAL)) {
 	    parser = new MalayalamCardinalParser();
 	} else if (selectedInput.equals(ORIYA_CARDINAL)) {
 	    parser = new OriyaCardinalParser();
+	} else if (selectedInput.equals(ROMAN_CARDINAL)) {
+	    parser = new RomanCardinalParser();
 	} else if (selectedInput.equals(TAMIL_CARDINAL)) {
 	    parser = new TamilCardinalParser();
 	} else if (selectedInput.equals(TELUGU_CARDINAL)) {
@@ -314,6 +336,10 @@ public class NumberTranslationApplet extends JApplet {
 	    scribe = new BengaliCardinalScribe(Form.SHORT);
 	} else if (selectedOutput.equals(ENGLISH_CARDINAL)) {
 	    scribe = new EnglishCardinalScribe(Form.SHORT);
+	} else if (selectedOutput.equals(ENGLISH_FRACTION)) {
+	    scribe = new EnglishFractionScribe(Form.SHORT);
+	} else if (selectedOutput.equals(ENGLISH_ORDINAL)) {
+	    scribe = new EnglishOrdinalScribe(Form.SHORT);
 	} else if (selectedOutput.equals(GUJARATI_CARDINAL)) {
 	    scribe = new GujaratiCardinalScribe(Form.SHORT);
 	} else if (selectedOutput.equals(GURUMUKHI_CARDINAL)) {
@@ -330,6 +356,8 @@ public class NumberTranslationApplet extends JApplet {
 	    scribe = new MalayalamCardinalScribe(Form.SHORT);
 	} else if (selectedOutput.equals(ORIYA_CARDINAL)) {
 	    scribe = new OriyaCardinalScribe(Form.SHORT);
+	} else if (selectedOutput.equals(ROMAN_CARDINAL)) {
+	    scribe = new RomanCardinalScribe(Form.SHORT);
 	} else if (selectedOutput.equals(TAMIL_CARDINAL)) {
 	    scribe = new TamilCardinalScribe(Form.SHORT);
 	} else if (selectedOutput.equals(TELUGU_CARDINAL)) {

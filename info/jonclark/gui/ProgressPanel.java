@@ -27,6 +27,7 @@
  */
 package info.jonclark.gui;
 
+import info.jonclark.log.LogUtils;
 import info.jonclark.util.Timeout;
 import info.jonclark.util.TimeoutListener;
 
@@ -48,7 +49,7 @@ class ProgressPanel extends JPanel {
     private final NumberFormat f = new DecimalFormat("#0.0");
     private final Timeout timeout = new Timeout();
     private String name;
-    private final Logger log = Logger.getLogger("info.jonclark.gui.ProgressPanel");
+    private final Logger log = LogUtils.getLogger();
     
     public ProgressPanel(String name, Logger parent) {
         log.setParent(parent);

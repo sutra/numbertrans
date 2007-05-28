@@ -27,6 +27,7 @@
  */
 package net.sourceforge.numbertrans.framework.scribe;
 
+import net.sourceforge.numbertrans.framework.base.GeneralNumber;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
 
 /**
@@ -37,6 +38,12 @@ public abstract class OrdinalScribe extends NumberScribe {
     
     public OrdinalScribe(Form form) {
 	super(form);
+    }
+    
+    @Override
+    public String getNumberString(GeneralNumber number) {
+	assert number instanceof WholeNumber;
+	return getOrdinalString((WholeNumber)number);	
     }
 
     /**
@@ -49,5 +56,5 @@ public abstract class OrdinalScribe extends NumberScribe {
          * @return The string representation of this whole number in ordinal
          *         form in the target langauge
          */
-    public abstract String getOrdinal(WholeNumber number);
+    public abstract String getOrdinalString(WholeNumber number);
 }

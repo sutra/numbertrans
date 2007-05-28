@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jardesc>
+<jar path="e:/My Documents/Eclipse Workspace/TcuFitness/lib/JonClarkDotInfo.jar"/>
+<options buildIfNeeded="true" compress="false" descriptionLocation="/JonsTools/conf/JarForTcuFitness.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+<storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+<selectedProjects/>
+<manifest generateManifest="true" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+<sealing sealJar="false">
+<packagesToSeal/>
+<packagesToUnSeal/>
+</sealing>
+</manifest>
+<selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.stat"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.clientserver"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.print"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.util"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.database"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.corpus"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.clientserver.examples"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.testcases"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.gui"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.corpus.tokenize"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.cache"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.lang"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.media"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.sourcecode"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.properties"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.corpus.interfaces"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.log"/>
+<javaElement handleIdentifier="=JonsTools/&lt;info.jonclark.io"/>
+</selectedElements>
+</jardesc>

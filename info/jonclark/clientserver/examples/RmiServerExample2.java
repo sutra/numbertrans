@@ -22,7 +22,7 @@ public class RmiServerExample2 extends RmiServer implements ReceiveMessageInterf
 
     public RmiServerExample2(String host, String port) throws RemoteException
     {
-        super(host, port, Logger.getAnonymousLogger());
+        super(host, port);
     }
 
     static public void main(String args[]) throws Exception

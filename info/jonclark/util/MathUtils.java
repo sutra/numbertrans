@@ -31,5 +31,13 @@ package info.jonclark.util;
  * @author Jonathan
  */
 public class MathUtils {
-    // NOTE: Always wrap division in try/catch with catch DivisionByZero exception
+    private static final double LOG_BASE10_OF_2 = Math.log10(2.0);
+    
+    public static double log2(double a) {
+	return Math.log10(a) / LOG_BASE10_OF_2;
+    }
+    
+    public static double logBase(double a, double base) {
+	return Math.log10(a) / Math.log10(base);
+    }
 }

@@ -25,11 +25,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.log;
+package info.jonclark.corpus.lm.smoothing;
+
+import info.jonclark.corpus.lm.LanguageModel;
+import info.jonclark.lang.TokenArray;
 
 /**
- * @author Jonathan
+ * A component of a LanguageModel that performs smoothing. That is, it attempts
+ * to deal with unseen cases such that a reasonable non-zero probability is
+ * produced.
  */
-public class BasicLog {
+public interface LanguageModelSmoothing {
 
+    /**
+         * Get the score (probability) for a sentence (array of tokens). The
+         * sentence must begin with the token LanguageModel.START_SENTENCE and
+         * end with the token LanguageModel.END_SENTENCE.
+         * 
+         * @param sentence
+         *                The sentence whose probability is to be evaluated.
+         */
+    public double getSentenceProbability(TokenArray sentence);
+
+    /**
+         * Get the probability of a word, given the word and its context. The
+         * probability of last token (n) in the phrase will be evaluated while
+         * tokens 0 through n-1 will be used as context.
+         * 
+         * @param phrase
+         * @return
+         */
+    public double getWordProbability(TokenArray phrase);
+
+    /**
+         * Set the parent language model of this smoothing technique. (Note a
+         * smoothing techniqe is typically useless without an underlying
+         * language model to back it).
+         * 
+         * @param lm
+         */
+    public void setParent(LanguageModel parent);
 }

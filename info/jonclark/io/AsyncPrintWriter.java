@@ -51,9 +51,9 @@ public class AsyncPrintWriter {
 
     boolean isWriting = false;
 
-    public AsyncPrintWriter(int nInitialLines, int nGrowSize, File outputFile)
+    public AsyncPrintWriter(int nInitialLines, File outputFile)
 	    throws FileNotFoundException {
-	vLines = new Vector<String>(nInitialLines, nGrowSize);
+	vLines = new Vector<String>(nInitialLines);
 	out = new PrintWriter(outputFile);
     }
 
@@ -64,9 +64,11 @@ public class AsyncPrintWriter {
          */
     public void println(String line, int nRow) {
 	synchronized (vLines) {
-	    if(vLines.size() < nRow + 1)
+	    if(vLines.size() < nRow + 1) {
+//		vLines.ensureCapacity(nRow + 1);
 		vLines.setSize(nRow + 1);
-	    vLines.set(nRow, line);
+	    }
+	    vLines.setElementAt(line, nRow);
 	}
     }
 
@@ -131,7 +133,7 @@ public class AsyncPrintWriter {
     }
 
     public static void main(String[] args) throws Exception {
-	AsyncPrintWriter writer = new AsyncPrintWriter(500, 10, new File("c:/test.txt"));
+	AsyncPrintWriter writer = new AsyncPrintWriter(500, new File("c:/test.txt"));
 	writer.beginAsyncWrite();
 
 	Thread.sleep(500);

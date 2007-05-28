@@ -27,7 +27,7 @@
  */
 package info.jonclark.stat;
 
-import java.text.DecimalFormat;
+import info.jonclark.util.FormatUtils;
 
 /**
  * @author Jonathan
@@ -38,10 +38,8 @@ public class SecondTimer {
     private long startDate = 0;
     
     private final boolean catchOverlappingGo;
-    public static final DecimalFormat format = new DecimalFormat("#,###.##");
-    
     /**
-     * Does not catch "overlapping go" by default.
+     * Does not catch "overlapping go" and does not "go" by default.
      * See next constructor for details.
      *
      */
@@ -56,7 +54,19 @@ public class SecondTimer {
      * 			throw an exception
      */
     public SecondTimer(boolean catchOverlappingGo) {
-        this.catchOverlappingGo = catchOverlappingGo;
+	this.catchOverlappingGo = catchOverlappingGo;
+    }
+    
+    /**
+     * 
+     * @param catchOverlappingGo If true, calling go()
+     * 			twice without calling pause() will
+     * 			throw an exception
+     */
+    public SecondTimer(boolean catchOverlappingGo, boolean goNow) {
+	this.catchOverlappingGo = catchOverlappingGo;
+	if(goNow)
+	    go();
     }
     
     /**
@@ -70,7 +80,7 @@ public class SecondTimer {
      */
     public String getEventsPerSecond(long nEvents) {
         if(getSeconds() > 0)
-            return format.format(nEvents / getSeconds());
+            return FormatUtils.FORMAT_2DECIMALS.format((double) nEvents / getSeconds());
         else
             return "Undefined";
     }
@@ -86,7 +96,7 @@ public class SecondTimer {
      */
     public String getSecondsPerEvent(long nEvents) {
 	if(nEvents > 0)
-            return format.format(getSeconds() / nEvents);
+            return FormatUtils.FORMAT_2DECIMALS.format(getSeconds() / (double) nEvents);
         else
             return "Undefined";
     }
@@ -108,7 +118,7 @@ public class SecondTimer {
      * @return
      */
     public String getSecondsFormatted() {
-	return format.format(getSeconds());
+	return FormatUtils.FORMAT_2DECIMALS.format(getSeconds());
     }
     
     /**

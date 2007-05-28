@@ -99,6 +99,18 @@ public class PrependStringBuilder {
 	count = newCount;
 	return this;
     }
+    
+    public PrependStringBuilder prepend(char c) {
+	int len = 1;
+
+	int newCount = count + len;
+	if (newCount > value.length)
+	    expandCapacity(newCount);
+
+	value[count] = c;
+	count = newCount;
+	return this;
+    }
 
     /**
          * This implements the expansion semantics of ensureCapacity with no

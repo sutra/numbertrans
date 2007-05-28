@@ -27,8 +27,6 @@
  */
 package info.jonclark.clientserver;
 
-import info.jonclark.util.StringUtils;
-
 import java.awt.Button;
 import java.awt.Choice;
 import java.awt.Frame;
@@ -45,7 +43,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * Broadcasts commands to the <code>RemoteExecutorListener</code> along with a
@@ -53,8 +51,12 @@ import java.util.Vector;
  */
 public class RemoteExecutorBroadcasterGui extends Frame {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 4205112995693089987L;
     private final static int DEFAULT_CLIENT_NUM = 50;
-    private final Vector<SimpleClient> clients = new Vector<SimpleClient>(DEFAULT_CLIENT_NUM);
+    private final ArrayList<SimpleClient> clients = new ArrayList<SimpleClient>(DEFAULT_CLIENT_NUM);
 
     private final TextArea textCommand = new TextArea();
     private final Choice comboSet = new Choice();

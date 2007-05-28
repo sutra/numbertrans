@@ -110,6 +110,35 @@ public class SimpleClient implements ClientInterface {
     }
 
     /**
+         * Create a new SimpleClient object with the specified encoding.
+         * <code>connect()</code> must still be called before performing IO.
+         * 
+         * @param address
+         *                The address of the server to be used for this
+         *                connection.
+         */
+    public SimpleClient(InetSocketAddress address) {
+	this(address, null);
+    }
+
+    /**
+         * Create a new SimpleClient object with the specified encoding.
+         * <code>connect()</code> must still be called before performing IO.
+         * 
+         * @param address
+         *                The address of the server to be used for this
+         *                connection.
+         * @param encodingName
+         *                The name of the encoding to be used over the socket
+         *                connection.
+         */
+    public SimpleClient(InetSocketAddress address, String encodingName) {
+	this.host = address.getHostName();
+	this.port = address.getPort();
+	this.encodingName = encodingName;
+    }
+
+    /**
          * Send a message to the server.
          * 
          * @param str

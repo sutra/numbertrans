@@ -25,60 +25,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.corpus;
-
-import java.util.*;
-import java.util.logging.Logger;
-
-import info.jonclark.corpus.interfaces.*;
+package info.jonclark.properties;
 
 /**
- * @author Jonathan
+ * An exception resulting from a Properties object
  */
-public class GutenbergCorpus implements CorpusStatistics {
-    
-    private final Logger log = Logger.getLogger("gutenberg");
-    
-    // do word counts for authors and stories on request
-    // navigate website and cache downloaded documents
-    
-    // keep word and sentence statistics for entire corpus
-    // use booleans to determine if counting will be done while loading/caching (default yes)
-    
-    // download catalog feed and then create index, based on author, this needs to be somewhat memory efficient
-    private final LinkedList<CorpusAuthor> authors = new LinkedList<CorpusAuthor>();
+public class PropertiesException extends Exception {
+    private static final long serialVersionUID = -6128594114385212663L;
 
-    /**
-     * Returns the GutenbergCorpus's logger. Use setParent on
-     * your own subsystem's log to include these log messages.
-     * 
-     * @return
-     */
-    public final Logger getLog() {
-        return log;
-    }
-    
-    /* (non-Javadoc)
-     * @see info.jonclark.corpus.interfaces.CorpusStatistics#getWordcount()
-     */
-    public long getWordcount() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    /* (non-Javadoc)
-     * @see info.jonclark.corpus.interfaces.CorpusStatistics#getMeanLengthOfSentence()
-     */
-    public float getMeanLengthOfSentence() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    /* (non-Javadoc)
-     * @see info.jonclark.corpus.interfaces.CorpusStatistics#getUniqueWordcount()
-     */
-    public long getUniqueWordcount() {
-        // TODO Auto-generated method stub
-        return 0;
+    public PropertiesException(String message) {
+        super(message);
     }
 }

@@ -53,7 +53,7 @@ public class DebugUtils {
          */
     public static void logAssertStatus(Logger log) {
 	if (isAssertEnabled()) {
-	    log.info("The assert keyword is ENABLED.\n This is good for debugging,"
+	    log.info("The assert keyword is ENABLED.\n This is good for debugging, "
 		    + "but could result in degraded program performance.");
 	} else {
 	    log.info("The assert keyword is **DISABLED**.\n This is good for distribution,"

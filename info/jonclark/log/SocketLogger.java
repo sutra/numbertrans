@@ -27,14 +27,10 @@
  */
 package info.jonclark.log;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
 import java.util.logging.Logger;
 
+import info.jonclark.clientserver.SimpleClient;
 import info.jonclark.clientserver.SimpleServer;
-import info.jonclark.util.StringUtils;
 
 public class SocketLogger extends SimpleServer {
 
@@ -55,17 +51,9 @@ public class SocketLogger extends SimpleServer {
     }
 
     @Override
-    public void handleClientRequest(Socket sock) {
-	try {
-	    final BufferedReader in = new BufferedReader(new InputStreamReader(sock
-		    .getInputStream()));
-	    String line;
-	    // TODO: Parse the XML formatted log message and output it in
-                // standard format.
-	} catch (IOException e) {
-	    out.warning("Error while acquiring input stream.");
-	    out.warning(StringUtils.getStackTrace(e));
-	}
+    public void handleClientRequest(SimpleClient client) {
+	// TODO: Parse the XML formatted log message and output it in
+	// standard format.
     }
 
 }

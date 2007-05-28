@@ -27,15 +27,19 @@
  */
 package info.jonclark.gui;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.logging.Logger;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
-import info.jonclark.clientserver.*;
-import info.jonclark.util.*;
+import info.jonclark.clientserver.SimpleClient;
+import info.jonclark.clientserver.SimpleServer;
+import info.jonclark.log.LogUtils;
+import info.jonclark.properties.PropertyUtils;
+import info.jonclark.util.StringUtils;
 
 /**
  * A progress server (monitor) accepts connections from various progress clients
@@ -46,13 +50,12 @@ public class ProgressServer extends SimpleServer {
     private BasicSwingApp frame = new BasicSwingApp("Progress Server");
     private JPanel contentPanel = new JPanel();
     private int nStallTimeoutSec = -1;
-    private final Logger log = Logger.getLogger("info.jonclark.gui.ProgressServer");
+    private final Logger log = LogUtils.getLogger();
     private Hashtable<String, ProgressPanel> pans = new Hashtable<String, ProgressPanel>();
-    private Hashtable<Socket, String> sockets = new Hashtable<Socket, String>();
+    private Hashtable<SimpleClient, String> clients = new Hashtable<SimpleClient, String>();
 
-    public ProgressServer(Properties props, Logger parent) throws IOException {
+    public ProgressServer(Properties props) throws IOException {
 	super(Integer.parseInt(props.getProperty("notifyServer.port", "4242")));
-	log.setParent(parent);
 	frame.setSize(250, 100);
 	frame.getContentPane().add(contentPanel);
 	runServer();
@@ -63,19 +66,17 @@ public class ProgressServer extends SimpleServer {
          * 
          * @see info.jonclark.clientserver.SimpleServer#handleClientRequest(java.net.Socket)
          */
-    public void handleClientRequest(Socket sock) {
-	BufferedReader in = null;
+    public void handleClientRequest(SimpleClient client) {
 	try {
-	    in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 	    // PrintWriter out = new PrintWriter(new
                 // OutputStreamWriter(sock.getOutputStream()));
 
-	    log.info("Got new connection from: " + sock.getInetAddress().getHostName());
+	    log.info("Got new connection from: " + client.getHost());
 
 	    // determine if we already have a client with this name
 
 	    String line = null;
-	    while ((line = in.readLine()) != null) {
+	    while ((line = client.getMessage()) != null) {
 		String[] tokens = StringUtils.tokenize(line);
 		StringUtils.internTokens(tokens);
 		if (tokens.length < 2) {
@@ -89,8 +90,8 @@ public class ProgressServer extends SimpleServer {
 		// make sure we don't get multiple clients
 		// with the same name (this is necessary because
 		// we allow reconnections)
-		if (sockets.containsKey(sock)) {
-		    if (sockets.get(sock) != name) {
+		if (clients.containsKey(client)) {
+		    if (clients.get(client) != name) {
 			JOptionPane.showInternalMessageDialog(frame,
 				"Duplicate task name from incoming client. Ignoring connection.",
 				"Duplicate Name", JOptionPane.ERROR_MESSAGE);
@@ -102,7 +103,7 @@ public class ProgressServer extends SimpleServer {
 			}
 		    }
 		} else {
-		    sockets.put(sock, name);
+		    clients.put(client, name);
 		}
 
 		ProgressPanel pan = getProgressPanel(name);
@@ -151,20 +152,13 @@ public class ProgressServer extends SimpleServer {
 		    log.warning("Unknown message: " + line);
 		}
 	    }
-	} catch (IOException ioe) {
-	    log.warning(StringUtils.getStackTrace(ioe));
 	} catch (Exception e) {
 	    // TODO: Set status as terminated here. (leave progress bar as
                 // is)
 	    log.warning(StringUtils.getStackTrace(e));
 	}
-	try {
-	    if (in != null)
-		in.close();
-	} catch (IOException ioe) {
-	    log.warning(StringUtils.getStackTrace(ioe));
-	}
-	sockets.remove(sock);
+	client.disconnect();
+	clients.remove(client);
     }
 
     /**
@@ -196,13 +190,9 @@ public class ProgressServer extends SimpleServer {
 
     public static void main(String[] args) throws Exception {
 	// GuiUtils.setNativeLookAndFeel();
-	Logger log = Logger.getAnonymousLogger();
-	Handler hand = new ConsoleHandler();
-	hand.setLevel(Level.ALL);
-	log.addHandler(hand);
-	log.setLevel(Level.ALL);
+	LogUtils.logAll();
 
 	Properties props = PropertyUtils.getProperties("conf/notifyServer.properties");
-	ProgressServer prog = new ProgressServer(props, log);
+	ProgressServer prog = new ProgressServer(props);
     }
 }

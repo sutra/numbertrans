@@ -29,6 +29,8 @@ package net.sourceforge.numbertrans.languages.roman;
 
 import net.sourceforge.numbertrans.framework.base.GeneralNumber;
 import net.sourceforge.numbertrans.framework.base.NumberMatch;
+import net.sourceforge.numbertrans.framework.base.WholeNumber;
+import net.sourceforge.numbertrans.framework.base.GeneralNumber.Context;
 import net.sourceforge.numbertrans.framework.parser.NumberParser;
 
 /**
@@ -73,14 +75,26 @@ public class RomanCardinalParser extends NumberParser {
     @Override
     public GeneralNumber getNumberFromString(String strNumber) throws NumberFormatException {
 	int totalValue = 0;
-	for(int i=0; i<strNumber.length(); i++) {
-	    int digit = (int) getCharacterValue(strNumber.charAt(i));
-	    
+	int localValue = 0;
+	int prevDigit = 0;
+
+	for (int i = 0; i < strNumber.length(); i++) {
+	    int currentDigit = (int) getCharacterValue(strNumber.charAt(i));
+
+	    if (currentDigit < prevDigit) {
+		totalValue += localValue;
+		localValue = currentDigit;
+	    } else if(currentDigit > prevDigit){
+		localValue = currentDigit - localValue;
+	    } else {
+		localValue += currentDigit;
+	    }
+	    prevDigit = currentDigit;
 	}
 	
-	// TODO: Finish method
-	
-	return null;
+	totalValue += localValue;
+
+	return new WholeNumber(totalValue, 0, Context.CARDINAL);
     }
 
 }

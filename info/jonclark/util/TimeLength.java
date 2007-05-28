@@ -43,7 +43,7 @@ import java.util.Date;
 // seconds, 9 milliseconds"
 
 public class TimeLength {
-    private final long length;
+    private long length;
     private static final DecimalFormat format = new DecimalFormat("0.#");
 
     /**
@@ -100,11 +100,43 @@ public class TimeLength {
          * @return
          */
     public long getInMillis() {
-	return length / (1000);
+	return length;
     }
 
     public long toLong() {
 	return length;
+    }
+
+    public void setInYears(double newLength) {
+	length = (long) (newLength * (double) (365L * 24L * 60L * 60L * 1000L));
+    }
+
+    public void setInDays(double newLength) {
+	this.length = (long) (newLength * (double) (24L * 60L * 60L * 1000L));
+    }
+
+    public void setInHours(double newLength) {
+	this.length = (long) (newLength * (double) (60 * 60 * 1000));
+    }
+
+    public void setInMinutes(double newLength) {
+	this.length = (long) (newLength * (double) (60 * 1000));
+    }
+
+    public void setInSeconds(double newLength) {
+	this.length = (long) (newLength * (double) (1000));
+    }
+
+    public void setInMillis(long newLength) {
+	this.length = newLength;
+    }
+    
+    public Date addToDate(Date in) {
+	return new Date(in.getTime() + this.length);
+    }
+    
+    public Date subtractFromDate(Date in) {
+	return new Date(in.getTime() - this.length);
     }
 
     public static TimeLength parseTimeLength(final String strInput) {
@@ -187,7 +219,7 @@ public class TimeLength {
 	    throw new IllegalArgumentException("Unknown time length format: " + strInput);
 	}
     }
-    
+
     /**
          * Finds the biggest unit possible that can be represented with a whole
          * number and outputs a String in that unit of time length as a
@@ -300,7 +332,7 @@ public class TimeLength {
 	return years + " years, " + days + " days, " + hours + " hours, " + minutes + " minutes, "
 		+ seconds + " seconds";
     }
-    
+
     public String toString() {
 	return toStringSingleUnit();
     }

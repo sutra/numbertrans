@@ -4,6 +4,7 @@
 package info.jonclark.clientserver;
 
 import info.jonclark.clientserver.examples.ReceiveMessageInterface;
+import info.jonclark.log.LogUtils;
 
 import java.rmi.*;
 import java.rmi.registry.*;
@@ -17,15 +18,13 @@ public class RmiServer extends UnicastRemoteObject
     final int thisPort;
     final String thisAddress;
     final Registry registry; // rmi registry for lookup the remote objects.
-    final Logger log;
+    final Logger log = LogUtils.getLogger();
     // This method is called from the remote client by the RMI.
-    // This is the implementation of the “ReceiveMessageInterface”.
+    // This is the implementation of the ï¿½ReceiveMessageInterfaceï¿½.
 
-    public RmiServer(String port, String bindName, Logger parent)
+    public RmiServer(String port, String bindName)
     	throws RemoteException
     {
-        log = Logger.getLogger("rmiServer");
-        log.setParent(parent);
         
         try {
             // get the address of this host.
@@ -34,7 +33,7 @@ public class RmiServer extends UnicastRemoteObject
             throw new RemoteException("Couldn't obtain server inetaddress", e);
         }
 
-        thisPort = Integer.parseInt(port); // this port(registry’s port)
+        thisPort = Integer.parseInt(port); // this port(registryï¿½s port)
         log.finer("Starting RMI Server with address=" + thisAddress + ",port=" + thisPort);
 
         // create the registry and bind the name and object.
@@ -45,8 +44,7 @@ public class RmiServer extends UnicastRemoteObject
 
     static public void main(String args[]) throws Exception
     {
-            RmiServer s = new RmiServer("4242", "rmiServer",
-                    Logger.getAnonymousLogger());
+            RmiServer s = new RmiServer("4242", "rmiServer");
     }
 
 }

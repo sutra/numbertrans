@@ -27,20 +27,21 @@
  */
 package info.jonclark.clientserver;
 
+import info.jonclark.log.LogUtils;
 import info.jonclark.util.ProcessUtils;
 import info.jonclark.util.StringUtils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 /**
  * Listens for commands from the <code>RemoteExecutorBroadcater</code> and
  * runs the command specified, provided the correct passkey is provided
  */
 public class RemoteExecutorListener extends SimpleServer {
+
+    private static final Logger log = LogUtils.getLogger();
 
     public RemoteExecutorListener(int port) {
 	super(port);
@@ -62,14 +63,20 @@ public class RemoteExecutorListener extends SimpleServer {
 	    final Process proc = Runtime.getRuntime().exec(commandLine);
 	    ProcessUtils.sendStreamToBlackHole(proc.getInputStream());
 	    ProcessUtils.sendStreamToBlackHole(proc.getErrorStream());
-	    processes.put(commandLine, proc);
+	    String processName = StringUtils.substringBefore(commandLine, " ");
+	    processes.put(processName, proc);
 	} catch (IOException e1) {
 	    ;
 	}
     }
 
     private void kill(String commandLine) {
-	System.err.println("Kill is unimplemented");
+	Process proc = processes.get(commandLine);
+	if (proc != null) {
+	    proc.destroy();
+	} else {
+	    log.warning("Process not found: " + commandLine);
+	}
     }
 
     private void killAll() {
@@ -79,11 +86,9 @@ public class RemoteExecutorListener extends SimpleServer {
     }
 
     @Override
-    public void handleClientRequest(Socket sock) {
+    public void handleClientRequest(SimpleClient client) {
 	try {
-	    final BufferedReader in = new BufferedReader(new InputStreamReader(sock
-		    .getInputStream()));
-	    for (String line = in.readLine(); line != null; line = in.readLine()) {
+	    for (String line = client.getMessage(); line != null; line = client.getMessage()) {
 		final String[] tokens = StringUtils.tokenize(line, " ", NUM_TOKENS);
 
 		if (tokens.length < 3) {
@@ -128,9 +133,8 @@ public class RemoteExecutorListener extends SimpleServer {
 		    System.err.println("Invalid key in request: " + line);
 		}
 	    }
-	} catch (IOException e) {
-	    // This was probably just a disconnect
-	    ;
+	} catch (ConnectionException e) {
+	    log.warning(StringUtils.getStackTrace(e));
 	}
     } // end handleClientRequest
 

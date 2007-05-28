@@ -28,6 +28,9 @@
 package info.jonclark.gui;
 
 import info.jonclark.clientserver.*;
+import info.jonclark.log.LogUtils;
+import info.jonclark.properties.PropertiesException;
+import info.jonclark.properties.PropertyUtils;
 import info.jonclark.util.*;
 
 import java.util.*;
@@ -58,12 +61,11 @@ public class ProgressClient implements ReconnectionListener {
     
     private int type = TYPE_BAR;
     private String name = "default";
-    private final Vector<ClientInterface> clients = new Vector<ClientInterface>();
+    private final ArrayList<ClientInterface> clients = new ArrayList<ClientInterface>();
     
-    private final Logger log = Logger.getLogger("ProgressClient");
+    private final Logger log = LogUtils.getLogger();
     
-    public ProgressClient(Properties props, Logger parent) throws PropertiesException {
-        log.setParent(parent);
+    public ProgressClient(Properties props) throws PropertiesException {
         
         // BEGIN PARSE PROPERTIES
         log.finest("Reading properties");
@@ -206,14 +208,10 @@ public class ProgressClient implements ReconnectionListener {
      * For testing only
      */
     public static void main(String[] args) throws Exception {
-        Logger log = Logger.getAnonymousLogger();
-        Handler hand = new ConsoleHandler();
-        hand.setLevel(Level.ALL);
-        log.addHandler(hand);
-        log.setLevel(Level.ALL);
-        
+	LogUtils.logAll();
+	
         Properties props = PropertyUtils.getProperties("conf/notify.properties");
-        ProgressClient cliente = new ProgressClient(props, log);
+        ProgressClient cliente = new ProgressClient(props);
         props.setProperty("notification.name", "" + new Random().nextInt());
         
         // we need to send the name to the server

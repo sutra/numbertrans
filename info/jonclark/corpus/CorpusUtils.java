@@ -27,57 +27,123 @@
  */
 package info.jonclark.corpus;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.StringTokenizer;
+
 import info.jonclark.util.StringUtils;
 
 /**
  * Utilities useful in working with corpus linguistics
  */
 public class CorpusUtils {
-    
-    private static final String SENTENCE_BOUNDARY_DELIMS = ".!?";
-    
+
+    public static final String SENTENCE_BOUNDARY_DELIMS = ".!?";
+    public static final String ALL_DELIMS = ":;,.?!/\\-_|()[]{}+=&\"'\t ";
+
     /**
-     * Counts the number of words of an untokenized string.
-     * If your string is already tokenized, consider
-     * using <code>StringUtils.countTokens()</code>
-     * 
-     * Currently, only calls <code>StringUtils.countTokens()</code>.
-     * Eventually, needs to use a linguistically accurate
-     * tokenizer before counting tokens.
-     * 
-     * @param str
-     * @return
-     */
-    public static int countWords(final String str) {
-        // TODO: Make this word count smarter so that
-        // it does linguistically-accurate word counts.
-        
-        // I guess this means we have to write a tokenizer
-        // ... and then something that distinguishes tokens?
-        
-        return StringUtils.countTokens(str);
+         * Counts the number of words of a tokenized string.
+         * 
+         * @param tokens
+         *                A list of tokens returned by
+         *                <code>CorpusUtils.tokenize()</code>
+         * @return
+         */
+    public static int countWords(final List<String> tokens) {
+	int nWords = 0;
+
+	for (final String token : tokens) {
+	    if (!StringUtils.isComposedOf(token, ALL_DELIMS)) {
+		nWords++;
+	    }
+	}
+
+	return nWords;
     }
-    
+
     /**
-     * Count the number of sentence boundary markers in a given sentence.
-     * Currently counts any mataching character. Ultimately needs
-     * to detect cases such as abbreviations.
-     * 
-     * @param str
-     * @return The number of sentence boundaries in <code>str</code>
-     */
-    public static int countSentenceBoundaries(final String str) {
-        return StringUtils.countOccurancesOfAnyDelim(str, SENTENCE_BOUNDARY_DELIMS);
+         * Removes all non-words from <code>tokens</code>.
+         * 
+         * @param tokens
+         *                The list of tokens that will be altered such that it
+         *                no longer contains non-words.
+         */
+    public static void filterNonWords(final List<String> tokens) {
+	for (int i = 0; i < tokens.size(); i++) {
+	    if (StringUtils.isComposedOf(tokens.get(i), ALL_DELIMS)) {
+		tokens.remove(i);
+	    }
+	}
     }
-    
+
     /**
-     * Currently tokenizes only by spaces. Eventually needs to tokenize
-     * with a more linguistically informed method.
-     * 
-     * @param str
-     * @return
-     */
-    public static String[] tokenize(final String str) {
-	return StringUtils.tokenize(str);
+         * Count the number of sentence boundary markers in a given sentence.
+         * Currently counts any mataching character. Ultimately needs to detect
+         * cases such as abbreviations.
+         * 
+         * @param str
+         * @return The number of sentence boundaries in <code>str</code>
+         */
+    public static int countSentenceBoundaries(final List<String> tokens) {
+	int nSentenceBoundaries = 0;
+
+	for (final String token : tokens) {
+	    if (token.length() == 1 && SENTENCE_BOUNDARY_DELIMS.contains(token)) {
+		nSentenceBoundaries++;
+	    }
+	}
+
+	return nSentenceBoundaries;
+    }
+
+    public static int countSentences(final List<String> tokens) {
+	return countSentenceBoundaries(tokens) + 1;
+    }
+
+    /**
+         * Tokenizes by all major punctuation. Does not give special treatment
+         * to abbreviations.
+         * 
+         * @param str
+         * @return
+         */
+    public static List<String> tokenize(final String str) {
+	final LinkedList<String> list = new LinkedList<String>();
+	final StringTokenizer tokenizer = new StringTokenizer(str, ALL_DELIMS, true);
+
+	while (tokenizer.hasMoreTokens()) {
+	    final String token = tokenizer.nextToken();
+	    // don't add spaces
+	    if (!token.equals(" ")) {
+		list.add(token);
+	    }
+	}
+
+	return list;
+    }
+
+    public static String untokenize(final String[] tokens) {
+	StringBuilder builder = new StringBuilder();
+
+	if (tokens.length > 0)
+	    builder.append(tokens[0]);
+
+	final String NO_SPACE_BEFORE = ".,!?'";
+	final String NO_SPACE_AFTER = "'-";
+
+	for (int i = 1; i < tokens.length; i++) {
+
+	    if (NO_SPACE_BEFORE.contains(tokens[i])) {
+		;
+	    } else if (NO_SPACE_AFTER.contains(tokens[i - 1])) {
+		;
+	    } else {
+		builder.append(" ");
+	    }
+
+	    builder.append(tokens[i]);
+	}
+
+	return builder.toString();
     }
 }

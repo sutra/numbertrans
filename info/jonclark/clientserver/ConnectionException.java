@@ -7,6 +7,7 @@ package info.jonclark.clientserver;
  * @author Jonathan
  */
 public class ConnectionException extends Exception {
+    private static final long serialVersionUID = 5150326000162254174L;
     public ConnectionException(String message) {
         super(message);
     }

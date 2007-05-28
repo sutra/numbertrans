@@ -34,7 +34,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * Broadcasts commands to the <code>RemoteExecutorListener</code> along with a
@@ -43,7 +43,7 @@ import java.util.Vector;
 public class RemoteExecutorBroadcaster {
 
     private final static int DEFAULT_CLIENT_NUM = 50;
-    private final Vector<SimpleClient> clients = new Vector<SimpleClient>(DEFAULT_CLIENT_NUM);
+    private final ArrayList<SimpleClient> clients = new ArrayList<SimpleClient>(DEFAULT_CLIENT_NUM);
 
     public RemoteExecutorBroadcaster(final String configFile) throws IOException {
 	loadConfig(configFile);

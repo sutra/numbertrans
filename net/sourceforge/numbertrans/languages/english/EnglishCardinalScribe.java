@@ -52,9 +52,14 @@ public class EnglishCardinalScribe extends CardinalScribe {
 
     @Override
     public String getCardinalString(WholeNumber number) {
-	String str = StringUtils.duplicateCharacter('0', number.getLeadingZeros())
-		+ number.getValue();
-	return str;
+	if (form == Form.SHORT) {
+	    String str = StringUtils.duplicateCharacter('0', number.getLeadingZeros())
+		    + number.getValue();
+	    return str;
+	} else {
+	    assert form == Form.LONG;
+	    return null;
+	}
     }
 
     @Override

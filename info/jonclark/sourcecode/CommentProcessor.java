@@ -30,82 +30,170 @@ package info.jonclark.sourcecode;
 import info.jonclark.util.StringUtils;
 
 /**
- * Separates comments from non-comments in Java source code. Allows
- * each of these pieces to be processed separately and then reconstituted
- * in an output file. This class's 2 abstract methods process the
- * types of text.
+ * Separates comments from non-comments in Java source code. Allows each of
+ * these pieces to be processed separately and then reconstituted in an output
+ * file. This class's 2 abstract methods process the types of text.
  */
 public abstract class CommentProcessor {
-    
-    /**
-     * Process a line of source code while separating the comments
-     * from the non-comments.
-     * 
-     * @param out
-     * @param line
-     * @param inComment
-     * @return
-     */
-    public String processLine(String line) {
-        // TODO: Move this file to a generic comment handler
-        // TODO: optimize this so that the builder isn't used if there is no comment
 
-        boolean inComment = false; // are we inside a /* */ style comment?
-        final StringBuilder builder = new StringBuilder();
+    private final boolean trackOutput;
+    private final boolean provideInput;
+    private boolean inComment = false; // are we inside a /* */ style comment?
 
-        // handle multiple /* */ /* */ on one line
-        while (line.indexOf("/*") != -1) {
-            // detect the beginning of a /* */ comment
-            if (!inComment && line.indexOf("/*") != -1) {
-                builder.append(processNoncomment(StringUtils.substringBefore(
-                        line, "/*", false)));
-                line = processComment(StringUtils.substringAfter(line, "/*",
-                        true));
-                inComment = true;
-            }
-
-            // detect the end of a /* */ comment
-            if (inComment && line.indexOf("*/") != -1) {
-                builder.append(processComment(StringUtils.substringBefore(line,
-                        "*/", true)));
-
-                line = StringUtils.substringAfter(line, "*/", false);
-                if (line.indexOf("/*") == -1)
-                    line = processNoncomment(line);
-                inComment = false;
-            }
-        }
-
-        if (inComment) {
-            // handle the continuations of /* * */ on multiple lines
-            builder.append(processComment(line));
-        } else {
-            // detect a // style comment (could be on the same line as a /* */
-            // comment
-            final String nonComment = StringUtils.substringBefore(line, "//",
-                    false);
-            final String comment = StringUtils.substringAfter(line, "//", true);
-            builder.append(processNoncomment(nonComment)
-                    + processComment(comment));
-        }
-
-        return builder.toString();
+    public CommentProcessor() {
+	this.trackOutput = true;
+	this.provideInput = true;
     }
 
     /**
-     * Process the comment (including the comment markers)
-     * 
-     * @param line
-     * @return
-     */
+         * @param trackOutput
+         *                Return non-null values from processing?
+         */
+    public CommentProcessor(boolean trackOutput) {
+	this.trackOutput = trackOutput;
+	this.provideInput = true;
+    }
+
+    /**
+         * @param trackOutput
+         *                Return non-null values from processing?
+         * @param provideInput
+         *                Give input to processComment() and
+         *                processNoncomment()? This might be useful in cases
+         *                where the user only cares about the number of comments
+         *                and non-comments encountered.
+         */
+    public CommentProcessor(boolean trackOutput, boolean provideInput) {
+	this.trackOutput = trackOutput;
+	this.provideInput = provideInput;
+    }
+
+    /**
+         * Process a line of source code while separating the comments from the
+         * non-comments.
+         * 
+         * @param out
+         * @param line
+         * @param inComment
+         * @return
+         */
+    public String processLine(String line) {
+	// TODO: optimize this so that the builder isn't used if there is no
+	// comment
+	StringBuilder builder = null;
+	if (trackOutput)
+	    builder = new StringBuilder();
+
+	// handle multiple /* */ /* */ on one line
+	while (!inComment && line.contains("/*") || inComment && line.contains("*/")) {
+	    // detect the beginning of a /* */ comment
+	    if (!inComment && line.contains("/*")) {
+		final String nonComment = StringUtils.substringBefore(line, "/*", false);
+		if (nonComment.length() > 0) {
+		    final String nonCommentResult = processNoncomment(nonComment);
+		    if (trackOutput)
+			builder.append(nonCommentResult);
+		}
+
+		String comment = null;
+		if (provideInput)
+		    StringUtils.substringAfter(line, "/*", true);
+
+		if (trackOutput) {
+		    line = processComment(comment);
+		    if (line.trim().startsWith("/*"))
+			line = line.trim().substring(2);
+		} else {
+		    processComment(null);
+		    final String remainder = StringUtils.substringAfter(line, "/*", false);
+		    line = remainder;
+		}
+		inComment = true;
+	    }
+
+	    // detect the end of a /* */ comment
+	    if (inComment && line.contains("*/")) {
+		String comment = null;
+		if (provideInput)
+		    comment = StringUtils.substringBefore(line, "*/", true);
+		final String commentResult = processComment(comment);
+		if (trackOutput)
+		    builder.append(commentResult);
+
+		line = StringUtils.substringAfter(line, "*/", false);
+		if (!line.contains("/*")) {
+		    String nonComment = line;
+		    if (nonComment.length() > 2) {
+			final String nonCommentResult = processNoncomment(nonComment);
+			if (trackOutput)
+			    line = nonCommentResult;
+		    }
+		}
+		inComment = false;
+	    }
+	}
+
+	// TODO: make sure lines with combination comments are handled correctly
+	if (inComment) {
+
+	    // handle the continuations of /* * */ on multiple lines
+	    String comment = null;
+	    if (provideInput)
+		comment = line;
+	    final String commentResult = processComment(comment);
+	    if (trackOutput)
+		builder.append(commentResult);
+
+	} else {
+	    // detect a // style comment (could be on the same line as a /*
+	    // */ comment
+	    if (line.contains("//")) {
+		final String nonComment = StringUtils.substringBefore(line, "//", false);
+		String comment = null;
+		if (provideInput)
+		    comment = StringUtils.substringAfter(line, "//", true);
+
+		String nonCommentResult = null;
+		if(nonComment.length() > 0)
+		    nonCommentResult = processNoncomment(nonComment);
+		final String commentResult = processComment(comment);
+		
+		if (trackOutput)
+		    builder.append(nonCommentResult + commentResult);
+	    } else {
+		final String nonComment = line;
+		if (nonComment.length() > 0) {
+		    final String nonCommentResult = processNoncomment(nonComment);
+		    if (trackOutput)
+			builder.append(nonCommentResult);
+		}
+	    }
+	}
+
+	if (trackOutput)
+	    return builder.toString();
+	else
+	    return null;
+    }
+
+    public boolean isInComment() {
+	return inComment;
+    }
+
+    /**
+         * Process the comment (including the comment markers)
+         * 
+         * @param line
+         * @return
+         */
     protected abstract String processComment(String line);
 
     /**
-     * Process the non-comment portion (excluding comment markers)
-     * 
-     * @param line
-     * @return
-     */
+         * Process the non-comment portion (excluding comment markers)
+         * 
+         * @param line
+         * @return
+         */
     protected abstract String processNoncomment(String line);
 
 }

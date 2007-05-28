@@ -25,31 +25,57 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.clientserver;
+package net.sourceforge.numbertrans.languages.english;
 
-import java.rmi.Remote;
-import java.util.*;
+import net.sourceforge.numbertrans.framework.base.WholeNumber;
+import net.sourceforge.numbertrans.framework.scribe.OrdinalScribe;
 
-/**
- * @author Jonathan
- */
-public class DistributorImpl {
-    //Vector <SimpleServerImpl> vServers = new Vector <SimpleServerImpl>();
-    // TODO: Rename this to RmiDistributor and create new simpleDistributor...
-    // if I can figure out how to make this work with rmi
-    
-    Vector <Remote> vServers = new Vector <Remote>();
-    
-    // Note: try to compile this stuff... supposedly, it's a pain
-    
-    // Rule #1: A distributed program should always take an array
-    // of something as its argument so that there's something
-    // to distribute
-    // hack the array into pieces to get the job done
-    
-    // this will end up being an example, but that's okay
-    public void sendMessage(String[] messages) {
-        // send to all Remote's (use generic T here?)
-        // at once, using executor and thread pool
+public class EnglishOrdinalScribe extends OrdinalScribe {
+
+    public EnglishOrdinalScribe(Form form) {
+	super(form);
+    }
+
+    public static final Form[] SUPPORTED_FORMS = { Form.SHORT };
+    protected static final EnglishCardinalScribe shortCardinalScribe = new EnglishCardinalScribe(
+	    Form.SHORT);
+
+    @Override
+    public String getOrdinalString(WholeNumber number) {
+	if (form == Form.SHORT) {
+	    String base = shortCardinalScribe.getCardinalString(number);
+	    String suffix;
+
+	    // handle the special cases of 11th, 12th, and 13th
+	    if (base.length() > 1 && base.charAt(base.length() - 2) == '1') {
+		suffix = "th";
+	    } else {
+
+		char lastChar = base.charAt(base.length() - 1);
+		switch (lastChar) {
+		case '1':
+		    suffix = "st";
+		    break;
+		case '2':
+		    suffix = "nd";
+		    break;
+		case '3':
+		    suffix = "rd";
+		    break;
+		default:
+		    suffix = "th";
+		    break;
+		}
+	    }
+
+	    return base + suffix;
+	} else {
+	    throw new RuntimeException("Unimplemented");
+	}
+    }
+
+    @Override
+    public Form[] getSupportedForms() {
+	return SUPPORTED_FORMS;
     }
 }

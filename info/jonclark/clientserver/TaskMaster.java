@@ -27,10 +27,9 @@
  */
 package info.jonclark.clientserver;
 
+import info.jonclark.log.LogUtils;
+import info.jonclark.properties.PropertiesException;
 import info.jonclark.stat.RemainingTimeEstimator;
-import info.jonclark.stat.SecondTimer;
-import info.jonclark.util.ArrayUtils;
-import info.jonclark.util.PropertiesException;
 import info.jonclark.util.StringUtils;
 
 import java.io.BufferedReader;
@@ -46,9 +45,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class TaskMaster {
-    private final ConcurrentLinkedQueue<String> queueTasks = new ConcurrentLinkedQueue<String>();
+    private final ConcurrentLinkedQueue<String> queueRemainingTasks = new ConcurrentLinkedQueue<String>();
+    private final AtomicInteger nCurrentTasks = new AtomicInteger();
     private final ConcurrentLinkedQueue<SimpleClient> disconnectedWorkers = new ConcurrentLinkedQueue<SimpleClient>();
     private final ConcurrentLinkedQueue<SimpleClient> idleWorkers = new ConcurrentLinkedQueue<SimpleClient>();
+//    private final ConcurrentLinkedQueue<SimpleClient> workingWorkers = new ConcurrentLinkedQueue<SimpleClient>();
 
     private static final long CONNECTOR_THREAD_WAIT = 5000;
     private static final long TASKER_THREAD_WAIT = 50;
@@ -67,7 +68,7 @@ public class TaskMaster {
     private final String desiredTask;
     private boolean running;
 
-    private final Logger log = Logger.getLogger("TASK_MASTER");
+    private final Logger log = LogUtils.getLogger();
     private final RemainingTimeEstimator timer = new RemainingTimeEstimator(50);
 
     private final TaskMasterIface listener;
@@ -114,6 +115,11 @@ public class TaskMaster {
 	running = true;
 	connectorThread.start();
 	taskerThread.start();
+
+	if (log.getLevel() != Level.FINE || log.getLevel() != Level.FINER || log.getLevel() != Level.FINEST) {
+	    log.info("Not displaying connection information because Log level is INFO;"
+		    + "Increase to FINE to see connection status.");
+	}
     }
 
     /**
@@ -130,7 +136,7 @@ public class TaskMaster {
     public void performTask(final String task, final String... args) {
 	final String encodedTask = task + GROUP_DELIM + StringUtils.untokenize(args, ARG_DELIM);
 	log.finest("Adding task: " + encodedTask);
-	queueTasks.add(encodedTask);
+	queueRemainingTasks.add(encodedTask);
     }
 
     /**
@@ -140,7 +146,7 @@ public class TaskMaster {
 	boolean done = false;
 	while (!done) {
 	    try {
-		if (queueTasks.isEmpty()) {
+		if (queueRemainingTasks.isEmpty() && nCurrentTasks.get() == 0) {
 		    done = true;
 		}
 		Thread.sleep(BLOCKER_THREAD_WAIT);
@@ -169,15 +175,17 @@ public class TaskMaster {
 		    boolean quitRequested = false;
 		    while (!quitRequested && (line = in.readLine()) != null) {
 			if (line.equals("help")) {
-			    System.out.println("time tasksleft taskscompleted workersidle "
+			    System.out.println("time tasksleft taskscompleted taskscurrent workersidle "
 				    + "workersdisconnected rate loglevel quit");
 			} else if (line.equals("time")) {
 			    System.out.println("Time remaining: "
-				    + timer.getRemainingTime(queueTasks.size()));
+				    + timer.getRemainingTime(queueRemainingTasks.size()));
 			} else if (line.equals("tasksleft")) {
-			    System.out.println("Tasks remaining: " + queueTasks.size());
+			    System.out.println("Tasks remaining: " + queueRemainingTasks.size());
 			} else if (line.equals("taskscompleted")) {
 			    System.out.println("Tasks completed: " + nTasksCompleted.intValue());
+			} else if (line.equals("taskscurrent")) {
+			    System.out.println("Current Tasks: " + nCurrentTasks.get());
 			} else if (line.equals("workersidle")) {
 			    System.out.println("Workers idle: " + idleWorkers.size());
 			} else if (line.equals("workersdisconnected")) {
@@ -229,6 +237,9 @@ public class TaskMaster {
 	}
     }
 
+    /**
+         * Connects a single worker to this TaskMaster.
+         */
     private Runnable workerConnector = new Runnable() {
 	public void run() {
 
@@ -238,6 +249,7 @@ public class TaskMaster {
 
 	    // we're not guaranteed to have a client here due to concurrency
 	    if (client != null) {
+//		workingWorkers.add(client);
 		log.finer("Attempting connection to " + client.toString());
 
 		try {
@@ -250,7 +262,7 @@ public class TaskMaster {
 
 			if (tokens.length == 2 && tokens[0].equals("CAN:")
 				&& tokens[1].equals(desiredTask)) {
-			    log.info("Connection to " + client.toString() + " sucessful.");
+			    log.fine("Connection to " + client.toString() + " sucessful.");
 			    boolean bAdded = idleWorkers.add(client);
 			    assert bAdded == true : "Unable to add worker to idleWorkers";
 			} else {
@@ -267,17 +279,23 @@ public class TaskMaster {
 		    }
 		} catch (ConnectionException e) {
 		    client.disconnect();
-		    log.warning("Connection to " + client.toString() + " failed because "
+		    log.fine("Connection to " + client.toString() + " failed because "
 			    + e.getMessage());
 		    disconnectedWorkers.add(client);
-		}
-	    }
+		} // end try connect
+//		workingWorkers.remove(client);
+		
+	    } // end if client != null
 	}
     };
 
+    /**
+         * Tasks a single worker with a task
+         */
     private Runnable workerTasker = new Runnable() {
 	public void run() {
-	    final String encodedTask = queueTasks.poll();
+	    nCurrentTasks.getAndIncrement();
+	    final String encodedTask = queueRemainingTasks.poll();
 
 	    if (encodedTask != null) {
 		final SimpleClient client = idleWorkers.poll();
@@ -332,7 +350,7 @@ public class TaskMaster {
 			// we need to try this task over again...
 			log.warning("Task requeued after exception: " + encodedTask);
 			log.warning(StringUtils.getStackTrace(t));
-			queueTasks.add(encodedTask);
+			queueRemainingTasks.add(encodedTask);
 
 			client.disconnect();
 			disconnectedWorkers.add(client);
@@ -343,9 +361,14 @@ public class TaskMaster {
 		}
 
 	    } // end if task != null
+	    nCurrentTasks.getAndDecrement();
 	}
     };
 
+    /**
+         * Continuously tries to connect to all disconnected workers by calling
+         * instances of the reconnectExecutor
+         */
     private Thread connectorThread = new Thread(new Runnable() {
 	public void run() {
 	    while (running) {
@@ -365,6 +388,10 @@ public class TaskMaster {
 	}
     });
 
+    /**
+         * Continuously tries to task untasked workers by calling instances of
+         * workerTasker.
+         */
     private Thread taskerThread = new Thread(new Runnable() {
 	public void run() {
 	    while (running) {

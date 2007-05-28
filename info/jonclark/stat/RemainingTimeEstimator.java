@@ -27,16 +27,14 @@
  */
 package info.jonclark.stat;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import info.jonclark.lang.CircularBuffer;
+import info.jonclark.util.FormatUtils;
 import info.jonclark.util.TimeLength;
 
 public class RemainingTimeEstimator {
     private final CircularBuffer<Long> eventLog;
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
-	    "MMMM dd, yyyy hh:mm aa");
 
     /**
          * Note: Try to choose an event window that is long enough such that
@@ -69,16 +67,36 @@ public class RemainingTimeEstimator {
 	return (double) span / 1000.0;
     }
 
-    public String getEventsPerSecond(long nEvents) {
+    public String getEventsPerSecond() {
+	return getEventsPerSecond(eventLog.size() - 1);
+    }
+
+    /**
+         * @param nEvents
+         *                The number of events that have occurred IN THE CURRENT
+         *                EVENT WINDOW
+         * @return
+         */
+    public String getEventsPerSecond(int nEvents) {
 	if (getSeconds() > 0)
-	    return SecondTimer.format.format(nEvents / getSeconds());
+	    return FormatUtils.FORMAT_2DECIMALS.format(nEvents / getSeconds());
 	else
 	    return "Undefined";
     }
 
-    public String getSecondsPerEvent(long nEvents) {
-	if (nEvents > 0)
-	    return SecondTimer.format.format(getSeconds() / nEvents);
+    public String getSecondsPerEvent() {
+	return getSecondsPerEvent(eventLog.size() - 1);
+    }
+
+    /**
+         * @param nEvents
+         *                The number of events that have occurred IN THE CURRENT
+         *                EVENT WINDOW
+         * @return
+         */
+    public String getSecondsPerEvent(int nEvents) {
+	if (nEvents > 1)
+	    return FormatUtils.FORMAT_2DECIMALS.format(getSeconds() / nEvents);
 	else
 	    return "Undefined";
     }
@@ -86,26 +104,29 @@ public class RemainingTimeEstimator {
     public TimeLength getRemainingTime(int nEventsRemaining) {
 	long span = getSpan();
 	int nRecentEventsDone = eventLog.size() - 1;
+
+	// timePerEvent = span / nRecentEventsDone
+	// remainingTime = timePerEvent * nEventsRemaining
+
 	long remainingTime;
 	if (nRecentEventsDone > 0) {
 	    remainingTime = span * nEventsRemaining / nRecentEventsDone;
 	} else {
 	    remainingTime = 0;
 	}
+
 	return new TimeLength(remainingTime);
     }
 
-    // TODO: Test the accuracy of this method
     public long getEstimatedCompetionTime(int nEventsRemaining) {
 	final TimeLength length = getRemainingTime(nEventsRemaining);
 	long completion = System.currentTimeMillis() + length.getInMillis();
 	return completion;
     }
 
-    // TODO: Test the accuracy of this method
     public String getEstimatedCompetionTimeFormatted(int nEventsRemaining) {
 	final long completion = getEstimatedCompetionTime(nEventsRemaining);
-	return dateFormat.format(new Date(completion));
+	return FormatUtils.formatFullDate(new Date(completion));
     }
 
     public static void main(String... args) throws Exception {

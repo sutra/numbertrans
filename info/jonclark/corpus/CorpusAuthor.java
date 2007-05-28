@@ -27,43 +27,93 @@
  */
 package info.jonclark.corpus;
 
-import info.jonclark.corpus.interfaces.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
+
+import info.jonclark.corpus.interfaces.CorpusStatistics;
 
 /**
  * @author Jonathan
  */
-public class CorpusAuthor implements CorpusStatistics {
+public class CorpusAuthor implements CorpusStatistics, Serializable, Comparator<CorpusAuthor> {
 
-    /* (non-Javadoc)
-     * @see info.jonclark.corpus.interfaces.CorpusStatistics#getWordcount()
-     */
-    public long getWordcount() {
-        // TODO Auto-generated method stub
-        return 0;
+    private static final boolean useIntern = false;
+    private static final long serialVersionUID = -7109345932526990961L;
+    private ArrayList<CorpusDocument> documents = new ArrayList<CorpusDocument>();
+    private UniqueWordCounter wordCount;
+    private long nSentenceCount = 0;
+    private final String authorName;
+
+    public CorpusAuthor(String authorName) {
+	this.authorName = authorName;
     }
 
-    /* (non-Javadoc)
-     * @see info.jonclark.corpus.interfaces.CorpusStatistics#getMeanLengthOfSentence()
-     */
+    public void addDocument(CorpusDocument doc) {
+	documents.add(doc);
+    }
+
+    public void updateStatistics() {
+	nSentenceCount = 0;
+
+	// save time by only referencing the unique word count if
+	// there's only one document for this word count
+	if (documents.size() > 1) {
+	    wordCount = new UniqueWordCounter(useIntern, false);
+	}
+
+	for (final CorpusDocument doc : documents) {
+	    nSentenceCount += doc.getSentenceCount();
+
+	    // save time by only referencing the unique word count if
+	    // there's only one document for this word count
+	    if (documents.size() == 1) {
+		this.wordCount = doc.getUniqueWordCounter();
+	    } else {
+		wordCount.addCounter(doc.getUniqueWordCounter());
+	    }
+	}
+    }
+
+    public ArrayList<CorpusDocument> getDocuments() {
+	return documents;
+    }
+
+    public String getAuthorName() {
+	return authorName;
+    }
+
     public float getMeanLengthOfSentence() {
-        // TODO Auto-generated method stub
-        return 0;
+	if (nSentenceCount > 0)
+	    return wordCount.getNonuniqueWordCount() / nSentenceCount;
+	else
+	    return 0;
     }
 
-    /* (non-Javadoc)
-     * @see info.jonclark.corpus.interfaces.CorpusStatistics#getMeanLengthOfUtterance()
-     */
-    public int getMeanLengthOfUtterance() {
-        // TODO Auto-generated method stub
-        return 0;
+    public long getSentenceCount() {
+	return nSentenceCount;
     }
-    // track stats
 
-    /* (non-Javadoc)
-     * @see info.jonclark.corpus.interfaces.CorpusStatistics#getUniqueWordcount()
-     */
     public long getUniqueWordcount() {
-        // TODO Auto-generated method stub
-        return 0;
+	if (wordCount == null)
+	    return 0;
+	else
+	    return wordCount.getUniqueWordCount();
+    }
+
+    public long getWordcount() {
+	if (wordCount == null)
+	    return 0;
+	else
+	    return wordCount.getNonuniqueWordCount();
+    }
+    
+    public void setCounts(long nonUniqueWordCount, long uniqueWordCount, long sentenceCount) {
+	nSentenceCount = sentenceCount;
+	wordCount = new UniqueWordCounter(nonUniqueWordCount, uniqueWordCount);
+    }
+
+    public int compare(CorpusAuthor o1, CorpusAuthor o2) {
+	return o1.authorName.compareToIgnoreCase(o2.authorName);
     }
 }

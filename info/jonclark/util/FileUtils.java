@@ -36,6 +36,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.channels.FileChannel;
@@ -82,6 +84,28 @@ public class FileUtils {
 	String line = null;
 	while ((line = in.readLine()) != null)
 	    out.println(line);
+    }
+
+    /**
+         * Inserts the entire contents of a file into an open PrintWriter by
+         * reading each line from <code>in</code> and calling
+         * <code>out.println()</code>.
+         * 
+         * @param inFile
+         *                The file to be inserted into out.
+         * @param out
+         *                The destination PrintWriter.
+         * @param A
+         *                prefix for every line in inFile.
+         * @throws IOException
+         *                 If an error is encountered in reading or writing.
+         */
+    public static void insertFile(final File inFile, final PrintWriter out,
+	    final String strLinePrefix) throws IOException {
+	final BufferedReader in = new BufferedReader(new FileReader(inFile));
+	String line = null;
+	while ((line = in.readLine()) != null)
+	    out.println(strLinePrefix + line);
     }
 
     /**
@@ -190,14 +214,30 @@ public class FileUtils {
          *                e.g. ".txt"
          * @return
          */
-    public static File[] getFilesWithExt(final File root, final String ext) {
+    public static File[] getFilesWithExt(final File root, final String... exts) {
 	assert root != null : "root must not be null";
 
 	final FilenameFilter filter = new FilenameFilter() {
 	    public boolean accept(File dir, String name) {
-		return name.endsWith(ext);
+		for (final String ext : exts) {
+		    if (name.endsWith(ext))
+			return true;
+		}
+		return false;
 	    }
 	};
+	return root.listFiles(filter);
+    }
+
+    public static File[] getNormalFiles(final File root) {
+	assert root != null : "root must not be null";
+
+	final FileFilter filter = new FileFilter() {
+	    public boolean accept(File f) {
+		return !f.isDirectory();
+	    }
+	};
+
 	return root.listFiles(filter);
     }
 
@@ -211,5 +251,39 @@ public class FileUtils {
 	};
 
 	return root.listFiles(filter);
+    }
+
+    public static void saveTextFileFromStream(final File file, final InputStream inStream) throws IOException {
+	file.createNewFile();
+	final BufferedReader in = new BufferedReader(new InputStreamReader(inStream));
+	final PrintWriter out = new PrintWriter(file);
+	
+	String line = in.readLine();
+	while (line != null) {
+	    out.write(line);
+	    line = in.readLine();
+	}
+	out.close();
+	in.close();
+    }
+
+    public static void saveFileFromString(final File file, final String str) throws IOException {
+	file.createNewFile();
+	final PrintWriter out = new PrintWriter(file);
+	out.println(str);
+	out.close();
+    }
+
+    public static String getFileAsString(final File file) throws IOException {
+	final StringBuilder builder = new StringBuilder(100000);
+	final BufferedReader in = new BufferedReader(new FileReader(file));
+
+	String line;
+	while ((line = in.readLine()) != null) {
+	    builder.append(line);
+	}
+	in.close();
+
+	return builder.toString();
     }
 }

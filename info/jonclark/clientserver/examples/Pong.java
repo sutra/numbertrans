@@ -27,13 +27,10 @@
  */
 package info.jonclark.clientserver.examples;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-
+import info.jonclark.clientserver.ConnectionException;
+import info.jonclark.clientserver.SimpleClient;
 import info.jonclark.clientserver.SimpleServer;
+import info.jonclark.util.ArrayUtils;
 
 /**
  * Waits to be "pinged" by the Ping class
@@ -41,35 +38,44 @@ import info.jonclark.clientserver.SimpleServer;
 public class Pong extends SimpleServer {
 
     public Pong(int port) {
-	super(port);
+	super(port, Integer.MAX_VALUE, unicode? "UTF-8" : "ASCII");
     }
+    
+    private static boolean unicode = false;
 
     /**
          * @param args
          */
     public static void main(String[] args) throws Exception {
-	if (args.length != 1) {
-	    System.err.println("Usage: <program> port");
+	if (args.length < 1) {
+	    System.err.println("Usage: <program> port [--unicode]");
 	    System.exit(1);
 	}
+	
+	System.out.println("Listening for pings on port " + args[0]);
+	
+	if(ArrayUtils.unsortedArrayContains(args, "--unicode"))
+	    unicode = true;
+	
 	Pong pong = new Pong(Integer.parseInt(args[0]));
 	pong.runServer();
     }
 
     @Override
-    public void handleClientRequest(Socket sock) {
+    public void handleClientRequest(SimpleClient client) {
 	try {
-	    BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-	    PrintWriter out = new PrintWriter(sock.getOutputStream());
-
-	    String line = in.readLine();
+	    System.out.println("connection from: " + client.getHost());
+	    String line = client.getMessage();
 	    System.out.println("received message: " + line);
-	    System.out.println("source: " + sock.getInetAddress().getHostName());
-	    out.println("pong");
-	    out.flush();
-	    System.out.println("sent message: pong");
+	    if (unicode) {
+		client.sendMessage("pong ﾎﾟﾝｸﾞ"); // unicode pong
+		System.out.println("sent message: pong ﾎﾟﾝｸﾞ");
+	    } else {
+		client.sendMessage("pong");
+		System.out.println("sent message: pong");
+	    }
 	    System.out.println();
-	} catch (IOException e) {
+	} catch (ConnectionException e) {
 	    e.printStackTrace();
 	}
     }

@@ -24,12 +24,12 @@ public class StringUtilsTest extends TestCase {
 
     public void testReplaceFastIntRange() {
 	assertEquals(StringUtils.replaceFast("aa aa aa aa",
-		ArrayUtils.arrayToVector(new IntRange[] { new IntRange(3, 5) }),
-		ArrayUtils.arrayToVector(new String[] { "bbb" })),
+		ArrayUtils.arrayToArrayList(new IntRange[] { new IntRange(3, 5) }),
+		ArrayUtils.arrayToArrayList(new String[] { "bbb" })),
 		"aa bbb aa aa");
 	assertEquals(StringUtils.replaceFast("aa aa aa aa",
-		ArrayUtils.arrayToVector(new IntRange[] { new IntRange(3, 5), new IntRange(7, 11)}),
-		ArrayUtils.arrayToVector(new String[] { "bbb", "X"  })),
+		ArrayUtils.arrayToArrayList(new IntRange[] { new IntRange(3, 5), new IntRange(7, 11)}),
+		ArrayUtils.arrayToArrayList(new String[] { "bbb", "X"  })),
 		"aa bbb aX");	
     }
 

@@ -25,26 +25,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.corpus;
+package net.sourceforge.numbertrans.languages;
 
-/**
- * @author Jonathan
- */
-public class GutenbergCatalogException extends Exception {
-
-    /**
-     * Comment for <code>serialVersionUID</code>
-     */
-    private static final long serialVersionUID = 3762251946123604785L;
-    
-    /**
-     * Create a new GutenbergCatalogException with a message
-     * of the given str
-     * 
-     * @param str
-     */
-    public GutenbergCatalogException(String str) {
-        super(str);
-    }
+public class NumberTranslatorFactory {
 
 }

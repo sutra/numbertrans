@@ -27,14 +27,10 @@
  */
 package info.jonclark.clientserver;
 
+import info.jonclark.log.LogUtils;
 import info.jonclark.util.StringUtils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.SocketException;
 import java.net.URLEncoder;
 import java.util.logging.Logger;
 
@@ -42,30 +38,23 @@ public abstract class TaskWorker extends SimpleServer {
 
     private final String knownTask;
     private boolean running = true;
-    private final Logger log;
+    private final Logger log = LogUtils.getLogger();
 
-    public TaskWorker(String knownTask, int port, int nMaxConcurrentTasks, Logger log) {
+    public TaskWorker(String knownTask, int port, int nMaxConcurrentTasks) {
 	super(port, nMaxConcurrentTasks);
 
 	this.knownTask = knownTask;
-	this.log = log;
     }
 
     @Override
-    public void handleClientRequest(Socket sock) {
+    public void handleClientRequest(SimpleClient client) {
 	try {
-	    log.info("New connection from " + sock.getInetAddress().getHostName());
-
-	    final BufferedReader in = new BufferedReader(new InputStreamReader(sock
-		    .getInputStream()));
-	    final PrintWriter out = new PrintWriter(sock.getOutputStream());
-
+	    log.info("New connection from " + client.getHost());
 	    // tell what task I can do
-	    out.println("CAN: " + knownTask);
-	    out.flush();
+	    client.sendMessage("CAN: " + knownTask);
 
 	    String line = null;
-	    while (running && (line = in.readLine()) != null) {
+	    while (running && (line = client.getMessage()) != null) {
 		log.finer("Got line: " + line);
 
 		try {
@@ -91,11 +80,10 @@ public abstract class TaskWorker extends SimpleServer {
 			}
 
 			// convert into a safe representation by escaping some
-                        // characters
+			// characters
 			// and reply with success
 			String reply = URLEncoder.encode("RESULT: TRUE " + results, "UTF-8");
-			out.println(reply);
-			out.flush();
+			client.sendMessage(reply);
 		    } else {
 			log.info("Unknown message type: " + command);
 		    }
@@ -108,27 +96,20 @@ public abstract class TaskWorker extends SimpleServer {
 
 		    String reply = URLEncoder.encode("RESULT: FALSE "
 			    + StringUtils.getStackTrace(t), "UTF-8");
-		    out.println(reply);
-		    out.flush();
+		    client.sendMessage(reply);
 		    dieAndRespawn();
 		}
 	    }
-
-	} catch (SocketException e) {
-	    ; // this is probably just the connection being reset
 	} catch (IOException e) {
 	    log.severe("IOException while handling task.");
 	    log.severe(StringUtils.getStackTrace(e));
+	} catch (ConnectionException e) {
+	    log.warning(StringUtils.getStackTrace(e));
 	}
 
-	try {
-	    // Make every effot to tidy up.
-	    log.finer("Ending client connection.");
-	    sock.close();
-	} catch (IOException e) {
-	    ; // we really don't care if this fails
-	    // the socket might already be closed
-	}
+	// Make every effot to tidy up.
+	log.finer("Ending client connection.");
+	client.disconnect();
     }
 
     /**

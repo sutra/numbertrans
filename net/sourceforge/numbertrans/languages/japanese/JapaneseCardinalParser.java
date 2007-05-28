@@ -25,15 +25,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.util;
+package net.sourceforge.numbertrans.languages.japanese;
 
-/**
- * An exception resulting from a Properties object
- */
-public class PropertiesException extends Exception {
-    private static final long serialVersionUID = -6128594114385212663L;
+import net.sourceforge.numbertrans.languages.chinese.ChineseCardinalParser;
 
-    public PropertiesException(String message) {
-        super(message);
-    }
+public class JapaneseCardinalParser extends ChineseCardinalParser {
+    // TODO: Select only the needed characters
 }

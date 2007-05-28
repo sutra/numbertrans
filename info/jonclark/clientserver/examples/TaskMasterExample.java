@@ -30,7 +30,7 @@ package info.jonclark.clientserver.examples;
 import java.util.Properties;
 
 import info.jonclark.clientserver.TaskMaster;
-import info.jonclark.util.PropertyUtils;
+import info.jonclark.properties.PropertyUtils;
 
 public class TaskMasterExample {
 

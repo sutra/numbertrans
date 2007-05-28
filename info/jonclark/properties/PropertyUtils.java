@@ -26,7 +26,10 @@
  * OF SUCH DAMAGE.
  */
 
-package info.jonclark.util;
+package info.jonclark.properties;
+
+import info.jonclark.util.FileUtils;
+import info.jonclark.util.StringUtils;
 
 import java.util.*;
 import java.io.*;
@@ -41,6 +44,11 @@ public class PropertyUtils {
     private static final String IMPORT_KEYWORD = "@import ";
     private static final String VARIABLE_PREFIX = "${";
     private static final String VARIABLE_SUFFIX = "}";
+
+    public static Properties getProperties(String path) throws FileNotFoundException, IOException,
+	    PropertiesException {
+	return getProperties(new File(path));
+    }
 
     /**
          * Open a text file in the standard Java Properties format, but also
@@ -60,11 +68,11 @@ public class PropertyUtils {
          * @throws PropertiesException
          *                 If a variable in the properties file is not defined.
          */
-    public static Properties getProperties(String path) throws FileNotFoundException, IOException,
+    public static Properties getProperties(File file) throws FileNotFoundException, IOException,
 	    PropertiesException {
 	// First, resolve imports in the properties file
 	final StringBuilder tempBuilder = new StringBuilder();
-	replaceImports(new File(path), tempBuilder);
+	replaceImports(file, tempBuilder);
 
 	// Now load the properties from our temp file,
 	// which is in the format that Properties expects.
@@ -92,6 +100,7 @@ public class PropertyUtils {
          */
     public static void validateProperties(Properties props, String[] mandatoryValues)
 	    throws PropertiesException {
+	assert props != null : "props parameter cannot be null";
 	for (String value : mandatoryValues)
 	    if (!props.containsKey(value))
 		throw new PropertiesException("Property not defined: " + value);
@@ -162,6 +171,46 @@ public class PropertyUtils {
 		FileUtils.insertFile(importedFile, out);
 	    } else {
 		out.append(line + '\n');
+	    }
+	}
+    }
+
+    /**
+         * Get a list of all property files referenced by this property files
+         * via import statements. (Including the property file passed in).
+         * 
+         * @param file
+         *                The properties file to be parsed.
+         * @return A list of files imported by this property file plus the file
+         *         itself.
+         * @throws IOException
+         *                 If there was an error in reading the base Properties
+         *                 file or any of its included files.
+         */
+    public static ArrayList<File> listImports(File file) throws IOException {
+	final ArrayList<File> list = new ArrayList<File>();
+	listImportsRecursive(file, list);
+	return list;
+    }
+
+    private static void listImportsRecursive(File file, ArrayList<File> list) throws IOException {
+	list.add(file);
+
+	final BufferedReader in = new BufferedReader(new FileReader(file));
+	String line = null;
+	while ((line = in.readLine()) != null) {
+	    if (line.startsWith(IMPORT_KEYWORD)) {
+		final String importedFileStr = StringUtils
+			.removeLeadingString(line, IMPORT_KEYWORD);
+		File importedFile = new File(importedFileStr);
+		if (!importedFile.isAbsolute()) {
+		    // resolve this relative import against the base path
+		    // of the properties file from which it was included
+		    importedFile = new File(file.getParent(), importedFileStr);
+		}
+
+		// recursively find imports in this file
+		listImportsRecursive(importedFile, list);
 	    }
 	}
     }

@@ -51,6 +51,13 @@ public interface CorpusStatistics {
     public float getMeanLengthOfSentence();
     
     /**
+     * Get the number of sentences.
+     * 
+     * @return
+     */
+    public long getSentenceCount();
+    
+    /**
      * The number of unique words in a text. This does not
      * include words with different capitalizations.
      * 

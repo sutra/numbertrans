@@ -36,56 +36,76 @@ import info.jonclark.corpus.interfaces.*;
  */
 public abstract class CorpusDocument implements CorpusStatistics, Comparable {
 
-    /**
-     * @return Returns the author.
-     */
-    public String getAuthor() {
-        return author;
-    }
-    /**
-     * @param author The author to set.
-     */
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-    /**
-     * @return Returns the id.
-     */
-    public String getId() {
-        return id;
-    }
-    /**
-     * @param id The id to set.
-     */
-    public void setId(String id) {
-        this.id = id;
-    }
-    /**
-     * @return Returns the title.
-     */
-    public String getTitle() {
-        return title;
-    }
-    /**
-     * @param title The title to set.
-     */
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    private static final boolean useIntern = false;
     private String author = "";
     private String title = "";
-    private String id = "";
+    private String id = "NONE";
     private String language = "";
-    
+    protected UniqueWordCounter wordCount = new UniqueWordCounter(useIntern, false);
+    protected long nSentenceCount = 0;
+
+    public UniqueWordCounter getUniqueWordCounter() {
+	return wordCount;
+    }
+
+    public long getSentenceCount() {
+	return nSentenceCount;
+    }
+
     /**
-     * Parse a document for this corpus type
-     * 
-     * @param in
-     * @throws IOException
-     */
+         * @return Returns the author.
+         */
+    public String getAuthor() {
+	return author;
+    }
+
+    /**
+         * @param author
+         *                The author to set.
+         */
+    public void setAuthor(String author) {
+	this.author = author;
+    }
+
+    /**
+         * @return Returns the id.
+         */
+    public String getId() {
+	return id;
+    }
+
+    /**
+         * @param id
+         *                The id to set.
+         */
+    public void setId(String id) {
+	this.id = id;
+    }
+
+    /**
+         * @return Returns the title.
+         */
+    public String getTitle() {
+	return title;
+    }
+
+    /**
+         * @param title
+         *                The title to set.
+         */
+    public void setTitle(String title) {
+	this.title = title;
+    }
+
+    /**
+         * Parse a document for this corpus type
+         * 
+         * @param in
+         * @throws IOException
+         */
     public abstract void parse(File file) throws IOException;
-    
-    // 	THIS CLASS IS ABSTRACT BECAUSE EACH TYPE OF
+
+    // THIS CLASS IS ABSTRACT BECAUSE EACH TYPE OF
     // CORPUS DOCUMENT NEEDS TO KNOW HOW TO PARSE
     // ITS OWN TYPE OF DOCUMNET
     // THAT METHOD WILL BE STATIC AND RETURN A NEW
@@ -94,42 +114,76 @@ public abstract class CorpusDocument implements CorpusStatistics, Comparable {
 
     // come up with heuristic to take out garbage
     // at beginning and end of files
-    
-    // what language was this document written in?
+
     /**
-     * @return Returns the language.
-     */
+         * what language was this document written in?
+         * 
+         * @return Returns the language.
+         */
     public String getLanguage() {
-        return language;
+	return language;
     }
+
     /**
-     * @param language The language to set.
-     */
+         * @param language
+         *                The language to set.
+         */
     public void setLanguage(String language) {
-        this.language = language;
+	this.language = language;
     }
-    
+
     /**
-     * Determine if 2 documents' ID's are the same
-     * 
-     * @return True if ID's match
-     */
+         * Determine if 2 documents' ID's are the same
+         * 
+         * @return True if ID's match
+         */
     public boolean equals(Object obj) {
-        if(obj instanceof CorpusDocument) {
-            return ((CorpusDocument)obj).id.equals(this.id);
-        } else {
-            return false;
-        }
+	if (obj instanceof CorpusDocument) {
+	    return ((CorpusDocument) obj).id.equals(this.id);
+	} else {
+	    return false;
+	}
     }
-    
-    /* (non-Javadoc)
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
+
+    /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Comparable#compareTo(java.lang.Object)
+         */
     public int compareTo(Object obj) {
-        if(obj instanceof CorpusDocument) {
-            return ((CorpusDocument)obj).id.compareTo(this.id);
-        } else {
-            return -1;
-        }
+	if (obj instanceof CorpusDocument) {
+	    return ((CorpusDocument) obj).id.compareTo(this.id);
+	} else {
+	    return -1;
+	}
+    }
+
+    public long getUniqueWordcount() {
+	if (wordCount == null)
+	    return 0;
+	else
+	    return wordCount.getUniqueWordCount();
+    }
+
+    public long getWordcount() {
+	if (wordCount == null)
+	    return 0;
+	else
+	    return wordCount.getNonuniqueWordCount();
+    }
+
+    public float getMeanLengthOfSentence() {
+	if (nSentenceCount != 0)
+	    return (float) getWordcount() / (float) nSentenceCount;
+	else
+	    return 0;
+    }
+
+    public void setCounts(long nonUniqueWordCount, long uniqueWordCount, long sentenceCount) {
+	nSentenceCount = sentenceCount;
+	if (uniqueWordCount == 0 && nonUniqueWordCount == 0)
+	    wordCount = new UniqueWordCounter(useIntern, false);
+	else
+	    wordCount = new UniqueWordCounter(nonUniqueWordCount, uniqueWordCount);
     }
 }

@@ -144,7 +144,7 @@ public class MyriadCardinalParser extends NumberParser<WholeNumber> {
 
 	final TokenArray arr = find.getMatchingTokens();
 	assert arr.length() == 1 : "More than one matching token for cardinal number";
-	final String strNumber = arr.tokenAt(0);
+	final String strNumber = arr.get(0);
 
 	final long value = toLong(strNumber);
 	final int nLeadingZeros = countLeadingZeros(strNumber);

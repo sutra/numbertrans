@@ -27,14 +27,12 @@
  */
 package info.jonclark.clientserver.examples;
 
-import java.util.logging.Logger;
-
 import info.jonclark.clientserver.TaskWorker;
 
 public class TaskWorkerExample extends TaskWorker {
 
     public TaskWorkerExample(int port) {
-	super("EXAMPLE", port, 1, Logger.getAnonymousLogger());
+	super("EXAMPLE", port, 1);
     }
 
     /**

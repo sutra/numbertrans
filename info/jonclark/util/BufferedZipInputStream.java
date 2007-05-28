@@ -53,7 +53,7 @@ public class BufferedZipInputStream extends ZipInputStream {
      * 			has another entry
      */
     public boolean nextEntry() throws IOException {
-        return super.getNextEntry() != null;
+        return (currentEntry = super.getNextEntry()) != null;
     }
     
     /**

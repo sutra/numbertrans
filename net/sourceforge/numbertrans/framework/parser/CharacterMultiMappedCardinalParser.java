@@ -27,9 +27,7 @@
  */
 package net.sourceforge.numbertrans.framework.parser;
 
-import java.util.Vector;
-
-import net.sourceforge.numbertrans.framework.base.WholeNumber;
+import java.util.ArrayList;
 
 /**
  * A class for converting out of number systems that have a Many-to-1 character
@@ -38,7 +36,7 @@ import net.sourceforge.numbertrans.framework.base.WholeNumber;
  */
 public class CharacterMultiMappedCardinalParser extends CharacterMappedCardinalParser {
 
-    private final Vector<char[]> sourceDigitSets;
+    private final ArrayList<char[]> sourceDigitSets;
 
     /**
          * Create a new <code>CharacterMappedCardinalParser</code> object.
@@ -48,7 +46,7 @@ public class CharacterMultiMappedCardinalParser extends CharacterMappedCardinalP
          *                source language with the character for 0 as the zeroth
          *                element.
          */
-    public CharacterMultiMappedCardinalParser(Vector<char[]> digitSets) {
+    public CharacterMultiMappedCardinalParser(ArrayList<char[]> digitSets) {
 	for (char[] digitSet : digitSets)
 	    assert digitSet.length == 10;
 	this.sourceDigitSets = digitSets;
@@ -68,7 +66,7 @@ public class CharacterMultiMappedCardinalParser extends CharacterMappedCardinalP
      * Test method
      */
     public static void main(String[] args) {
-	Vector<char[]> v = new Vector<char[]>();
+	ArrayList<char[]> v = new ArrayList<char[]>();
 	v.add(new char[] {'0','1','2','3','4','5','6','7','8','9'});
 	CharacterMultiMappedCardinalParser x = new CharacterMultiMappedCardinalParser(v);
 	x.getNumberFromString("10");
