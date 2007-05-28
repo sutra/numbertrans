@@ -27,53 +27,49 @@
  */
 package info.jonclark.corpus.tokenize;
 
+import info.jonclark.util.FileUtils;
 import info.jonclark.util.StringUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.Properties;
 
 /**
  * A NLP tokenizer for the English language
  */
 public class EnglishTokenizer implements Tokenizer {
-    
-    // TODO: Don't slice apart abbreviations
-    
-    public EnglishTokenizer(Properties props) {
-        
-    }
-    
-    /**
-     * Currently, a very cheesy way of tokenizing. Needs
-     * work to become really effective
-     * 
-     * @param str
-     * @return
-     */
-    public String[] tokenize(String str) {
-        
-	// modify this to use the new method, but keep the old so that we can time it.
-        str = StringUtils.replaceFast(str, ".", " . ");
-        str = StringUtils.replaceFast(str, ",", " , ");
-        str = StringUtils.replaceFast(str, ";", " ; ");
-        str = StringUtils.replaceFast(str, "!", " ! ");
-        str = StringUtils.replaceFast(str, "?", " ? ");
-        str = StringUtils.replaceFast(str, ":", " : ");
-        
-        str = StringUtils.replaceFast(str, "\"", " \" ");
-        str = StringUtils.replaceFast(str, "'", " ' ");
-        
-        str = StringUtils.replaceFast(str, "\\", " \\ ");
-        str = StringUtils.replaceFast(str, "/", " / ");
-        
-        str = StringUtils.replaceFast(str, "-", " - ");
-        str = StringUtils.replaceFast(str, "$", " $ ");
-        str = StringUtils.replaceFast(str, "%", " % ");
-        str = StringUtils.replaceFast(str, "(", " ( ");
-        str = StringUtils.replaceFast(str, ")", " ) ");
-        str = StringUtils.replaceFast(str, "[", " [ ");
-        str = StringUtils.replaceFast(str, "]", " ] ");
 
-        return StringUtils.tokenize(str);
+    private final HashSet<String> abbreviations = new HashSet<String>();
+    
+    public static final String SENTENCE_PUNCTUATION = ".!?";
+    public static final String NORMAL_PUNCTUATION = SENTENCE_PUNCTUATION + ",;:\'\\/-$%()[]";
+    public static final String ALL_PUNCTUATION = NORMAL_PUNCTUATION + "|@#^&*<>";
+
+    public EnglishTokenizer(Properties props) throws IOException {
+	final String abbrevFile = props.getProperty("abbrevFile");
+	FileUtils.addLinesOfFileToCollection(new File(abbrevFile), abbreviations);
+    }
+
+    /**
+         * Currently, a very cheesy way of tokenizing. Needs work to become
+         * really effective
+         * 
+         * @param str
+         * @return
+         */
+    public String[] tokenize(String str) {
+
+	// TODO: don't mangle abbreviations
+	
+	// modify this to use the new method, but keep the old so that we can
+        // time it.
+	for(int i=0; i<ALL_PUNCTUATION.length(); i++) {
+	    char c = ALL_PUNCTUATION.charAt(i);
+	    str = StringUtils.replaceFast(str, "" + c, " " + c + " ");
+	}
+
+	return StringUtils.tokenize(str);
     }
 
 }

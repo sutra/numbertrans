@@ -969,7 +969,7 @@ public class StringUtils {
          *                The array of tokens to be untokenized.
          * @return The String form of the token array.
          */
-    public static String untokenize(final String[] tokens) {
+    public static String untokenize(final Iterable<String> tokens) {
 	final StringBuilder builder = new StringBuilder();
 	for (final String token : tokens)
 	    builder.append(token + " ");
@@ -988,7 +988,7 @@ public class StringUtils {
          *                included in the output string.
          * @return The String form of the given part of the token array.
          */
-    public static String untokenize(final String[] tokens, int nStartElement) {
+    public static String untokenize(final Iterable<String> tokens, int nStartElement) {
 	final StringBuilder builder = new StringBuilder();
 	for (int i = nStartElement; i < tokens.length; i++)
 	    builder.append(tokens[i] + " ");

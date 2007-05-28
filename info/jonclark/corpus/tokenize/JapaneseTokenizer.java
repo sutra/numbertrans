@@ -3,8 +3,16 @@
  */
 package info.jonclark.corpus.tokenize;
 
+import info.jonclark.log.LogUtils;
+import info.jonclark.properties.PropertyUtils;
+import info.jonclark.util.FileUtils;
+import info.jonclark.util.StringUtils;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * Features:<br>
@@ -20,32 +28,40 @@ public class JapaneseTokenizer {
     private final EnglishTokenizer englishTokenizer;
 
     // see http://unicode.org/charts/PDF/UFF00.pdf
-    public static final char FIRST_FULLWIDTH_ASCII_VARIANT = 0xFF01;
-    public static final char LAST_FULLWIDTH_ASCII_VARIANT = 0xFF5E;
+    public static final int FIRST_FULLWIDTH_ASCII_VARIANT = 0xFF01;
+    public static final int LAST_FULLWIDTH_ASCII_VARIANT = 0xFF5E;
 
-    public static final char FIRST_HALFWIDTH_KATAKANA_VARIANT = 0xFF65;
-    public static final char LAST_HALFWIDTH_KATAKANA_VARIANT = 0xFF9F;
+    public static final int FIRST_HALFWIDTH_KATAKANA_VARIANT = 0xFF65;
+    public static final int LAST_HALFWIDTH_KATAKANA_VARIANT = 0xFF9F;
 
-    public static final char FIRST_HALFWIDTH_CJK_PUNC_VARIANT = 0xFF61;
-    public static final char LAST_HALFWIDTH_CJK_PUNC_VARIANT = 0xFF64;
+    public static final int FIRST_HALFWIDTH_CJK_PUNC_VARIANT = 0xFF61;
+    public static final int LAST_HALFWIDTH_CJK_PUNC_VARIANT = 0xFF64;
 
-    public static final char FIRST_HIRAGANA = 0x3041;
-    public static final char LAST_HIRAGANA = 0x309F;
+    public static final int FIRST_HIRAGANA = 0x3041;
+    public static final int LAST_HIRAGANA = 0x309F;
 
-    public static final char FIRST_KATAKANA = 0x30A0;
-    public static final char LAST_KATAKANA = 0x30FF;
-    
-    public static final char FIRST_CJK_IDEOGRAPH = 0x30A0;
-    public static final char LAST_CJK_IDEOGRAPH = 0x30FF;
+    public static final int FIRST_KATAKANA = 0x30A0;
+    public static final int LAST_KATAKANA = 0x30FF;
+
+    public static final int FIRST_CJK_IDEOGRAPH = 0x4E00;
+    public static final int LAST_CJK_IDEOGRAPH = 0x9FBF;
+
+    public static final int FIRST_CJK_IDEOGRAPH_EXT_A = 0x3400;
+    public static final int LAST_CJK_IDEOGRAPH_EXT_A = 0x4DBF;
+
+    public static final int FIRST_CJK_IDEOGRAPH_EXT_B = 0x00020000;
+    public static final int LAST_CJK_IDEOGRAPH_EXT_B = 0x0002A6DF;
 
     // see http://unicode.org/charts/PDF/U3000.pdf
-    public static final char FIRST_CJK_PUNC = 0x3000;
-    public static final char LAST_CJK_PUNC = 0x303F;
+    public static final int FIRST_CJK_PUNC = 0x3000;
+    public static final int LAST_CJK_PUNC = 0x303F;
 
-    public static final char FIRST_ROMAN_CHAR = 0x0021;
-    public static final char LAST_ROMAN_CHAR = 0x007E;
+    public static final int FIRST_ROMAN_CHAR = 0x0021;
+    public static final int LAST_ROMAN_CHAR = 0x007E;
 
-    public JapaneseTokenizer(Properties props) {
+    private static final Logger log = LogUtils.getLogger();
+
+    public JapaneseTokenizer(Properties props) throws IOException {
 	englishTokenizer = new EnglishTokenizer(props);
     }
 
@@ -60,24 +76,47 @@ public class JapaneseTokenizer {
 	int nBegin = 0;
 	while (nBegin < input.length()) {
 	    int nEnd;
-	    char c = input.charAt(nBegin);
+	    int codePoint = input.codePointAt(nBegin);
 
-	    if (c >= FIRST_ROMAN_CHAR && c <= LAST_ROMAN_CHAR) {
+	    if (codePoint >= FIRST_ROMAN_CHAR && codePoint <= LAST_ROMAN_CHAR) {
 
+		// let English tokenizer handle Roman chunks
 		nEnd = findEnd(str, nBegin, FIRST_ROMAN_CHAR, LAST_ROMAN_CHAR);
 		final String chunk = input.substring(nBegin, nEnd);
 		String[] enTokens = englishTokenizer.tokenize(chunk);
 		for (final String token : enTokens)
 		    tokens.add(token);
 
-	    } else if (c >= FIRST_KATAKANA && c <= LAST_KATAKANA) {
+	    } else if (codePoint >= FIRST_KATAKANA && codePoint <= LAST_KATAKANA) {
 
-	    } else if (c >= FIRST_HIRAGANA && c <= LAST_HIRAGANA) {
+		// leave katakana chunks as one word
+		nEnd = findEnd(str, nBegin, FIRST_KATAKANA, LAST_KATAKANA);
+		final String chunk = input.substring(nBegin, nEnd);
+		tokens.add(chunk);
 
-	    } else if (false /* Kanji */) {
+	    } else if (codePoint >= FIRST_HIRAGANA && codePoint <= LAST_HIRAGANA) {
+
+		// make hiragana individual tokens
+		nEnd = findEnd(str, nBegin, FIRST_HIRAGANA, LAST_HIRAGANA);
+		final String chunk = input.substring(nBegin, nEnd);
+		for (int i = 0; i < chunk.length(); i++)
+		    tokens.add(chunk.charAt(i) + "");
+
+	    } else if (isKanji(codePoint)) {
+
+		// make kanji individual tokens
+		nEnd = findEndOfKanji(str, nBegin);
+		final String chunk = input.substring(nBegin, nEnd);
+		for (int i = 0; i < chunk.length(); i++)
+		    tokens.add(chunk.charAt(i) + "");
 
 	    } else {
-		// unknown character type!
+		// all other unknown characters will be single tokens
+		nEnd = nBegin + 1;
+		tokens.add(input.charAt(nBegin) + "");
+		
+		log.fine("Unknown code point: " + codePoint + " = "
+			+ new String(Character.toChars(codePoint)));
 	    }
 
 	    assert nBegin != nEnd : "Infinite loop detected due to nBegin == nEnd";
@@ -102,12 +141,34 @@ public class JapaneseTokenizer {
 	// iterate through characters, finding end of contiguous block with
 	// chars
 
-	int i = 0;
-	char c = (char) leastCodePoint;
-	while (i < str.length() && c >= leastCodePoint && c <= greatestCodePoint) {
+	int i = fromIndex;
+	int codePoint = leastCodePoint;
+	while (i < str.length() && codePoint >= leastCodePoint && codePoint <= greatestCodePoint) {
 	    // first iteration guaranteed not to fail unless the user gave
 	    // us a bad from index
-	    c = str.charAt(i);
+	    codePoint = str.codePointAt(i);
+	    i++;
+	}
+
+	return i;
+    }
+
+    public static boolean isKanji(final int codePoint) {
+	return (codePoint >= FIRST_CJK_IDEOGRAPH && codePoint <= LAST_CJK_IDEOGRAPH)
+		|| (codePoint >= FIRST_CJK_IDEOGRAPH_EXT_A && codePoint <= LAST_CJK_IDEOGRAPH_EXT_A)
+		|| (codePoint >= FIRST_CJK_IDEOGRAPH_EXT_B && codePoint <= LAST_CJK_IDEOGRAPH_EXT_B);
+    }
+
+    private static int findEndOfKanji(final String str, int fromIndex) {
+	// iterate through characters, finding end of contiguous block with
+	// chars
+
+	int i = 0;
+	int codePoint = FIRST_CJK_IDEOGRAPH;
+	while (i < str.length() && isKanji(codePoint)) {
+	    // first iteration guaranteed not to fail unless the user gave
+	    // us a bad from index
+	    codePoint = str.codePointAt(i);
 	    i++;
 	}
 
@@ -193,8 +254,28 @@ public class JapaneseTokenizer {
 		    break;
 		}
 	    }
-	}
+
+	    // normalize katakana word separator
+	    if (arr[i] == '・') {
+		arr[i] = ' ';
+	    }
+	} // end while
 
 	return new String(arr);
+    }
+
+    public static void main(String... args) throws Exception {
+	if (args.length != 3) {
+	    System.err.println("Usage: program <properties_file> <input_file> <output_file>");
+	    System.exit(1);
+	}
+
+	Properties props = PropertyUtils.getProperties(args[0]);
+	JapaneseTokenizer tok = new JapaneseTokenizer(props);
+	String input = FileUtils.getFileAsString(new File(args[1]));
+	String norm = normalizeChars(input);
+	FileUtils.saveFileFromString(new File(args[2]), norm);
+	String tokenized = StringUtils.untokenize(tok.tokenize(input));
+	FileUtils.saveFileFromString(new File(args[2]), tokenized);
     }
 }

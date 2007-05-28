@@ -41,6 +41,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.channels.FileChannel;
+import java.util.Collection;
 
 /**
  * Convenience methods for deailing with files
@@ -280,10 +281,21 @@ public class FileUtils {
 
 	String line;
 	while ((line = in.readLine()) != null) {
-	    builder.append(line);
+	    builder.append(line + "\n");
 	}
 	in.close();
 
 	return builder.toString();
+    }
+    
+    public static void addLinesOfFileToCollection(final File file, Collection<String> col)
+	    throws IOException {
+	final BufferedReader in = new BufferedReader(new FileReader(file));
+
+	String line;
+	while ((line = in.readLine()) != null) {
+	    col.add(line);
+	}
+	in.close();
     }
 }
