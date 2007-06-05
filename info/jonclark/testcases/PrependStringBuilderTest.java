@@ -3,7 +3,7 @@
  */
 package info.jonclark.testcases;
 
-import info.jonclark.util.PrependStringBuilder;
+import info.jonclark.lang.PrependStringBuilder;
 import junit.framework.TestCase;
 
 public class PrependStringBuilderTest extends TestCase {

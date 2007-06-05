@@ -27,6 +27,8 @@
  */
 package info.jonclark.util;
 
+import info.jonclark.lang.PrependStringBuilder;
+
 import java.util.Date;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -39,6 +41,7 @@ public class FormatUtils {
 	    "EEEEEEEEE, MMMMMMMM dd, yyyy hh:mm:ss aa");
     private static final SimpleDateFormat fDateLong = new SimpleDateFormat("MMMMMMMM dd, yyyy");
     public static final DecimalFormat FORMAT_2DECIMALS = new DecimalFormat("#,###.##");
+    public static final DecimalFormat FORMAT_4DECIMALS = new DecimalFormat("#,###.####");
     public static final DecimalFormat FORMAT_WHOLE = new DecimalFormat("#,###");
 
     /**
@@ -113,6 +116,10 @@ public class FormatUtils {
     public static String formatDouble2(double decimalNumber) {
 	return FORMAT_2DECIMALS.format(decimalNumber);
     }
+    
+    public static String formatDouble4(double decimalNumber) {
+    	return FORMAT_4DECIMALS.format(decimalNumber);
+        }
 
     public static String formatPhoneNumber(String phoneNumber) {
 	// make a list of only the digits

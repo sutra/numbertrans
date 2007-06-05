@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006, Jonathan Clark <jon_DOT_h_DOT_clark_AT_gmail_DOT_com> 
+ * Copyright (c) 2007, Jonathan Clark <jon_DOT_h_DOT_clark_AT_gmail_DOT_com> 
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification,
@@ -33,117 +33,142 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 
 /**
- * Allows for treating a text file as an array of lines
+ * Allows for treating a text file encoded in UTF-8 or ASCII as an array of
+ * lines
  */
 public class FileLineArray {
-    /**
-         * ORIGINAL (LESS EFFICIENT) IMPLEMENTATION private final Vector<String>
-         * vLines = new Vector<String>(1000, 1000); public
-         * FileLineArray(InputStream inputStream) throws IOException {
-         * BufferedReader in = new BufferedReader(new
-         * InputStreamReader(inputStream)); String line; while( (line =
-         * in.readLine()) != null) { vLines.add(line); } } public String
-         * getLine(int nLine) { return vLines.get(nLine); }
-         */
 
-    public enum Mode {
-	READ, READ_WRITE, READ_WRITE_NO_METADATA, READ_WRITE_WITH_METADATA
-    };
+	/**
+	 * ORIGINAL (LESS EFFICIENT) IMPLEMENTATION private final Vector<String>
+	 * vLines = new Vector<String>(1000, 1000); public
+	 * FileLineArray(InputStream inputStream) throws IOException {
+	 * BufferedReader in = new BufferedReader(new
+	 * InputStreamReader(inputStream)); String line; while( (line =
+	 * in.readLine()) != null) { vLines.add(line); } } public String getLine(int
+	 * nLine) { return vLines.get(nLine); }
+	 */
 
-    private final ArrayList<Long> vNewLines = new ArrayList<Long>(10000);
-    private final RandomAccessFile raFile;
-    private int nCurrentLine ;
+	public enum Mode {
+		READ, READ_WRITE, READ_WRITE_NO_METADATA, READ_WRITE_WITH_METADATA
+	};
 
-    public FileLineArray(File file, Mode mode) throws IOException {
-	String strMode = getModeString(mode);
+	private final ArrayList<Long> vNewLines = new ArrayList<Long>(10000);
+	private final RandomAccessFile raFile;
+	private int nCurrentLine;
 
-	this.raFile = new RandomAccessFile(file, strMode);
-	byte[] buf = new byte[1024];
+	public FileLineArray(File file, Mode mode) throws IOException {
+		String strMode = getModeString(mode);
 
-	long offset = 0;
-	int nRead = 0;
-	while ((nRead = raFile.read(buf)) != -1) {
-	    for (int i = 0; i < nRead; i++) {
+		this.raFile = new RandomAccessFile(file, strMode);
+		byte[] buf = new byte[1024];
 
-		// add the position AFTER each newline character
-		// TODO: Deal with other possible types of newlines
-		if (buf[i] == 0x0A)
-		    vNewLines.add(offset + i + 1);
-	    }
-	    offset = raFile.getFilePointer();
+		long offset = 0;
+		int nRead = 0;
+		while ((nRead = raFile.read(buf)) != -1) {
+			for (int i = 0; i < nRead; i++) {
+
+				// use the properties of UTF-8 to our advantage:
+				// no ASCII character can appear in a multi-byte set
+
+				// add the position AFTER each newline character
+				// TODO: Deal with other possible types of newlines
+				if (buf[i] == 0x0A)
+					vNewLines.add(offset + i + 1);
+			}
+			offset = raFile.getFilePointer();
+		}
+
+		nCurrentLine = 0;
+		raFile.seek(0);
 	}
-	
-	nCurrentLine = 0;
-	raFile.seek(0);
-    }
 
-    private static String getModeString(Mode mode) {
-	if (mode == Mode.READ) {
-	    return "r";
-	} else if (mode == Mode.READ_WRITE) {
-	    return "rw";
-	} else if (mode == Mode.READ_WRITE_NO_METADATA) {
-	    return "rws";
-	} else if (mode == Mode.READ_WRITE_WITH_METADATA) {
-	    return "rwd";
-	} else {
-	    throw new RuntimeException("Unknown mode: " + mode);
+	private static String getModeString(Mode mode) {
+		if (mode == Mode.READ) {
+			return "r";
+		} else if (mode == Mode.READ_WRITE) {
+			return "rw";
+		} else if (mode == Mode.READ_WRITE_NO_METADATA) {
+			return "rws";
+		} else if (mode == Mode.READ_WRITE_WITH_METADATA) {
+			return "rwd";
+		} else {
+			throw new RuntimeException("Unknown mode: " + mode);
+		}
 	}
-    }
 
-    public String getLine(int nLine) throws IOException {
-	// TODO: Use lazy instantiation: Don't index the file until a certain
-	// line number is requested.
+	/**
+	 * 
+	 * @param nLine
+	 *            Zero-based line number
+	 * @return
+	 * @throws IOException
+	 */
+	public String getLine(int nLine) throws IOException {
+		// TODO: Use lazy instantiation: Don't index the file until a certain
+		// line number is requested.
 
-	// get the byte address where these lines are located
-	if (nLine == 0) {
-	    raFile.seek(0);
-	} else {
-	    long nFirstByte = vNewLines.get(nLine - 1);
-	    raFile.seek(nFirstByte);
+		nCurrentLine = nLine;
+
+		long nFirstByte;
+		if (nLine == 0)
+			nFirstByte = 0;
+		else
+			nFirstByte = vNewLines.get(nLine - 1);
+
+		long nLastByte;
+		if(nLine < vNewLines.size())
+			nLastByte = vNewLines.get(nLine);
+		else
+			nLastByte = raFile.length() + 1;
+
+		// return the string without the newline
+		int nByteCount = (int) (nLastByte - nFirstByte - 1);
+		byte[] bytes = new byte[nByteCount];
+
+		raFile.seek(nFirstByte);
+		raFile.readFully(bytes);
+
+		return new String(bytes);
 	}
-	
-	return raFile.readLine();
-    }
 
-    public void seekToLine(int nLine) throws IOException {
-	nCurrentLine = nLine;
-	if (nLine == 0) {
-	    raFile.seek(0);
-	} else {
-	    long nFirstByte = vNewLines.get(nLine - 1);
-	    raFile.seek(nFirstByte);
+	public void seekToLine(int nLine) throws IOException {
+		nCurrentLine = nLine;
+		if (nLine == 0) {
+			raFile.seek(0);
+		} else {
+			long nFirstByte = vNewLines.get(nLine - 1);
+			raFile.seek(nFirstByte);
+		}
 	}
-    }
 
-    /**
-         * Read a line and increment the current line number.
-         * 
-         * @return
-         * @throws IOException
-         */
-    public String readLine() throws IOException {
-	nCurrentLine++;
-	return raFile.readLine();
-    }
+	/**
+	 * Read a line and increment the current line number.
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	public String readLine() throws IOException {
+		nCurrentLine++;
+		return this.getLine(nCurrentLine);
+	}
 
-    /**
-         * @return The line number of the line that would be returned by a call
-         *         to <code>readLine()</code>
-         */
-    public int getNextLineNumber() {
-	return nCurrentLine;
-    }
+	/**
+	 * @return The line number of the line that would be returned by a call to
+	 *         <code>readLine()</code>
+	 */
+	public int getNextLineNumber() {
+		return nCurrentLine;
+	}
 
-    public int getLineCount() {
-	return vNewLines.size() + 1;
-    }
+	public int getLineCount() {
+		return vNewLines.size() + 1;
+	}
 
-    public static void main(String... args) throws Exception {
-	FileLineArray arr = new FileLineArray(new File("conf/notify.properties"), Mode.READ);
-	System.out.println(arr.getLine(0));
-	System.out.println(arr.getLine(2));
-	System.out.println(arr.getLine(6));
-    }
+	public static void main(String... args) throws Exception {
+		FileLineArray arr = new FileLineArray(new File("conf/notify.properties"), Mode.READ);
+		System.out.println(arr.getLine(0));
+		System.out.println(arr.getLine(2));
+		System.out.println(arr.getLine(6));
+	}
 
 }

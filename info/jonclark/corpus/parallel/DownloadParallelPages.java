@@ -53,7 +53,23 @@ public class DownloadParallelPages {
 	int nGoodPageCount = 1;
 	int nBadPageCount = 0;
 
+	final int nFilesPerDirectory = 1000;
+	int nDir = -nFilesPerDirectory;
+	File currentEnglishDir = null;
+	File currentForeignDir = null;
+	
 	for (int i = 1; i <= englishUrls.size(); i++) {
+		
+		if(i % nFilesPerDirectory == 0) {
+			// put files in separate directories to appease the filesystem
+			nDir += nFilesPerDirectory;
+			String strDirName = StringUtils.forceNumberLength(nDir + "", 5);
+			currentEnglishDir = new File(englishDir, strDirName);
+			currentForeignDir = new File(englishDir, strDirName);
+			currentEnglishDir.mkdir();
+			currentForeignDir.mkdir();
+		}
+		
 	    try {
 		est.recordEvent();
 		System.out.println("Downloading page pair " + i + " of " + englishUrls.size() + "("
@@ -61,11 +77,11 @@ public class DownloadParallelPages {
 			+ " bad pages); estimated completion at "
 			+ est.getEstimatedCompetionTimeFormatted(englishUrls.size() - i));
 
-		final File englishFile = new File(englishDir, "page" + i + ".html");
+		final File englishFile = new File(currentEnglishDir, "page" + i + ".html");
 		final InputStream englishStream = NetUtils.getUrlStream(englishUrls.get(i - 1));
 		FileUtils.saveTextFileFromStream(englishFile, englishStream);
 
-		final File foreignFile = new File(foreignDir, "page" + i + ".html");
+		final File foreignFile = new File(currentForeignDir, "page" + i + ".html");
 		final InputStream foreignStream = NetUtils.getUrlStream(foreignUrls.get(i - 1));
 		FileUtils.saveTextFileFromStream(foreignFile, foreignStream);
 

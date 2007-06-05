@@ -27,12 +27,11 @@
  */
 package info.jonclark.corpus.gutenberg;
 
-import info.jonclark.corpus.CorpusDocument;
 import info.jonclark.corpus.CorpusUtils;
+import info.jonclark.io.BufferedZipInputStream;
 import info.jonclark.log.LogUtils;
 import info.jonclark.properties.PropertiesException;
 import info.jonclark.properties.PropertyUtils;
-import info.jonclark.util.BufferedZipInputStream;
 import info.jonclark.util.FileUtils;
 import info.jonclark.util.NetUtils;
 import info.jonclark.util.StringUtils;

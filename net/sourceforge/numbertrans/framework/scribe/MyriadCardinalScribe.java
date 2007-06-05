@@ -27,7 +27,7 @@
  */
 package net.sourceforge.numbertrans.framework.scribe;
 
-import info.jonclark.util.PrependStringBuilder;
+import info.jonclark.lang.PrependStringBuilder;
 import net.sourceforge.numbertrans.framework.base.MyriadNumeralSet;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
 

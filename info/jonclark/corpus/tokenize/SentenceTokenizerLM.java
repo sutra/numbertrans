@@ -25,7 +25,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.corpus.util;
+package info.jonclark.corpus.tokenize;
 
 import info.jonclark.corpus.CorpusUtils;
 import info.jonclark.corpus.lm.LanguageModel;
@@ -44,7 +44,7 @@ import java.util.List;
  * The typical usage is to call <code>nextSentence()</code> until no more
  * sentences remain.
  */
-public class SentenceTokenizer {
+public class SentenceTokenizerLM {
 
     private final BufferedReader in;
     private List<String> tokens = new LinkedList<String>();
@@ -63,7 +63,7 @@ public class SentenceTokenizer {
          *                modeling.
          * @throws IOException
          */
-    public SentenceTokenizer(InputStream inStream, boolean useNewLineAsSentenceDelim,
+    public SentenceTokenizerLM(InputStream inStream, boolean useNewLineAsSentenceDelim,
 	    boolean addSentenceBoundaryMarkers) throws IOException {
 	in = new BufferedReader(new InputStreamReader(inStream));
 	this.addSentenceBoundaryMarkers = addSentenceBoundaryMarkers;

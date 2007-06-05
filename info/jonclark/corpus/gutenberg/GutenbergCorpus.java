@@ -30,7 +30,6 @@ package info.jonclark.corpus.gutenberg;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
-import info.jonclark.corpus.CorpusAuthor;
 import info.jonclark.corpus.interfaces.CorpusStatistics;
 import info.jonclark.log.LogUtils;
 

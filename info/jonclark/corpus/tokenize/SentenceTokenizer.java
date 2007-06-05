@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 public class SentenceTokenizer {
+	
+	public static final String SENTENCE_BOUNDARIES = ".!?\n";
 
 	public SentenceTokenizer(Properties props) {
 
@@ -16,7 +18,7 @@ public class SentenceTokenizer {
 		if (str.length() != 1) {
 			return false;
 		} else {
-			return (EnglishTokenizer.SENTENCE_PUNCTUATION.indexOf(str.charAt(0)) != -1);
+			return (SENTENCE_BOUNDARIES.indexOf(str.charAt(0)) != -1);
 		}
 	}
 
@@ -31,8 +33,13 @@ public class SentenceTokenizer {
 		final ArrayList<String> sentence = new ArrayList<String>(40);
 
 		for (final String token : wordTokens) {
-			sentence.add(token);
-			if (isSentenceBoundary(token)) {
+			assert token.trim().equals(token) || token.equals("\n") : "Untrimmed token";
+			assert !token.trim().equals("") || token.equals("\n") : "Empty token";
+			
+			if(!token.equals("\n"))
+				sentence.add(token);
+			
+			if (isSentenceBoundary(token) && sentence.size() > 0) {
 				String[] arrSentence = sentence.toArray(new String[sentence.size()]);
 				allSentences.add(arrSentence);
 				sentence.clear();

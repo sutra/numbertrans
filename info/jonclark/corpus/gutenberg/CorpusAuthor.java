@@ -25,12 +25,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  */
-package info.jonclark.corpus;
+package info.jonclark.corpus.gutenberg;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import info.jonclark.corpus.UniqueWordCounter;
 import info.jonclark.corpus.interfaces.CorpusStatistics;
 
 /**

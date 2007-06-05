@@ -27,37 +27,65 @@
  */
 package info.jonclark.util;
 
+import info.jonclark.io.PipedStream;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 
 public class ProcessUtils {
-    public static void runProcessWait(final String commandLine) throws InterruptedException, IOException {
-	Runtime.getRuntime().exec(commandLine).wait();
-    }
-    
-    public static void sendStreamToBlackHole(final InputStream in) {
-	final StreamBlackHole hole = new StreamBlackHole(in);
-	hole.start();
-    }
-    
-    /**
-     * Takes all input from the given stream and sends it into oblivion.
-     */
-    private static class StreamBlackHole extends Thread {
-	final InputStream in;
-	public StreamBlackHole(InputStream in) {
-	    this.in = in;
+
+	@Deprecated
+	public static void runProcessWait(final String commandLine) throws InterruptedException,
+			IOException {
+		runProcessWait(commandLine, false);
 	}
-	public void run() {
-	    final BufferedReader br = new BufferedReader(new InputStreamReader(in));
-	    try {
-		while(br.readLine() != null);
-	    } catch (IOException e) {
-		// we really don't care since this is a black hole
-		e.printStackTrace();
-	    }
+
+	public static void runProcessWait(final String commandLine, boolean showOutput)
+			throws InterruptedException, IOException {
+		Process p = Runtime.getRuntime().exec(commandLine);
+		if (showOutput) {
+			sendStreamTo(p.getErrorStream(), System.err);
+			sendStreamTo(p.getInputStream(), System.out);
+		} else {
+			sendStreamToBlackHole(p.getErrorStream());
+			sendStreamToBlackHole(p.getInputStream());
+		}
+		p.wait();
 	}
-    }
+
+	public static void sendStreamToBlackHole(final InputStream in) {
+		final StreamBlackHole hole = new StreamBlackHole(in);
+		hole.start();
+	}
+	
+	public static void sendStreamTo(final InputStream in, final OutputStream out) {
+		final PipedStream pipe = new PipedStream(in, out);
+		pipe.start();
+	}
+
+	/**
+	 * Takes all input from the given stream and sends it into oblivion.
+	 */
+	private static class StreamBlackHole extends Thread {
+
+		final InputStream in;
+
+		public StreamBlackHole(InputStream in) {
+			this.in = in;
+		}
+
+		public void run() {
+			final BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			try {
+				while (br.readLine() != null)
+					;
+			} catch (IOException e) {
+				// we really don't care since this is a black hole
+				e.printStackTrace();
+			}
+		}
+	}
 }

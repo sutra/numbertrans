@@ -27,9 +27,12 @@
  */
 package info.jonclark.corpus;
 
+import info.jonclark.util.FileUtils;
 import info.jonclark.util.FormatUtils;
+import info.jonclark.util.StringUtils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.Serializable;
 import java.util.*;
@@ -40,213 +43,240 @@ import java.util.Map.Entry;
  * provides statistics accordingly.
  */
 public class UniqueWordCounter implements Serializable {
-    private static final long serialVersionUID = 5087475836426817361L;
-    private HashMap<String, Integer> counts = new HashMap<String, Integer>();
-    // String.CASE_INSENSITIVE_ORDER);
-    private long uniqueCount = -1;
-    private long nonUniqueCount = 0;
-    private final boolean alreadyInterned;
-    private final boolean useIntern;
-    private boolean frozen;
+	private static final long serialVersionUID = 5087475836426817361L;
 
-    /**
-         * Creates a new <code>UniqueWordCounter</code>
-         * 
-         * @param inputAlreadyInterned
-         *                Are all strings to be passed to <code>addWord()</code>
-         *                guaranteed to be <code>intern</code>ed? If not,
-         *                they will be interned as they are added.
-         */
-    public UniqueWordCounter(boolean useIntern, boolean inputAlreadyInterned) {
-	this.useIntern = useIntern;
-	this.alreadyInterned = inputAlreadyInterned;
-	frozen = false;
-    }
+	private HashMap<String, Integer> counts = new HashMap<String, Integer>();
 
-    /**
-         * Creates a new <code>UniqueWordCounter</code> in a frozen state (new
-         * words cannot be added) with the specified counts.
-         * 
-         * @param nonUniqueCount
-         * @param uniqueCount
-         */
-    public UniqueWordCounter(long nonUniqueCount, long uniqueCount) {
-	this.nonUniqueCount = nonUniqueCount;
-	this.uniqueCount = uniqueCount;
-	alreadyInterned = true;
-	useIntern = false;
-	frozen = true;
-    }
+	// String.CASE_INSENSITIVE_ORDER);
+	private long uniqueCount = -1;
 
-    /**
-         * Put this object in a "frozen" state in which it will not accept new
-         * words, but memory usage will be reduced.
-         */
-    public void freezeCounts() {
-	frozen = true;
-	uniqueCount = counts.size();
-	counts = null;
-    }
+	private long nonUniqueCount = 0;
 
-    /**
-         * Get the total number of non-unique words (that is, all tokens)
-         * encountered so far
-         * 
-         * @return
-         */
-    public long getNonuniqueWordCount() {
-	return nonUniqueCount;
-    }
+	private final boolean alreadyInterned;
 
-    /**
-         * Get the total number of unique words encountered so far
-         * 
-         * @return
-         */
-    public long getUniqueWordCount() {
-	if (frozen)
-	    return uniqueCount;
-	else
-	    return counts.size();
-    }
+	private final boolean useIntern;
 
-    /**
-         * Get an iterable set with all words and their assocatiated frequencies
-         * 
-         * @return
-         */
-    public Set<Entry<String, Integer>> getEntrySet() {
-	return counts.entrySet();
-    }
+	private boolean frozen;
 
-    /**
-         * Adds the word with a frequency of 1 if not previously encountered.
-         * Otherwise, increments the frequency for this word. Calls
-         * <code>intern()</code> on the word to minimize memory usage.
-         * 
-         * @param word
-         *                A word as a single token
-         */
-    public void addWord(String word) {
-	if (frozen)
-	    throw new RuntimeException("Cannot add new words when UniqueWordCounter is frozen");
-
-	// pool strings to minimize memory usage when using multiple word
-	// counters
-	if (useIntern && !alreadyInterned)
-	    word = word.intern();
-
-	nonUniqueCount++;
-
-	Integer count = counts.get(word);
-	if (count == null)
-	    counts.put(word, 1);
-	else
-	    counts.put(word, count++);
-    }
-
-    /**
-         * Adds each word in <code>words</code>. Uses a frequency of 1 if a
-         * word previously encountered. Otherwise, increments the frequency for
-         * that word. Calls <code>intern()</code> on the word to minimize
-         * memory usage.
-         * 
-         * @param word
-         *                A word as a single token
-         */
-    public void addWords(List<String> words) {
-	if (frozen)
-	    throw new RuntimeException("Cannot add new words when UniqueWordCounter is frozen");
-
-	nonUniqueCount += words.size();
-
-	for (String word : words) {
-	    // pool strings to minimize memory usage when using multiple
-	    // word
-	    // counters
-	    if (useIntern && !alreadyInterned)
-		word = word.intern();
-
-	    Integer count = counts.get(word);
-	    if (count == null)
-		counts.put(word, 1);
-	    else
-		counts.put(word, count++);
+	/**
+	 * Creates a new <code>UniqueWordCounter</code>
+	 * 
+	 * @param inputAlreadyInterned
+	 *            Are all strings to be passed to <code>addWord()</code>
+	 *            guaranteed to be <code>intern</code>ed? If not, they will
+	 *            be interned as they are added.
+	 */
+	public UniqueWordCounter(boolean useIntern, boolean inputAlreadyInterned) {
+		this.useIntern = useIntern;
+		this.alreadyInterned = inputAlreadyInterned;
+		frozen = false;
 	}
-    }
 
-    /**
-         * Adds the unique and non-unique values of another counter to this one
-         * without loss of data.
-         * 
-         * @param other
-         *                Another <code>UniqueWordCounter</code> whose value
-         *                will be added to this one.
-         */
-    public void addCounter(UniqueWordCounter other) {
-	this.nonUniqueCount += other.nonUniqueCount;
+	/**
+	 * Creates a new <code>UniqueWordCounter</code> in a frozen state (new
+	 * words cannot be added) with the specified counts.
+	 * 
+	 * @param nonUniqueCount
+	 * @param uniqueCount
+	 */
+	public UniqueWordCounter(long nonUniqueCount, long uniqueCount) {
+		this.nonUniqueCount = nonUniqueCount;
+		this.uniqueCount = uniqueCount;
+		alreadyInterned = true;
+		useIntern = false;
+		frozen = true;
+	}
 
-	if (other.frozen) {
-	    // TODO: FIXME
-	} else {
+	/**
+	 * Put this object in a "frozen" state in which it will not accept new
+	 * words, but memory usage will be reduced.
+	 */
+	public void freezeCounts() {
+		frozen = true;
+		uniqueCount = counts.size();
+		counts = null;
+	}
 
-	    // see if we can save time by just cloning the other counts
-	    if (this.counts.size() == 0) {
-		this.counts = cloneCounts(other.counts);
-	    } else {
-		for (final Map.Entry<String, Integer> entry : other.counts.entrySet()) {
-		    final String word = entry.getKey();
-		    final Integer otherCount = entry.getValue();
+	/**
+	 * Get the total number of non-unique words (that is, all tokens)
+	 * encountered so far
+	 * 
+	 * @return
+	 */
+	public long getNonuniqueWordCount() {
+		return nonUniqueCount;
+	}
 
-		    Integer prevCount = counts.get(word);
-		    if (prevCount == null)
-			counts.put(word, otherCount);
-		    else
-			counts.put(word, prevCount + otherCount);
+	/**
+	 * Get the total number of unique words encountered so far
+	 * 
+	 * @return
+	 */
+	public long getUniqueWordCount() {
+		if (frozen)
+			return uniqueCount;
+		else
+			return counts.size();
+	}
+
+	/**
+	 * Get an iterable set with all words and their assocatiated frequencies
+	 * 
+	 * @return
+	 */
+	public Set<Entry<String, Integer>> getEntrySet() {
+		return counts.entrySet();
+	}
+
+	/**
+	 * Adds the word with a frequency of 1 if not previously encountered.
+	 * Otherwise, increments the frequency for this word. Calls
+	 * <code>intern()</code> on the word to minimize memory usage.
+	 * 
+	 * @param word
+	 *            A word as a single token
+	 */
+	public void addWord(String word) {
+		if (frozen)
+			throw new RuntimeException(
+					"Cannot add new words when UniqueWordCounter is frozen");
+
+		// pool strings to minimize memory usage when using multiple word
+		// counters
+		if (useIntern && !alreadyInterned)
+			word = word.intern();
+
+		nonUniqueCount++;
+
+		Integer count = counts.get(word);
+		if (count == null)
+			counts.put(word, 1);
+		else
+			counts.put(word, count++);
+	}
+
+	/**
+	 * Adds each word in <code>words</code>. Uses a frequency of 1 if a word
+	 * previously encountered. Otherwise, increments the frequency for that
+	 * word. Calls <code>intern()</code> on the word to minimize memory usage.
+	 * 
+	 * @param word
+	 *            A word as a single token
+	 */
+	public void addWords(List<String> words) {
+		if (frozen)
+			throw new RuntimeException(
+					"Cannot add new words when UniqueWordCounter is frozen");
+
+		nonUniqueCount += words.size();
+
+		for (String word : words) {
+			// pool strings to minimize memory usage when using multiple
+			// word
+			// counters
+			if (useIntern && !alreadyInterned)
+				word = word.intern();
+
+			Integer count = counts.get(word);
+			if (count == null)
+				counts.put(word, 1);
+			else
+				counts.put(word, count++);
 		}
-	    } // end if this.count.size() == 0
-	} // end if other.frozen
-    }
-
-    public int getCountForWord(final String word) {
-	Integer count = counts.get(word);
-	if (count == null) {
-	    return 0;
-	} else {
-	    return count.intValue();
-	}
-    }
-
-    @SuppressWarnings("unchecked")
-    private HashMap<String, Integer> cloneCounts(final HashMap<String, Integer> map) {
-	return (HashMap<String, Integer>) map.clone();
-    }
-
-    public static void main(String[] args) throws Exception {
-	if (args.length != 1) {
-	    System.err.println("Usage: program <input_file>");
-	    System.exit(1);
 	}
 
-	UniqueWordCounter counter = new UniqueWordCounter(false, false);
-	int nSentences = 0;
-	BufferedReader in = new BufferedReader(new FileReader(args[0]));
-	String line;
-	while ((line = in.readLine()) != null) {
-	    final List<String> words = CorpusUtils.tokenize(line);
-	    nSentences += CorpusUtils.countSentenceBoundaries(words);
+	/**
+	 * Adds the unique and non-unique values of another counter to this one
+	 * without loss of data.
+	 * 
+	 * @param other
+	 *            Another <code>UniqueWordCounter</code> whose value will be
+	 *            added to this one.
+	 */
+	public void addCounter(UniqueWordCounter other) {
+		this.nonUniqueCount += other.nonUniqueCount;
 
-	    CorpusUtils.filterNonWords(words);
-	    counter.addWords(words);
+		if (other.frozen) {
+			// TODO: FIXME
+		} else {
+
+			// see if we can save time by just cloning the other counts
+			if (this.counts.size() == 0) {
+				this.counts = cloneCounts(other.counts);
+			} else {
+				for (final Map.Entry<String, Integer> entry : other.counts
+						.entrySet()) {
+					final String word = entry.getKey();
+					final Integer otherCount = entry.getValue();
+
+					Integer prevCount = counts.get(word);
+					if (prevCount == null)
+						counts.put(word, otherCount);
+					else
+						counts.put(word, prevCount + otherCount);
+				}
+			} // end if this.count.size() == 0
+		} // end if other.frozen
 	}
-	in.close();
 
-	final float mls = nSentences > 0 ? counter.getNonuniqueWordCount() / nSentences : 0;
-	System.out.println("For file:\t" + args[0]);
-	System.out.println("Total words:\t"
-		+ FormatUtils.formatLong(counter.getNonuniqueWordCount()));
-	System.out.println("Unique words:\t" + FormatUtils.formatLong(counter.getUniqueWordCount()));
-	System.out.println("Sentence count:\t" + FormatUtils.formatLong(nSentences));
-	System.out.println("Mean Length of Sentence:\t" + FormatUtils.formatDouble2(mls));
-    }
+	public int getCountForWord(final String word) {
+		Integer count = counts.get(word);
+		if (count == null) {
+			return 0;
+		} else {
+			return count.intValue();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private HashMap<String, Integer> cloneCounts(
+			final HashMap<String, Integer> map) {
+		return (HashMap<String, Integer>) map.clone();
+	}
+
+	public static void main(String[] args) throws Exception {
+		if (args.length < 1) {
+			System.err.println("Usage: program <input_file_wildcard> (<tokens_only>)");
+			System.exit(1);
+		}
+
+		System.out.println("Finding files...");
+		File[] files = FileUtils.getFilesFromWildcard(args[0]);
+		System.out.println("Found " + files.length + " files to count.");
+
+		UniqueWordCounter counter = new UniqueWordCounter(false, false);
+		int nSentences = 0;
+		long nWords = 0;
+		
+		for (final File file : files) {
+			BufferedReader in = new BufferedReader(new FileReader(file));
+			String line;
+			while ((line = in.readLine()) != null) {
+				final List<String> words = CorpusUtils.tokenize(line);
+				nSentences += CorpusUtils.countSentenceBoundaries(words);
+
+				CorpusUtils.filterNonWords(words);
+				if(args.length == 1)
+					counter.addWords(words);
+				else
+					nWords += words.size();
+			}
+			in.close();
+		}
+		
+		if(nWords == 0)
+			nWords = counter.getNonuniqueWordCount();
+
+		final float mls = nSentences > 0 ? nWords
+				/ nSentences : 0;
+		System.out.println("For file:\t" + args[0]);
+		System.out.println("Total words:\t"
+				+ FormatUtils.formatLong(nWords));
+		System.out.println("Unique words:\t"
+				+ FormatUtils.formatLong(counter.getUniqueWordCount()));
+		System.out.println("Sentence count:\t"
+				+ FormatUtils.formatLong(nSentences));
+		System.out.println("Mean Length of Sentence:\t"
+				+ FormatUtils.formatDouble2(mls));
+	}
 }

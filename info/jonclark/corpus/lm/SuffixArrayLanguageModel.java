@@ -34,7 +34,7 @@ import java.util.List;
 
 import info.jonclark.corpus.UniqueWordCounter;
 import info.jonclark.corpus.lm.smoothing.LanguageModelSmoothing;
-import info.jonclark.corpus.util.SentenceTokenizer;
+import info.jonclark.corpus.tokenize.SentenceTokenizer;
 import info.jonclark.lang.NaiveSuffixArray;
 import info.jonclark.lang.TokenArray;
 import info.jonclark.log.LogUtils;

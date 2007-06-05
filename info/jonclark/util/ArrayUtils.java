@@ -30,6 +30,7 @@ package info.jonclark.util;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Vector;
 
 /**
  * Utilities for working with arrays
@@ -367,5 +368,19 @@ public class ArrayUtils {
 	}
 	return nIndex;
 
+    }
+    
+    public static<T> ArrayList<T> toArrayList(T[] arr) {
+    	final ArrayList<T> list = new ArrayList<T>(arr.length);
+    	for(final T item : arr)
+    		list.add(item);
+    	return list;
+    }
+    
+    public static<T> Vector<T> toVector(T[] arr) {
+    	final Vector<T> list = new Vector<T>(arr.length);
+    	for(final T item : arr)
+    		list.add(item);
+    	return list;
     }
 }
