@@ -1,6 +1,9 @@
 package info.jonclark.corpus.management.directories;
 
+import info.jonclark.corpus.management.etc.CorpusProperties;
+
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -14,14 +17,16 @@ public class AutoNumberCorpusDirectory extends AbstractCorpusDirectory {
 	
 	private final int nFilesPerDirectory;
 	private int nCurrentDirectory = -1;
+	private final DecimalFormat format;
 	private Vector<Integer> nChildFileCount = new Vector<Integer>();
 	private Vector<AbstractCorpusDirectory> children = new Vector<AbstractCorpusDirectory>();
 
 	public AutoNumberCorpusDirectory(Properties props, String namespace, File root) {
 		super(props, namespace, root);
-		// TODO Auto-generated constructor stub
 		
-		// init current files in directory
+		this.nFilesPerDirectory = CorpusProperties.getAutoNumberFilesPerDir(props, namespace);
+		String pattern = CorpusProperties.getAutoNumberPattern(props, namespace);
+		this.format = new DecimalFormat(pattern);
 	}
 
 	@Override
@@ -44,8 +49,10 @@ public class AutoNumberCorpusDirectory extends AbstractCorpusDirectory {
 			// create new directory
 		} else {
 			// create new file in same directory
-			return children.get(nCurrentDirectory).getNextFileForCreation(query));
+			return children.get(nCurrentDirectory).getNextFileForCreation(query);
 		}
+		
+		return null;
 	}
 
 }

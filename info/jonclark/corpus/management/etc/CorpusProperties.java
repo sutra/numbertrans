@@ -1,46 +1,78 @@
 package info.jonclark.corpus.management.etc;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import info.jonclark.properties.PropertiesException;
-import info.jonclark.properties.PropertyUtils;
 import info.jonclark.util.StringUtils;
 
 public class CorpusProperties {
 
-	public static String getRunNamespace(Properties props, String corpusName, String runName)
-			throws PropertiesException {
+    public static String getRunNamespace(Properties props, String runName)
+	    throws PropertiesException {
+	return "run." + runName + ".";
+    }
 
-		String allRunsNamespace = "run." + corpusName;
-		String nameKey = PropertyUtils.getPropertyWithValue(props, allRunsNamespace, "runName",
-				runName);
-		String currentRunNamespace = StringUtils.substringBefore(nameKey, "runName");
+    public static String getRunSetNamespace(Properties props, String runSetName) {
+	return "run." + runSetName + ".";
+    }
 
-		return currentRunNamespace;
+    public static String getCorpusNamespace(Properties props, String corpusName) {
+	return "corpus." + corpusName + ".";
+    }
+
+    public static String getInputRunName(Properties props, String runNamespace) {
+	String inputRunKey = props.getProperty(runNamespace + "transform.inputRun");
+	return props.getProperty(inputRunKey);
+    }
+    
+    public static int getAutoNumberFilesPerDir(Properties props, String namespace) {
+	namespace = StringUtils.forceSuffix(namespace, ".");
+	String inputRunKey = props.getProperty(namespace + "autonumber.filesPerDir");
+	String value = props.getProperty(inputRunKey);
+	return Integer.parseInt(value);
+    }
+    
+    public static String getAutoNumberPattern(Properties props, String namespace) {
+	namespace = StringUtils.forceSuffix(namespace, ".");
+	String inputRunKey = props.getProperty(namespace + "autonumber.pattern");
+	return props.getProperty(inputRunKey);
+    }
+
+    public static File getCorpusRootDirectory(Properties props, String corpusName) {
+	String corpusNamespace = getCorpusNamespace(props, corpusName);
+	String corpusRootDirKey = corpusNamespace + "rootdir";
+	String corpusRootDir = props.getProperty(corpusRootDirKey);
+	return new File(corpusRootDir);
+    }
+
+    public static String[] getParallelTargets(Properties props, String directoryNamespace) {
+	directoryNamespace = StringUtils.forceSuffix(directoryNamespace, ".");
+
+	ArrayList<String> targets = new ArrayList<String>();
+	int i = 0;
+	String value = props.getProperty(directoryNamespace + "parallel.target." + i);
+	while (value != null) {
+	    i++;
+	    value = props.getProperty(directoryNamespace + "parallel.target." + i);
 	}
 
-	public static String getCorpusNamespace(Properties props, String corpusName)
-			throws PropertiesException {
-
-		String allCorpora = "parallelCorpus.";
-		String nameKey = PropertyUtils.getPropertyWithValue(props, allCorpora, "corpusName",
-				corpusName);
-		String currentRunNamespace = StringUtils.substringBefore(nameKey, "corpusName");
-
-		return currentRunNamespace;
+	if (i <= 1) {
+	    throw new RuntimeException("No targets defined for parallel directory: "
+		    + directoryNamespace);
 	}
 
-	public static String getInputRunName(Properties props, String runNamespace) {
-		String inputRunKey = props.getProperty(runNamespace + "transform.inputRun");
-		return props.getProperty(inputRunKey);
-	}
+	return targets.toArray(new String[targets.size()]);
+    }
 
-	public static File getCorpusRootDirectory(Properties props, String corpusName)
-			throws PropertiesException {
-		String corpusNamespace = getCorpusNamespace(props, corpusName);
-		String corpusRootDirKey = corpusNamespace + "rootdir";
-		String corpusRootDir = props.getProperty(corpusRootDirKey);
-		return new File(corpusRootDir);
-	}
+    public static String getType(Properties props, String namespace) {
+	namespace = StringUtils.forceSuffix(namespace, ".");
+	return props.getProperty(namespace + "type");
+    }
+
+    public static String getName(Properties props, String namespace) {
+	namespace = StringUtils.forceSuffix(namespace, ".");
+	return props.getProperty(namespace + "name");
+    }
 }

@@ -6,6 +6,5 @@ import java.io.File;
 public interface ParallelCorpusCreationIterator extends CorpusIterator {
 	public void nextPair();
 	
-	public File getOutputDocumentA();
-	public File getOutputDocumentB();
+	public File getOutputDocument(int nParallel);
 }

@@ -1,5 +1,7 @@
 package info.jonclark.corpus.management.etc;
 
+import java.util.Properties;
+
 import info.jonclark.corpus.management.iterators.CorpusIterator;
 
 /**
@@ -11,5 +13,5 @@ import info.jonclark.corpus.management.iterators.CorpusIterator;
  */
 public interface CorpusRun<T extends CorpusIterator> {
 
-	public void processCorpus(T iterator);
+	public void processCorpus(Properties props, T iterator);
 }

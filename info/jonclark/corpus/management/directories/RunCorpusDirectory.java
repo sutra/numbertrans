@@ -11,13 +11,13 @@ import java.util.Properties;
  */
 public class RunCorpusDirectory extends AbstractCorpusDirectory {
 
-	public RunCorpusDirectory(Properties props, String namespace, File root, boolean bNode) {
-		super(props, namespace, root, bNode);
+	public RunCorpusDirectory(Properties props, String namespace, File root) {
+		super(props, namespace, root);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
-	public File[] getDocuments(DirectoryQuery query {
+	public File[] getDocuments(DirectoryQuery query) {
 		// TODO Auto-generated method stub
 		return null;
 	}

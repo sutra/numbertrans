@@ -1006,6 +1006,13 @@ public class StringUtils {
 			builder.append(token + " ");
 		return builder.toString().trim();
 	}
+	
+	public static String untokenize(final Iterable<String> tokens) {
+		final StringBuilder builder = new StringBuilder();
+		for (final String token : tokens)
+			builder.append(token + " ");
+		return builder.toString().trim();
+	}
 
 	/**
 	 * Create a single string from an array of tokens, starting with the element
@@ -1075,5 +1082,12 @@ public class StringUtils {
 			}
 		}
 		return new String(arr);
+	}
+	
+	public static String forceSuffix(String in, String suffix) {
+	    if(!in.endsWith(suffix))
+		return in + suffix;
+	    else
+		return in;
 	}
 }

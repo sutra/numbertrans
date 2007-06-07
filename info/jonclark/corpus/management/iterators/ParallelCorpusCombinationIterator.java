@@ -8,8 +8,6 @@ public interface ParallelCorpusCombinationIterator extends CorpusIterator {
 	public boolean hasNextPair();
 	public void nextPair();
 	
-	public File getInputDocumentA();
-	public File getInputDocumentB();
-	
+	public File getInputDocument(int nParallel);
 	public File getOutputDocument();
 }
