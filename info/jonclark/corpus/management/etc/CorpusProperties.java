@@ -39,12 +39,33 @@ public class CorpusProperties {
 	String inputRunKey = props.getProperty(namespace + "autonumber.pattern");
 	return props.getProperty(inputRunKey);
     }
+    
+    public static boolean getAutoNumberArrangeByFilename(Properties props, String namespace) {
+	namespace = StringUtils.forceSuffix(namespace, ".");
+	String inputRunKey = props.getProperty(namespace + "autonumber.arrangeByFilename");
+	String value = props.getProperty(inputRunKey);
+	return Boolean.parseBoolean(value);
+    }
+    
+    public static String getNodeFilenamePattern(Properties props, String namespace) {
+	namespace = StringUtils.forceSuffix(namespace, ".");
+	String inputRunKey = props.getProperty(namespace + "node.filenamePattern");
+	String value = props.getProperty(inputRunKey);
+	return value;
+    }
 
     public static File getCorpusRootDirectory(Properties props, String corpusName) {
 	String corpusNamespace = getCorpusNamespace(props, corpusName);
 	String corpusRootDirKey = corpusNamespace + "rootdir";
 	String corpusRootDir = props.getProperty(corpusRootDirKey);
 	return new File(corpusRootDir);
+    }
+    
+    public static String getSubdirectory(Properties props, String namespace) {
+	namespace = StringUtils.forceSuffix(namespace, ".");
+	String corpusRootDirKey = namespace + "subdir.name";
+	String subdir = props.getProperty(corpusRootDirKey);
+	return subdir;
     }
 
     public static String[] getParallelTargets(Properties props, String directoryNamespace) {

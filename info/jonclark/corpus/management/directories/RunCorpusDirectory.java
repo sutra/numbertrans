@@ -1,6 +1,9 @@
 package info.jonclark.corpus.management.directories;
 
+import info.jonclark.corpus.management.etc.CorpusGlobals;
+
 import java.io.File;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -10,22 +13,27 @@ import java.util.Properties;
  * Also, the run type saves meta-data about when runs were performed.
  */
 public class RunCorpusDirectory extends AbstractCorpusDirectory {
+    
+    public RunCorpusDirectory(Properties props, CorpusGlobals globals, String namespace) {
+	super(props, globals, namespace);
+    }
 
-	public RunCorpusDirectory(Properties props, String namespace, File root) {
-		super(props, namespace, root);
-		// TODO Auto-generated constructor stub
-	}
+    @Override
+    public List<File> getDocuments(CorpusQuery query, File currentDirectory) {
+	
+	File subdir = new File(currentDirectory, query.runName);
+	return getChild().getDocuments(query, subdir);
+	
+    }
 
-	@Override
-	public File[] getDocuments(DirectoryQuery query) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public File getNextFileForCreation(DirectoryQuery query) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public File getNextFileForCreation(CorpusQuery query, File currentDirectory) {
+	
+	File subdir = new File(currentDirectory, query.runName);
+	if(!subdir.exists())
+	    subdir.mkdir();
+	
+	return getChild().getNextFileForCreation(query, subdir);
+    }
 
 }
