@@ -2,7 +2,7 @@ package info.jonclark.corpus.management.etc;
 
 import java.util.Properties;
 
-import info.jonclark.corpus.management.iterators.CorpusIterator;
+import info.jonclark.corpus.management.iterators.interfaces.CorpusIterator;
 
 /**
  * Defines a class that performs some operator on the corpus. These classes

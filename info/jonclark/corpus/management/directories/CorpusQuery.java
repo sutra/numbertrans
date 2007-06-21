@@ -2,24 +2,47 @@ package info.jonclark.corpus.management.directories;
 
 public class CorpusQuery {
     public static final int ALL_PARALLEL_DIRECTORIES = -100;
+    public static final int NO_INDEX = -200;
+    public static final String NO_FILE_NAME = "NO_FILE";
+    public static final String ALL_FILES = "ALL_FILES";
+
+    private final int nParallel;
+    private final String runName;
+    private final int fileIndex;
+    private final String fileName;
+
+    public enum Statistic {
+	NONE, DOCUMENT_COUNT, PARALLEL_COUNT
+    };
     
-    public int nParallel;
-    public String runName;
-    public int fileNumber;
-    
-    public CorpusQuery(int nParallel, String runName) {
-	this(nParallel, runName, -1);
-    }
-    
-    /**
-     * 
-     * @param nParallel
-     * @param runName
-     * @param fileNumber Optional parameter to force the fileNumber not to be the globalfile count
-     */
-    public CorpusQuery(int nParallel, String runName, int fileNumber) {
+    private final Statistic stat;
+
+    public CorpusQuery(int nParallel, String runName, String fileName, int fileIndex,
+	    Statistic stat) {
 	this.nParallel = nParallel;
 	this.runName = runName;
-	this.fileNumber = fileNumber;
+	this.fileIndex = fileIndex;
+	this.fileName = fileName;
+	this.stat = stat;
+    }
+
+    public int getFileIndex() {
+	return fileIndex;
+    }
+
+    public String getFileName() {
+	return fileName;
+    }
+
+    public int getNParallel() {
+	return nParallel;
+    }
+
+    public String getRunName() {
+	return runName;
+    }
+    
+    public Statistic getStatistic() {
+	return stat;
     }
 }

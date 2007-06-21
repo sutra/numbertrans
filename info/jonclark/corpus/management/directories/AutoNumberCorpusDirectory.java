@@ -1,6 +1,6 @@
 package info.jonclark.corpus.management.directories;
 
-import info.jonclark.corpus.management.etc.CorpusGlobals;
+import info.jonclark.corpus.management.directories.CorpusQuery.Statistic;
 import info.jonclark.corpus.management.etc.CorpusProperties;
 import info.jonclark.util.FileUtils;
 
@@ -25,9 +25,8 @@ public class AutoNumberCorpusDirectory extends AbstractCorpusDirectory {
     private int nFilesInCurrentSubdir;
     private File currentSubdir;
 
-    public AutoNumberCorpusDirectory(Properties props, CorpusGlobals globals,
-	    String directoryNamespace) {
-	super(props, globals, directoryNamespace);
+    public AutoNumberCorpusDirectory(Properties props, String directoryNamespace) {
+	super(props, directoryNamespace);
 
 	this.nFilesPerDirectory = CorpusProperties.getAutoNumberFilesPerDir(props,
 		directoryNamespace);
@@ -50,6 +49,28 @@ public class AutoNumberCorpusDirectory extends AbstractCorpusDirectory {
 	    documents.addAll(getChild().getDocuments(query, subdir));
 	return documents;
 
+    }
+
+    @Override
+    public double getStatistic(CorpusQuery query, File currentDirectory) {
+	if (query.getStatistic() == Statistic.DOCUMENT_COUNT) {
+
+	    File[] subdirs = FileUtils.getSubdirectories(currentDirectory);
+	    double total = 0.0;
+	    for (final File subdir : subdirs)
+		total += getChild().getStatistic(query, subdir);
+	    return total;
+
+	} else if (query.getStatistic() == Statistic.PARALLEL_COUNT) {
+
+	    File[] subdirs = FileUtils.getSubdirectories(currentDirectory);
+	    return getChild().getStatistic(query, subdirs[0]);
+
+	} else if (query.getStatistic() == Statistic.NONE) {
+	    return -1;
+	} else {
+	    throw new RuntimeException("Unknown Statistics: " + query.getStatistic());
+	}
     }
 
     @Override

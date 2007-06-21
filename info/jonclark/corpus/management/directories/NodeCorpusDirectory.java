@@ -1,13 +1,10 @@
 package info.jonclark.corpus.management.directories;
 
-import info.jonclark.corpus.management.etc.CorpusGlobals;
-import info.jonclark.corpus.management.etc.CorpusProperties;
+import info.jonclark.corpus.management.directories.CorpusQuery.Statistic;
 import info.jonclark.util.ArrayUtils;
 import info.jonclark.util.FileUtils;
-import info.jonclark.util.StringUtils;
 
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Properties;
 
@@ -18,19 +15,8 @@ import java.util.Properties;
  * corpus.
  */
 public class NodeCorpusDirectory extends AbstractCorpusDirectory {
-
-    private final String filePrefix;
-    private final String fileSuffix;
-    private final DecimalFormat format;
-
-    public NodeCorpusDirectory(Properties props, CorpusGlobals globals, String namespace) {
-	super(props, globals, namespace);
-
-	String filenamePattern = CorpusProperties.getNodeFilenamePattern(props, namespace);
-	String pattern = StringUtils.substringBetween(filenamePattern, "(", ")");
-	this.format = new DecimalFormat(pattern);
-	this.filePrefix = StringUtils.substringBefore(filenamePattern, "(");
-	this.fileSuffix = StringUtils.substringAfter(filenamePattern, ")");
+    public NodeCorpusDirectory(Properties props, String namespace) {
+	super(props, namespace);
     }
 
     @Override
@@ -40,13 +26,24 @@ public class NodeCorpusDirectory extends AbstractCorpusDirectory {
 
     @Override
     public File getNextFileForCreation(CorpusQuery query, File currentDirectory) {
-	String filename = filePrefix + format.format(getGlobals().getGlobalFileCount())
-		+ fileSuffix;
-	
-	getGlobals().incrementGlobalFileCount();
-
-	File file = new File(currentDirectory, filename);
+	File file = new File(currentDirectory, query.getFileName());
 	return file;
+    }
+
+    @Override
+    public double getStatistic(CorpusQuery query, File currentDirectory) {
+	if (query.getStatistic() == Statistic.DOCUMENT_COUNT) {
+	    
+	    File[] files = FileUtils.getNormalFiles(currentDirectory);
+	    return files.length;
+	    
+	} else if (query.getStatistic() == Statistic.PARALLEL_COUNT) {
+	    return 0;
+	} else if (query.getStatistic() == Statistic.NONE) {
+	    return -1;
+	} else {
+	    throw new RuntimeException("Unknown Statistics: " + query.getStatistic());
+	}
     }
 
 }
