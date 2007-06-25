@@ -2,11 +2,8 @@ package info.jonclark.sourcecode;
 
 import info.jonclark.util.FileUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 /**
  * Kills off all .svn directories and their contents in a tree. Fixes accidental
@@ -29,7 +26,7 @@ public class SvnDataKiller {
 
     }
     
-    public static void killRecursively(File root) {
+    public static void killRecursively(File root) throws IOException {
 	final File[] directories = FileUtils.getSubdirectories(root);
 	for (final File dir : directories)
 	    killRecursively(dir);

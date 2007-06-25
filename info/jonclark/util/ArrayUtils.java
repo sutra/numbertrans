@@ -251,6 +251,17 @@ public class ArrayUtils {
 	return false;
     }
 
+    public static int findInUnsortedArray(int[] arr, int key) {
+	return findInUnsortedArray(arr, key, 0);
+    }
+
+    public static int findInUnsortedArray(int[] arr, int key, int nStartIndex) {
+	for (int i = nStartIndex; i < arr.length; i++)
+	    if (arr[i] == key)
+		return i;
+	return -1;
+    }
+
     /**
          * Find where in an array a value is. Searching starts from element 0.
          * 
@@ -338,8 +349,10 @@ public class ArrayUtils {
          * 
          * @param a
          * @param key
-         * @param nFirst The first index to be searched
-         * @param nLast The last index to be searched
+         * @param nFirst
+         *                The first index to be searched
+         * @param nLast
+         *                The last index to be searched
          */
     public static <T extends Comparable<T>> int binarySearchForFirstIndex(T[] a, T key,
 	    final int nFirst, final int nLast) {
@@ -369,18 +382,72 @@ public class ArrayUtils {
 	return nIndex;
 
     }
-    
-    public static<T> ArrayList<T> toArrayList(T[] arr) {
-    	final ArrayList<T> list = new ArrayList<T>(arr.length);
-    	for(final T item : arr)
-    		list.add(item);
-    	return list;
+
+    public static <T> ArrayList<T> toArrayList(T[] arr) {
+	final ArrayList<T> list = new ArrayList<T>(arr.length);
+	for (final T item : arr)
+	    list.add(item);
+	return list;
+    }
+
+    public static <T> Vector<T> toVector(T[] arr) {
+	final Vector<T> list = new Vector<T>(arr.length);
+	for (final T item : arr)
+	    list.add(item);
+	return list;
+    }
+
+    public static int indexOfMax(double[] arr) {
+	double maxValue = Double.NEGATIVE_INFINITY;
+	int nMax = 0;
+	for (int i = 0; i < arr.length; i++) {
+	    if (arr[i] > maxValue) {
+		maxValue = arr[i];
+		nMax = i;
+	    }
+	}
+	return nMax;
+    }
+
+    /**
+         * Find the index of the nth largest value in the array
+         * 
+         * @param arr
+         * @param n
+         * @return
+         */
+    public static int indexOfMax(double[] arr, int n) {
+	if (n > arr.length)
+	    throw new IllegalArgumentException("n > arr.length: " + n);
+
+	double[] max = new double[n];
+	int[] indexes = new int[n];
+	for (int i = 0; i < n; i++)
+	    max[i] = Double.NEGATIVE_INFINITY;
+
+	for (int i = 0; i < arr.length; i++) {
+	    for (int j = 0; j < n; j++) {
+		if (arr[i] > max[j]) {
+		    
+		    // first copy all values less than this
+		    for (int k = n - 1; k > j; k--) {
+			max[k] = max[k - 1];
+			indexes[k] = indexes[k - 1];
+		    }
+		    
+		    // now insert our new "maximum" for this position
+		    max[j] = arr[i];
+		    indexes[j] = i;
+		    break;
+		}
+	    }
+	}
+
+	return indexes[n - 1];
     }
     
-    public static<T> Vector<T> toVector(T[] arr) {
-    	final Vector<T> list = new Vector<T>(arr.length);
-    	for(final T item : arr)
-    		list.add(item);
-    	return list;
+    public static void main(String... args) {
+	double[] x = new double[] {1,3,2,4};
+	System.out.println(x[indexOfMax(x, 3)]);
     }
 }

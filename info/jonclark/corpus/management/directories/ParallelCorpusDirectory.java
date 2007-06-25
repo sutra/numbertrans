@@ -1,10 +1,12 @@
 package info.jonclark.corpus.management.directories;
 
 import info.jonclark.corpus.management.directories.CorpusQuery.Statistic;
+import info.jonclark.corpus.management.etc.CorpusManException;
 import info.jonclark.corpus.management.etc.CorpusProperties;
 import info.jonclark.util.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -12,15 +14,20 @@ import java.util.Properties;
 public class ParallelCorpusDirectory extends AbstractCorpusDirectory {
     private final String[] targets;
 
-    public ParallelCorpusDirectory(Properties props, String directoryNamespace) {
+    public ParallelCorpusDirectory(Properties props, String directoryNamespace)
+	    throws CorpusManException {
 	super(props, directoryNamespace);
 	assert this.getType().equals("parallel") : "Incorrect directory type: " + this.getType();
 
 	this.targets = CorpusProperties.getParallelTargets(props, directoryNamespace);
+	if (targets.length <= 1) {
+	    throw new CorpusManException("No targets defined for parallel directory: "
+		    + directoryNamespace);
+	}
     }
 
     @Override
-    public List<File> getDocuments(CorpusQuery query, File currentDirectory) {
+    public List<File> getDocuments(CorpusQuery query, File currentDirectory) throws IOException {
 	if (query.getNParallel() >= targets.length)
 	    throw new RuntimeException("Invalid query for parallel directory: "
 		    + query.getNParallel() + " when there are only " + targets.length
@@ -34,7 +41,10 @@ public class ParallelCorpusDirectory extends AbstractCorpusDirectory {
 	    return documents;
 	} else {
 	    File subdir = new File(currentDirectory, targets[query.getNParallel()]);
-	    return getChild().getDocuments(query, subdir);
+	    if (subdir.exists())
+		return getChild().getDocuments(query, subdir);
+	    else
+		return new ArrayList<File>(0);
 	}
     }
 
@@ -46,14 +56,11 @@ public class ParallelCorpusDirectory extends AbstractCorpusDirectory {
 		    + " parallel directories.");
 
 	File childFile = new File(currentDirectory, targets[query.getNParallel()]);
-	if (!childFile.exists())
-	    childFile.mkdir();
-
 	return getChild().getNextFileForCreation(query, childFile);
     }
 
     @Override
-    public double getStatistic(CorpusQuery query, File currentDirectory) {
+    public double getStatistic(CorpusQuery query, File currentDirectory) throws IOException {
 	if (query.getStatistic() == Statistic.PARALLEL_COUNT) {
 	    return targets.length;
 	} else if (query.getStatistic() == Statistic.DOCUMENT_COUNT) {

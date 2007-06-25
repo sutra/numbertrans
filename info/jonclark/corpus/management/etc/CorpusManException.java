@@ -10,6 +10,10 @@ public class CorpusManException extends Exception {
     public CorpusManException(String message) {
 	super(message);
     }
+    
+    public CorpusManException(Throwable cause) {
+	super(cause);
+    }
 
     public CorpusManException(String message, Throwable cause) {
 	super(message, cause);

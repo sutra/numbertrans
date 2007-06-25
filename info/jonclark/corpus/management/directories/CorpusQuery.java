@@ -10,6 +10,9 @@ public class CorpusQuery {
     private final String runName;
     private final int fileIndex;
     private final String fileName;
+    
+    /* Only simulate creating the file, don't update any counts */
+    public boolean simulate = false;
 
     public enum Statistic {
 	NONE, DOCUMENT_COUNT, PARALLEL_COUNT

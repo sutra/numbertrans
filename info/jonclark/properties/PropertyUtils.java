@@ -266,7 +266,7 @@ public class PropertyUtils {
 				+ " while searching for key " + rightMostKey + " with value "
 				+ value);
 		    } else {
-			matchingKey = value;
+			matchingKey = propName;
 		    }
 		}
 	    }
@@ -274,16 +274,34 @@ public class PropertyUtils {
 
 	return matchingKey;
     }
-    
+
+    public static String getPropertyWithValue(Properties props, String namespace,
+	    String desiredValue) throws PropertiesException {
+	return getPropertyWithValue(props, namespace, "", desiredValue);
+    }
+
+    /**
+     * Returns null if no matching property is found 
+     */
+    public static String getPropertyInNamespaceThatEndsWith(Properties props, String namespace,
+	    String suffix) {
+	for (final Object p : props.keySet()) {
+	    String propName = (String) p;
+	    if (propName.startsWith(namespace) && propName.endsWith(suffix))
+		return propName;
+	}
+	return null;
+    }
+
     public static String[] getPropertiesInNamespace(Properties props, String namespace) {
 	ArrayList<String> list = new ArrayList<String>();
-	
+
 	for (final Object p : props.keySet()) {
 	    String propName = (String) p;
 	    if (propName.startsWith(namespace))
 		list.add(propName);
 	}
-	
+
 	return list.toArray(new String[list.size()]);
     }
 }

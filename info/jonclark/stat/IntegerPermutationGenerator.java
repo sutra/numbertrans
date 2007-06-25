@@ -1,7 +1,7 @@
 /*
  * Created on Jun 5, 2007
  */
-package info.jonclark.util;
+package info.jonclark.stat;
 
 public class IntegerPermutationGenerator {
 

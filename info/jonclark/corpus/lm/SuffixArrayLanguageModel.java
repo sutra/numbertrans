@@ -79,21 +79,21 @@ public class SuffixArrayLanguageModel implements LanguageModel {
 	    int nGramMax, boolean useNewLineAsSentenceDelim) throws IOException {
 	this.nGramMax = nGramMax;
 	setSmoothingTechnique(smoother);
-	
-	SentenceTokenizer sentenceBuilder = new SentenceTokenizer(inStream,
-		useNewLineAsSentenceDelim, false);
-	ArrayList<TokenArray> sentences = new ArrayList<TokenArray>(DEFAULT_SENTENCE_COUNT);
-	while (sentenceBuilder.hasNextSentence()) {
-	    List<String> sentence = sentenceBuilder.nextSentence();
-	    wordCounter.addWords(sentence);
-	    SentenceTokenizer.addBoundaryMarkers(sentence);
-	    sentences.add(new TokenArray(sentence));
-	}
+//	
+//	SentenceTokenizer sentenceBuilder = new SentenceTokenizer(inStream,
+//		useNewLineAsSentenceDelim, false);
+//	ArrayList<TokenArray> sentences = new ArrayList<TokenArray>(DEFAULT_SENTENCE_COUNT);
+//	while (sentenceBuilder.hasNextSentence()) {
+//	    List<String> sentence = sentenceBuilder.nextSentence();
+//	    wordCounter.addWords(sentence);
+//	    SentenceTokenizer.addBoundaryMarkers(sentence);
+//	    sentences.add(new TokenArray(sentence));
+//	}
 	wordCounter.freezeCounts();
 
 	log.info("Building Suffix array...");
 	SecondTimer timer = new SecondTimer(true, true);
-	suffixArray = new NaiveSuffixArray(sentences);
+	suffixArray = null; // new NaiveSuffixArray(sentences);
 	log.info("Constructed suffix array in {0} seconds", timer.getSecondsFormatted());
 	this.nTokenCount = suffixArray.size();
 

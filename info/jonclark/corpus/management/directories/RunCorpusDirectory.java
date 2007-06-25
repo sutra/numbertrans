@@ -1,9 +1,11 @@
 package info.jonclark.corpus.management.directories;
 
 import info.jonclark.corpus.management.directories.CorpusQuery.Statistic;
+import info.jonclark.corpus.management.etc.CorpusManException;
 import info.jonclark.util.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -14,31 +16,28 @@ import java.util.Properties;
  * Also, the run type saves meta-data about when runs were performed.
  */
 public class RunCorpusDirectory extends AbstractCorpusDirectory {
-    
-    public RunCorpusDirectory(Properties props, String namespace) {
+
+    public RunCorpusDirectory(Properties props, String namespace) throws CorpusManException {
 	super(props, namespace);
     }
 
     @Override
-    public List<File> getDocuments(CorpusQuery query, File currentDirectory) {
-	
+    public List<File> getDocuments(CorpusQuery query, File currentDirectory) throws IOException {
+
 	File subdir = new File(currentDirectory, query.getRunName());
 	return getChild().getDocuments(query, subdir);
-	
+
     }
 
     @Override
     public File getNextFileForCreation(CorpusQuery query, File currentDirectory) {
-	
+
 	File subdir = new File(currentDirectory, query.getRunName());
-	if(!subdir.exists())
-	    subdir.mkdir();
-	
 	return getChild().getNextFileForCreation(query, subdir);
     }
 
     @Override
-    public double getStatistic(CorpusQuery query, File currentDirectory) {
+    public double getStatistic(CorpusQuery query, File currentDirectory) throws IOException {
 	if (query.getStatistic() == Statistic.DOCUMENT_COUNT) {
 
 	    File[] subdirs = FileUtils.getSubdirectories(currentDirectory);

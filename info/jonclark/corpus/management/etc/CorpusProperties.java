@@ -1,109 +1,185 @@
 package info.jonclark.corpus.management.etc;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Properties;
-
-import info.jonclark.corpus.management.directories.AbstractCorpusDirectory;
-import info.jonclark.properties.PropertyUtils;
 import info.jonclark.properties.PropertiesException;
+import info.jonclark.properties.PropertyUtils;
+import info.jonclark.util.ArrayUtils;
 import info.jonclark.util.StringUtils;
+
+import java.io.File;
+import java.util.Properties;
 
 public class CorpusProperties {
 
     public static String getRunNamespace(Properties props, String runName) {
-	return "run." + runName + ".";
+	return StringUtils.forceSuffix("run." + runName, ".");
     }
 
     public static String getRunSetNamespace(Properties props, String runSetName) {
-	return "runSet." + runSetName + ".";
+	return StringUtils.forceSuffix("runSet." + runSetName, ".");
     }
 
     public static String getCorpusNamespace(Properties props, String corpusName) {
-	return "corpus." + corpusName + ".";
+	return StringUtils.forceSuffix("corpus." + corpusName, ".");
     }
 
-    public static String getInputRunName(Properties props, String outputRunName) {
+    public static String[] getRunsInRunSet(Properties props, String runsetNamespace)
+	    throws CorpusManException {
+
+	String runs = props.getProperty(runsetNamespace + ".runs");
+	if (runs == null)
+	    throw new CorpusManException("No such runset: " + runsetNamespace);
+	return StringUtils.tokenize(runs);
+    }
+
+    public static String getRunProcessor(Properties props, String runNamespace)
+	    throws CorpusManException {
+	runNamespace = StringUtils.forceSuffix(runNamespace, ".");
+	String processor = props.getProperty(runNamespace + "processor");
+	if (processor == null)
+	    throw new CorpusManException("No such run: " + runNamespace);
+	return processor.trim();
+    }
+
+    public static String getRunType(Properties props, String runNamespace)
+	    throws CorpusManException {
+	runNamespace = StringUtils.forceSuffix(runNamespace, ".");
+	String processor = props.getProperty(runNamespace + "type");
+	if (processor == null)
+	    throw new CorpusManException("Type not defined for run " + runNamespace);
+	return processor.trim();
+    }
+
+    public static String getInputRunName(Properties props, String outputRunName)
+	    throws CorpusManException {
 	String outputRunNamespace = getRunNamespace(props, outputRunName);
 	String inputRunKey = PropertyUtils.getPropertyInNamespaceThatEndsWith(props,
 		outputRunNamespace, ".inputRun");
-	return props.getProperty(inputRunKey);
+	if (inputRunKey == null)
+	    throw new CorpusManException("No input run specified for output run: " + outputRunName);
+	String inputRunName = props.getProperty(inputRunKey).trim();
+	return inputRunName;
     }
 
-    public static int getAutoNumberFilesPerDir(Properties props, String namespace) {
-	namespace = StringUtils.forceSuffix(namespace, ".");
-	String inputRunKey = props.getProperty(namespace + "autonumber.filesPerDir");
+    public static int getAutoNumberFilesPerDir(Properties props, String directoryNamespace)
+	    throws CorpusManException {
+	directoryNamespace = StringUtils.forceSuffix(directoryNamespace, ".");
+	String inputRunKey = directoryNamespace + "autonumber.filesPerDir";
 	String value = props.getProperty(inputRunKey);
-	return Integer.parseInt(value);
+	if (value == null)
+	    throw new CorpusManException("filesPerDir not specified for autonumber directory: "
+		    + directoryNamespace);
+	return Integer.parseInt(value.trim());
     }
 
-    public static String getAutoNumberPattern(Properties props, String namespace) {
-	namespace = StringUtils.forceSuffix(namespace, ".");
-	String inputRunKey = props.getProperty(namespace + "autonumber.pattern");
-	return props.getProperty(inputRunKey);
+    public static String getAutoNumberPattern(Properties props, String directoryNamespace)
+	    throws CorpusManException {
+	directoryNamespace = StringUtils.forceSuffix(directoryNamespace, ".");
+	String inputRunKey = directoryNamespace + "autonumber.pattern";
+	String value = props.getProperty(inputRunKey);
+	if (value == null)
+	    throw new CorpusManException(
+		    "No autonumber pattern specified for autonumber directory: "
+			    + directoryNamespace);
+	return value;
     }
 
-    public static boolean getAutoNumberArrangeByFilename(Properties props, String namespace) {
+    /**
+         * Defaults to false
+         */
+    public static boolean getAutoNumberArrangeByFilename(Properties props, String namespace)
+	    throws CorpusManException {
 	namespace = StringUtils.forceSuffix(namespace, ".");
-	String inputRunKey = props.getProperty(namespace + "autonumber.arrangeByFilename");
+	String inputRunKey = props.getProperty(namespace + "autonumber.arrangeByFilename", "false");
 	String value = props.getProperty(inputRunKey);
 	return Boolean.parseBoolean(value);
     }
 
-    public static String getNodeFilenamePattern(Properties props, String namespace) {
-	namespace = StringUtils.forceSuffix(namespace, ".");
-	String inputRunKey = props.getProperty(namespace + "node.filenamePattern");
+    public static String getNodeFilenamePattern(Properties props, String runNamespace)
+	    throws CorpusManException {
+	runNamespace = StringUtils.forceSuffix(runNamespace, ".");
+	String inputRunKey = runNamespace + "create.filenamePattern";
 	String value = props.getProperty(inputRunKey);
+	if (value == null)
+	    throw new CorpusManException("Filename pattern not specified for node directory: "
+		    + runNamespace);
 	return value;
     }
 
-    public static File getCorpusRootDirectoryFile(Properties props, String corpusName) {
+    public static boolean hasNodeFilenamePattern(Properties props, String runName) {
+	String runNamespace = getRunNamespace(props, runName);
+	String inputRunKey = runNamespace + "create.filenamePattern";
+	String value = props.getProperty(inputRunKey);
+	return (value != null);
+    }
+
+    public static File getCorpusRootDirectoryFile(Properties props, String corpusName)
+	    throws CorpusManException {
 	String corpusNamespace = getCorpusNamespace(props, corpusName);
-	String corpusRootDirKey = corpusNamespace + "rootdir";
+	String corpusRootDirKey = corpusNamespace + "rootDir";
 	String corpusRootDir = props.getProperty(corpusRootDirKey);
+	if (corpusRootDir == null)
+	    throw new CorpusManException("Root directory location not defined for corpus: "
+		    + corpusName);
 	return new File(corpusRootDir);
     }
 
-    public static String getSubdirectory(Properties props, String namespace) {
-	namespace = StringUtils.forceSuffix(namespace, ".");
-	String corpusRootDirKey = namespace + "subdir.name";
+    /**
+         * NOTE: This method may return null if the directory is a node
+         * directory
+         */
+    public static String getSubdirectory(Properties props, String directoryNamespace)
+	    throws CorpusManException {
+	directoryNamespace = StringUtils.forceSuffix(directoryNamespace, ".");
+	String corpusRootDirKey = directoryNamespace + "subdir.name";
 	String subdir = props.getProperty(corpusRootDirKey);
+	if (subdir == null && !getCorpusDirectoryType(props, directoryNamespace).equals("node"))
+	    throw new CorpusManException("Subdirectory not defined for non-node directory: "
+		    + directoryNamespace);
 	return subdir;
     }
 
-    public static String getParallelAlignmentDest(Properties props, String runName) {
+    public static String getParallelAlignmentDest(Properties props, String runName)
+	    throws CorpusManException {
 	String runNamespace = getRunNamespace(props, runName);
+	runNamespace = StringUtils.removeTrailingString(runNamespace, ".");
 	String parallelDest = props.getProperty(runNamespace + ".align.parallelDest");
+	if (parallelDest == null) {
+	    throw new CorpusManException("You must specify an align.parallelDest"
+		    + "(which parallel directory the aligned files will be put in) for " + runName);
+	}
 	return parallelDest;
     }
 
-    public static String[] getParallelTargets(Properties props, String directoryNamespace) {
+    public static String[] getParallelTargets(Properties props, String directoryNamespace)
+	    throws CorpusManException {
 	directoryNamespace = StringUtils.forceSuffix(directoryNamespace, ".");
 
-	ArrayList<String> targets = new ArrayList<String>();
-	int i = 0;
-	String value = props.getProperty(directoryNamespace + "parallel.target." + i);
-	while (value != null) {
-	    i++;
-	    value = props.getProperty(directoryNamespace + "parallel.target." + i);
-	}
-
-	if (i <= 1) {
-	    throw new RuntimeException("No targets defined for parallel directory: "
+	String value = props.getProperty(directoryNamespace + "parallel.targets");
+	if (value == null)
+	    throw new CorpusManException("Parallel targets not defined for directory: "
 		    + directoryNamespace);
-	}
-
-	return targets.toArray(new String[targets.size()]);
+	return StringUtils.tokenize(value);
     }
 
-    public static String getType(Properties props, String namespace) {
-	namespace = StringUtils.forceSuffix(namespace, ".");
-	return props.getProperty(namespace + "type");
+    public static String getCorpusDirectoryType(Properties props, String directoryNamespace)
+	    throws CorpusManException {
+	directoryNamespace = StringUtils.forceSuffix(directoryNamespace, ".");
+	String type = props.getProperty(directoryNamespace + "type");
+	if (type == null)
+	    throw new CorpusManException("Directory type not defined for directory: "
+		    + directoryNamespace);
+	return type;
     }
 
-    public static String getName(Properties props, String namespace) {
-	namespace = StringUtils.forceSuffix(namespace, ".");
-	return props.getProperty(namespace + "name");
+    public static String getDirectoryName(Properties props, String directoryNamespace)
+	    throws CorpusManException {
+
+	String directory = directoryNamespace;
+	if (directory.endsWith("."))
+	    directory = directory.substring(0, directory.length() - 1);
+	directory = StringUtils.substringAfterLast(directory, ".");
+
+	return directory;
     }
 
     public static String findParallelNamespace(Properties props, String corpusName)
@@ -120,37 +196,74 @@ public class CorpusProperties {
 	}
     }
 
-    public static String getCorpusNameFromRun(Properties props, String runName) {
+    public static String getCorpusNameFromRun(Properties props, String runName)
+	    throws CorpusManException {
 	String runNamespace = getRunNamespace(props, runName);
-	String corpusName = props.getProperty(runNamespace + ".corpus");
+	String corpusName = props.getProperty(runNamespace + "corpus");
+	if (corpusName == null)
+	    throw new CorpusManException("Corpus name not specified for run: " + runName);
 	return corpusName;
     }
 
-    public static String getUniCreateParallelDest(Properties props, String runName) {
+    /**
+         * NOTE: This method may return null if the we're not dealing with a
+         * parallel corpus
+         */
+    public static String getUniCreateParallelDest(Properties props, String runName)
+	    throws CorpusManException {
 	String runNamespace = getRunNamespace(props, runName);
-	String corpusName = props.getProperty(runNamespace + ".create.parallelDest");
-	return corpusName;
+	runNamespace = StringUtils.forceSuffix(runNamespace, ".");
+	String parallelDest = props.getProperty(runNamespace + "create.parallelDest");
+	return parallelDest;
     }
 
     public static int getParallelIndex(Properties props, String corpusName, String parallelDirName)
 	    throws CorpusManException {
-	try {
-	    String corpusNamespace = getCorpusNamespace(props, corpusName);
-	    String targetNamespace = corpusNamespace + ".parallel.target.";
-	    String propName = PropertyUtils.getPropertyWithValue(props, targetNamespace,
-		    parallelDirName);
-	    String index = StringUtils.substringAfter(propName, targetNamespace);
-	    int n = Integer.parseInt(index);
-	    return n;
-	} catch (PropertiesException e) {
-	    throw new CorpusManException("Could not determine parallel index for directory "
-		    + parallelDirName, e);
-	}
+	// first get a list of all parallel dirs to check against
+	String parallelNamespace = CorpusProperties.findParallelNamespace(props, corpusName);
+	String[] allParallelDirs = CorpusProperties.getParallelTargets(props, parallelNamespace);
+	int index = ArrayUtils.findInUnsortedArray(allParallelDirs, parallelDirName);
+	return index;
     }
-    
-    public static String[] getUniCorpusTransformParallelDirs(Properties props, String runName) {
+
+    public static String[] getUniCorpusTransformParallelDirs(Properties props, String runName)
+	    throws CorpusManException {
 	String runNamespace = getRunNamespace(props, runName);
-	String targets = props.getProperty(runNamespace + ".transform.parallelDirs");
+	runNamespace = StringUtils.forceSuffix(runNamespace, ".");
+	String targets = props.getProperty(runNamespace + "transform.parallelDirs");
+	if (targets == null)
+	    throw new CorpusManException(
+		    "No parallel directories specified for uni.transform run: " + runName);
 	return StringUtils.tokenize(targets);
+    }
+
+    public static String getParallelE(Properties props, String runName) throws CorpusManException {
+	String runNamespace = getRunNamespace(props, runName);
+	runNamespace = StringUtils.forceSuffix(runNamespace, ".");
+	String e = props.getProperty(runNamespace + "parallel.e");
+	if (e == null)
+	    throw new CorpusManException("E parallel directory not specified for run: " + runName);
+	return e;
+    }
+
+    public static String getParallelF(Properties props, String runName) throws CorpusManException {
+	String runNamespace = getRunNamespace(props, runName);
+	runNamespace = StringUtils.forceSuffix(runNamespace, ".");
+	String f = props.getProperty(runNamespace + "parallel.f");
+	if (f == null)
+	    throw new CorpusManException("F parallel directory not specified for run: " + runName);
+	return f;
+    }
+
+    public static int getParallelIndexE(Properties props, String corpusName, String outputRunName)
+	    throws CorpusManException {
+	String desiredParallelDirE = CorpusProperties.getParallelE(props, outputRunName);
+	return CorpusProperties.getParallelIndex(props, corpusName, desiredParallelDirE);
+    }
+
+    public static int getParallelIndexF(Properties props, String corpusName, String outputRunName)
+	    throws CorpusManException {
+	String desiredParallelDirF = CorpusProperties.getParallelF(props, outputRunName);
+	return CorpusProperties.getParallelIndex(props, corpusName, desiredParallelDirF);
     }
 }

@@ -3,13 +3,14 @@
  */
 package info.jonclark.corpus.management.iterators.impl;
 
-import java.util.Properties;
-
+import info.jonclark.corpus.management.documents.OutputDocument;
 import info.jonclark.corpus.management.etc.CorpusManException;
-import info.jonclark.corpus.management.etc.OutputDocument;
 import info.jonclark.corpus.management.etc.CorpusProperties;
 import info.jonclark.corpus.management.iterators.interfaces.ParallelCorpusAlignmentIterator;
 import info.jonclark.util.ArrayUtils;
+
+import java.io.IOException;
+import java.util.Properties;
 
 public class SimpleParallelAlignmentIterator extends SimpleParallelTransformIterator implements
 	ParallelCorpusAlignmentIterator {
@@ -32,7 +33,7 @@ public class SimpleParallelAlignmentIterator extends SimpleParallelTransformIter
 		    + parallelDest + "\" before it can be used for output.");
     }
 
-    public OutputDocument getAlignedOutputDocument() {
-	return super.getOutputDocument(nParallelDest);
+    public OutputDocument getAlignedOutputDocument() throws IOException {
+	return super.getOutputDocument(eParallelFiles, nParallelDest);
     }
 }

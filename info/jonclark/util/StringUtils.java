@@ -1090,4 +1090,9 @@ public class StringUtils {
 	    else
 		return in;
 	}
+	
+	public static void trimTokens(String[] tokens) {
+	    for(int i=0; i<tokens.length; i++)
+		tokens[i] = tokens[i].trim();
+	}
 }

@@ -35,6 +35,7 @@ public class SourceLineCounter extends CommentProcessor {
 	    throws IOException {
 	int nDirectoryLines = 0;
 //	System.out.println("Reading directory: " + root.getAbsolutePath());
+	assert root.exists() : "dir doesn't exist";
 	final File[] files = FileUtils.getFilesWithExt(root, ext);
 	for (final File file : files)
 	    nDirectoryLines += countLinesInFile(file);

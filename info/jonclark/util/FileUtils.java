@@ -345,10 +345,11 @@ public class FileUtils {
 			}
 		};
 
-		return root.listFiles(filter);
+		File[] files = root.listFiles(filter);
+		return files;
 	}
 
-	public static File[] getSubdirectories(final File root) {
+	public static File[] getSubdirectories(final File root) throws IOException {
 		assert root != null : "root must not be null";
 
 		final FileFilter filter = new FileFilter() {
@@ -358,7 +359,10 @@ public class FileUtils {
 			}
 		};
 
-		return root.listFiles(filter);
+		File[] files = root.listFiles(filter);
+		if(files == null)
+		    throw new IOException("IO Error or not a valid path: " + root.getAbsolutePath());
+		return files;
 	}
 
 	public static void saveTextFileFromStream(final File file, final InputStream inStream)

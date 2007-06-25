@@ -1,6 +1,8 @@
 package info.jonclark.corpus.management.iterators.interfaces;
 
-import info.jonclark.corpus.management.etc.OutputDocument;
+import java.io.IOException;
+
+import info.jonclark.corpus.management.documents.OutputDocument;
 
 public interface UniCorpusCreationIterator extends CorpusIterator {
 
@@ -13,9 +15,26 @@ public interface UniCorpusCreationIterator extends CorpusIterator {
          */
     public void setExpectedDocumentCount(int count);
 
+    /**
+         * Returns true if we should skip the creation of output documents for
+         * this input pair. The usual reason for this is if the output files
+         * already exist.
+         */
+    public boolean shouldSkip();
+    
+    public boolean shouldSkip(String docName);
+
+    /**
+         * Must be called BEFORE the next document is read.
+         */
     public void next();
 
-    public OutputDocument getOutputDocument();
+    /**
+         * Gets the next OutputDocument for creation IFF a naming pattern has
+         * been specified for the run. If no naming pattern has been specified,
+         * an exception is thrown.
+         */
+    public OutputDocument getOutputDocument() throws IOException;
 
-    public OutputDocument getOutputDocument(String docName);
+    public OutputDocument getOutputDocument(String docName) throws IOException;
 }

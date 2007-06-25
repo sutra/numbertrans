@@ -1,7 +1,7 @@
 /*
  * Created on Jun 6, 2007
  */
-package info.jonclark.util;
+package info.jonclark.stat;
 
 public class StringPermutationGenerator {
     private final IntegerPermutationGenerator perm;

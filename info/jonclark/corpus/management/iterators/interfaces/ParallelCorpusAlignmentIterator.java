@@ -1,25 +1,36 @@
 package info.jonclark.corpus.management.iterators.interfaces;
 
-import info.jonclark.corpus.management.etc.InputDocument;
-import info.jonclark.corpus.management.etc.OutputDocument;
+import java.io.IOException;
+
+import info.jonclark.corpus.management.documents.InputDocument;
+import info.jonclark.corpus.management.documents.OutputDocument;
 
 public interface ParallelCorpusAlignmentIterator extends CorpusIterator {
 
-    public boolean hasNextPair();
+    public boolean hasNext();
 
-    public void nextPair();
+    /**
+         * Must be called BEFORE the next document is read.
+         */
+    public void next();
 
-    public InputDocument getInputDocument(int nParallel);
+    public InputDocument getInputDocumentE() throws IOException;
+    
+    public InputDocument getInputDocumentF() throws IOException;
 
     /**
          * A method to output multiple aligned files, if desired. (Usually the
          * format preferred as external program inputs).
          */
-    public OutputDocument getOutputDocument(int nParallel);
+    public OutputDocument getOutputDocumentE() throws IOException;
+    
+    public OutputDocument getOutputDocumentF() throws IOException;
 
     /**
          * A method to output a singled aligned file, if desired. (Usually the
          * format preferred by humans doing debugging).
+         * 
+         * @throws IOException
          */
-    public OutputDocument getAlignedOutputDocument();
+    public OutputDocument getAlignedOutputDocument() throws IOException;
 }

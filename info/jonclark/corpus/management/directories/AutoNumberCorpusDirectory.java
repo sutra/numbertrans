@@ -1,12 +1,15 @@
 package info.jonclark.corpus.management.directories;
 
 import info.jonclark.corpus.management.directories.CorpusQuery.Statistic;
+import info.jonclark.corpus.management.etc.CorpusManException;
 import info.jonclark.corpus.management.etc.CorpusProperties;
 import info.jonclark.util.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -21,17 +24,30 @@ public class AutoNumberCorpusDirectory extends AbstractCorpusDirectory {
     private final int nFilesPerDirectory;
     private final DecimalFormat format;
 
-    private int nCurrentSubdir = -1;
-    private int nFilesInCurrentSubdir;
-    private File currentSubdir;
+    private final HashMap<File, AutoNumberData> dirs = new HashMap<File, AutoNumberData>();
 
-    public AutoNumberCorpusDirectory(Properties props, String directoryNamespace) {
+    private class AutoNumberData implements Cloneable {
+	public int nCurrentSubdir = -1;
+	public int nFilesInCurrentSubdir = Integer.MAX_VALUE; // force
+	// creation
+	public File currentSubdir = null;
+
+	public AutoNumberData clone() {
+	    try {
+		return (AutoNumberData) super.clone();
+	    } catch (CloneNotSupportedException e) {
+		throw new Error(e);
+	    }
+	}
+    }
+
+    public AutoNumberCorpusDirectory(Properties props, String directoryNamespace)
+	    throws CorpusManException {
 	super(props, directoryNamespace);
 
 	this.nFilesPerDirectory = CorpusProperties.getAutoNumberFilesPerDir(props,
 		directoryNamespace);
-	// force creation of first directory
-	this.nFilesInCurrentSubdir = this.nFilesPerDirectory;
+	;
 
 	this.arrangeByFilename = CorpusProperties.getAutoNumberArrangeByFilename(props,
 		directoryNamespace);
@@ -41,7 +57,7 @@ public class AutoNumberCorpusDirectory extends AbstractCorpusDirectory {
     }
 
     @Override
-    public List<File> getDocuments(CorpusQuery query, File currentDirectory) {
+    public List<File> getDocuments(CorpusQuery query, File currentDirectory) throws IOException {
 
 	File[] subdirs = FileUtils.getSubdirectories(currentDirectory);
 	ArrayList<File> documents = new ArrayList<File>(nFilesPerDirectory * subdirs.length);
@@ -52,7 +68,7 @@ public class AutoNumberCorpusDirectory extends AbstractCorpusDirectory {
     }
 
     @Override
-    public double getStatistic(CorpusQuery query, File currentDirectory) {
+    public double getStatistic(CorpusQuery query, File currentDirectory) throws IOException {
 	if (query.getStatistic() == Statistic.DOCUMENT_COUNT) {
 
 	    File[] subdirs = FileUtils.getSubdirectories(currentDirectory);
@@ -76,23 +92,36 @@ public class AutoNumberCorpusDirectory extends AbstractCorpusDirectory {
     @Override
     public File getNextFileForCreation(CorpusQuery query, File autonumberDirectory) {
 
+	AutoNumberData data = dirs.get(autonumberDirectory);
+	if (data == null) {
+	    // create a new data object with an "infinite" number of files
+	    // which forces the creation of the first directory
+	    data = new AutoNumberData();
+	    if (!query.simulate)
+		dirs.put(autonumberDirectory, data);
+	    
+	} else if (query.simulate) {
+	    // don't mess up our real data if we're just simulating
+	    data = data.clone();
+	}
+
 	if (arrangeByFilename) {
 	    // TODO: test me
 	    // use query.fileNumber to implement this... maybe
 	    // that idea probably needs to be rearchitected
 	    throw new RuntimeException("Unimplemented");
 	} else {
-	    if (nFilesInCurrentSubdir >= nFilesPerDirectory) {
+	    if (data.nFilesInCurrentSubdir >= nFilesPerDirectory) {
 		// create new directory
-		nFilesInCurrentSubdir = 0;
-		nCurrentSubdir++;
+		data.nFilesInCurrentSubdir = 0;
+		data.nCurrentSubdir++;
 
-		String directoryName = format.format(nCurrentSubdir);
-		currentSubdir = new File(autonumberDirectory, directoryName);
+		String directoryName = format.format(data.nCurrentSubdir);
+		data.currentSubdir = new File(autonumberDirectory, directoryName);
 	    }
 	}
 
-	nFilesInCurrentSubdir++;
-	return getChild().getNextFileForCreation(query, currentSubdir);
+	data.nFilesInCurrentSubdir++;
+	return getChild().getNextFileForCreation(query, data.currentSubdir);
     }
 }

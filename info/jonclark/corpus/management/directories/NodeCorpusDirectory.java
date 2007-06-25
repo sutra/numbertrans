@@ -1,6 +1,7 @@
 package info.jonclark.corpus.management.directories;
 
 import info.jonclark.corpus.management.directories.CorpusQuery.Statistic;
+import info.jonclark.corpus.management.etc.CorpusManException;
 import info.jonclark.util.ArrayUtils;
 import info.jonclark.util.FileUtils;
 
@@ -15,7 +16,7 @@ import java.util.Properties;
  * corpus.
  */
 public class NodeCorpusDirectory extends AbstractCorpusDirectory {
-    public NodeCorpusDirectory(Properties props, String namespace) {
+    public NodeCorpusDirectory(Properties props, String namespace) throws CorpusManException {
 	super(props, namespace);
     }
 
@@ -26,6 +27,7 @@ public class NodeCorpusDirectory extends AbstractCorpusDirectory {
 
     @Override
     public File getNextFileForCreation(CorpusQuery query, File currentDirectory) {
+	assert query.getFileName() != null : "null filename in query";
 	File file = new File(currentDirectory, query.getFileName());
 	return file;
     }
@@ -33,10 +35,10 @@ public class NodeCorpusDirectory extends AbstractCorpusDirectory {
     @Override
     public double getStatistic(CorpusQuery query, File currentDirectory) {
 	if (query.getStatistic() == Statistic.DOCUMENT_COUNT) {
-	    
+
 	    File[] files = FileUtils.getNormalFiles(currentDirectory);
 	    return files.length;
-	    
+
 	} else if (query.getStatistic() == Statistic.PARALLEL_COUNT) {
 	    return 0;
 	} else if (query.getStatistic() == Statistic.NONE) {

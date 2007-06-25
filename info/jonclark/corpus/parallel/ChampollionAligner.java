@@ -63,11 +63,11 @@ public class ChampollionAligner {
 			File alignmentFile = FileUtils.changeFileExt(filesX[i], alignmentsFileExt);
 			
 			File fileY = FileUtils.changeFileExt(filesX[i], sentExtForeign);
-			fileY = FileUtils.changeFileDir(fileY, sentDirForeign);
-			 
-			
-			File fileY = new File(filesX[i].getParentFile(), name);
-			File alignmentFile = new File(filesX[i].getParentFile(), alignmentFileName);
+//			fileY = FileUtils.changeFileDir(fileY, sentDirForeign);
+//			 
+//			
+//			File fileY = new File(filesX[i].getParentFile(), name);
+//			File alignmentFile = new File(filesX[i].getParentFile(), alignmentFileName);
 			aligner.alignSentences(filesX[i], fileY, alignmentFile);
 			
 			time.recordEvent();
