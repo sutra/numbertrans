@@ -3,6 +3,7 @@ package info.jonclark.corpus.management.iterators.interfaces;
 import java.io.IOException;
 
 import info.jonclark.corpus.management.documents.OutputDocument;
+import info.jonclark.corpus.management.etc.BadFilenameException;
 
 public interface UniCorpusCreationIterator extends CorpusIterator {
 
@@ -22,7 +23,7 @@ public interface UniCorpusCreationIterator extends CorpusIterator {
          */
     public boolean shouldSkip();
     
-    public boolean shouldSkip(String docName);
+    public boolean shouldSkip(String docName) throws BadFilenameException;
 
     /**
          * Must be called BEFORE the next document is read.
@@ -36,5 +37,6 @@ public interface UniCorpusCreationIterator extends CorpusIterator {
          */
     public OutputDocument getOutputDocument() throws IOException;
 
-    public OutputDocument getOutputDocument(String docName) throws IOException;
+    public OutputDocument getOutputDocument(String docName) throws IOException,
+	    BadFilenameException;
 }

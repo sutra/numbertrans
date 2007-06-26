@@ -7,6 +7,7 @@ import info.jonclark.corpus.management.directories.AbstractCorpusDirectory;
 import info.jonclark.corpus.management.directories.CorpusDirectoryFactory;
 import info.jonclark.corpus.management.directories.CorpusQuery;
 import info.jonclark.corpus.management.documents.OutputDocument;
+import info.jonclark.corpus.management.etc.BadFilenameException;
 import info.jonclark.corpus.management.etc.CorpusManException;
 import info.jonclark.corpus.management.etc.CorpusManRuntimeException;
 import info.jonclark.corpus.management.etc.CorpusProperties;
@@ -28,12 +29,13 @@ public class SimpleParallelCreationIterator extends AbstractIterator implements
     private final File rootFile;
     private final String outputRunName;
     private final FileNamer namer;
-    
+
     private final int eParallel;
     private final int fParallel;
-    
+
+    private final boolean arrangeByFilename;
     private boolean checkedShouldSkip = false;
-    
+
     private static final Logger log = LogUtils.getLogger();
 
     /**
@@ -49,10 +51,11 @@ public class SimpleParallelCreationIterator extends AbstractIterator implements
 	String corpusName = CorpusProperties.getCorpusNameFromRun(props, outputRunName);
 	this.rootFile = CorpusProperties.getCorpusRootDirectoryFile(props, corpusName);
 	this.rootDirectory = CorpusDirectoryFactory.getCorpusRootDirectory(props, corpusName);
+	this.arrangeByFilename = CorpusProperties.getArrangeByFilename(props, corpusName);
 
 	outputRunName = StringUtils.removeTrailingString(outputRunName, ".");
 	this.outputRunName = outputRunName;
-	
+
 	this.eParallel = CorpusProperties.getParallelIndexE(props, corpusName, outputRunName);
 	this.fParallel = CorpusProperties.getParallelIndexF(props, corpusName, outputRunName);
 
@@ -62,15 +65,19 @@ public class SimpleParallelCreationIterator extends AbstractIterator implements
 	    this.namer = null;
     }
 
-    private OutputDocument getOutputDocument(int nParallel, String docName) throws IOException {
+    private OutputDocument getOutputDocument(int nParallel, String docName) throws IOException,
+	    BadFilenameException {
 	if (nFileIndex == -1)
 	    throw new CorpusManRuntimeException("You must call next() first.");
-	
-	if(!checkedShouldSkip)
+
+	if (!checkedShouldSkip)
 	    log.warning("shouldSkip() was not checked.");
 
 	CorpusQuery query = new CorpusQuery(nParallel, outputRunName, docName, nFileIndex,
 		CorpusQuery.Statistic.NONE);
+	if (arrangeByFilename)
+	    query.fileIndex = namer.getIndexFromFilename(docName);
+
 	File file = rootDirectory.getNextFileForCreation(query, rootFile);
 
 	if (!file.getParentFile().exists())
@@ -94,6 +101,8 @@ public class SimpleParallelCreationIterator extends AbstractIterator implements
     public void next() {
 	super.nFileIndex++;
 	checkedShouldSkip = false;
+	
+	super.updateStatus();
 
 	boolean unclean = validate();
 	if (unclean) {
@@ -110,10 +119,15 @@ public class SimpleParallelCreationIterator extends AbstractIterator implements
 	    throw new CorpusManRuntimeException(
 		    "You must specify a filename pattern use the auto-naming feature.");
 
-	return getOutputDocumentE(namer.getFilename(nFileIndex));
+	try {
+	    return getOutputDocumentE(namer.getFilename(nFileIndex));
+	} catch (BadFilenameException e) {
+	    throw new CorpusManRuntimeException(e);
+	}
     }
 
-    public OutputDocument getOutputDocumentE(String docName) throws IOException {
+    public OutputDocument getOutputDocumentE(String docName) throws IOException,
+	    BadFilenameException {
 	return getOutputDocument(eParallel, docName);
     }
 
@@ -122,27 +136,39 @@ public class SimpleParallelCreationIterator extends AbstractIterator implements
 	    throw new CorpusManRuntimeException(
 		    "You must specify a filename pattern use the auto-naming feature.");
 
-	return getOutputDocumentF(namer.getFilename(nFileIndex));
+	try {
+	    return getOutputDocumentF(namer.getFilename(nFileIndex));
+	} catch (BadFilenameException e) {
+	    throw new CorpusManRuntimeException(e);
+	}
     }
 
-    public OutputDocument getOutputDocumentF(String docName) throws IOException {
+    public OutputDocument getOutputDocumentF(String docName) throws IOException,
+	    BadFilenameException {
 	return getOutputDocument(fParallel, docName);
     }
 
     public boolean shouldSkip() {
-	return shouldSkip(namer.getFilename(nFileIndex));
+	try {
+	    return shouldSkip(namer.getFilename(nFileIndex));
+	} catch (BadFilenameException e) {
+	    throw new CorpusManRuntimeException(e);
+	}
     }
 
-    public boolean shouldSkip(String docName) {
+    public boolean shouldSkip(String docName) throws BadFilenameException {
 	checkedShouldSkip = true;
 
 	CorpusQuery query = new CorpusQuery(eParallel, outputRunName, docName, nFileIndex,
 		CorpusQuery.Statistic.NONE);
 	// don't update any counts for now
 	query.simulate = true;
+	if (arrangeByFilename)
+	    query.fileIndex = namer.getIndexFromFilename(docName);
+
 	File file = rootDirectory.getNextFileForCreation(query, rootFile);
 
-	if(file.exists()) {
+	if (file.exists()) {
 	    // we're going to skip this file, so go ahead and update
 	    // counts in the directory structure
 	    query.simulate = false;

@@ -246,8 +246,8 @@ public class TimeLength {
     public String toStringMultipleUnits(final int nMaxUnits) {
 	// this algorithm might already exist elsewhere
 	long millis = length;
+	long seconds = (millis / 1000);
 	millis %= 1000;
-	long seconds = (length / 1000);
 	long minutes = seconds / 60;
 	seconds %= 60;
 	long hours = minutes / 60;
@@ -263,9 +263,9 @@ public class TimeLength {
 	if (years > 0 && nActualUnits < nMaxUnits) {
 	    nActualUnits++;
 	    if (years == 1)
-		builder.append(years + " years, ");
-	    else
 		builder.append(years + " year, ");
+	    else
+		builder.append(years + " years, ");
 	}
 	if (days > 0 && nActualUnits < nMaxUnits) {
 	    nActualUnits++;

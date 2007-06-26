@@ -18,7 +18,7 @@ public class ParallelTransformTest implements ParallelCorpusTransformRun {
 
     private static final Logger log = LogUtils.getLogger();
     
-    public ParallelTransformTest(Properties props) {
+    public ParallelTransformTest(Properties props, String runName, String corpusName) {
 
     }
 

@@ -30,20 +30,23 @@ public class CorpusManager {
     private static final Logger log = LogUtils.getLogger();
 
     private static void processRun(Properties props, String runNamespace)
-	    throws InstantiationException, IllegalAccessException, InvocationTargetException,
-	    ClassNotFoundException, CorpusManException {
+	    throws Throwable {
+
+	String runName = CorpusProperties.getRunName(runNamespace);
+	String corpusName = CorpusProperties.getCorpusNameFromRun(props, runName);
 
 	log.info("Processing run: " + runNamespace);
-	
+
 	// get the corpus run processor
 	String processorName = null;
 	String type = null;
 	try {
 	    processorName = CorpusProperties.getRunProcessor(props, runNamespace);
 	    Class clazz = Class.forName(processorName);
-	    Constructor[] constructors = clazz.getConstructors();
-	    Object[] args = new Object[] { props };
-	    Object instance = constructors[0].newInstance(args);
+	    Constructor constructor = clazz.getConstructor(new Class[] { Properties.class,
+		    String.class, String.class });
+	    Object[] args = new Object[] { props, runName, corpusName };
+	    Object instance = constructor.newInstance(args);
 
 	    CorpusIterator iterator = IteratorFactory.getIterator(props, runNamespace);
 
@@ -66,28 +69,37 @@ public class CorpusManager {
 	    } else {
 		throw new CorpusManException("Unknown run type: " + type);
 	    }
-	    
+
 	    iterator.validate();
-	    
-	} catch(NumberFormatException e) {
+
+	} catch (NumberFormatException e) {
 	    throw e;
 	} catch (IllegalArgumentException e) {
+	    // XXX: still used?
 	    throw new CorpusManException(
-		    "Class must define a constructor that takes a single Properties argument: "
-			    + processorName, e);
+		    "Class must define a constructor that takes arguments Properties,"
+			    + " String (runName), String (corpusName): " + processorName, e);
 	} catch (ClassCastException e) {
 	    throw new CorpusManException(
 		    "Class must implement the CorpusRun interface corresponding to type " + type
 			    + ": " + processorName, e);
+	} catch (SecurityException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	} catch (NoSuchMethodException e) {
+	    throw new CorpusManException(
+		    "Class must define a constructor that takes arguments Properties,"
+			    + " String (runName), String (corpusName): " + processorName, e);
+	} catch(InvocationTargetException e) {
+	    throw e.getCause();
 	}
     }
 
     private static void processRunSet(Properties props, String runsetNamespace)
-	    throws IllegalArgumentException, InstantiationException, IllegalAccessException,
-	    InvocationTargetException, ClassNotFoundException, CorpusManException {
+	    throws Throwable {
 
 	log.info("Processing run set: " + runsetNamespace);
-	
+
 	String[] runs = CorpusProperties.getRunsInRunSet(props, runsetNamespace);
 	for (final String runName : runs) {
 	    String runNamespace = CorpusProperties.getRunNamespace(props, runName);
@@ -95,7 +107,7 @@ public class CorpusManager {
 	}
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Throwable {
 	if (args.length != 2) {
 	    System.err.println("Usage: CorpusManager <properties_file> <run_set_name_or_run_name>");
 	    System.err.println("Example: CorpusManager corpus.properties runSet.ALL");

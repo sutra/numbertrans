@@ -8,7 +8,7 @@ public class CorpusQuery {
 
     private final int nParallel;
     private final String runName;
-    private final int fileIndex;
+    public int fileIndex;
     private final String fileName;
     
     /* Only simulate creating the file, don't update any counts */

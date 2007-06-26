@@ -12,7 +12,7 @@ import java.util.Properties;
 
 public class UniCreateTest implements UniCorpusCreationRun {
 
-    public UniCreateTest(Properties props) {
+    public UniCreateTest(Properties props, String runName, String corpusName) {
 
     }
 
@@ -20,15 +20,21 @@ public class UniCreateTest implements UniCorpusCreationRun {
 	try {
 	    for (int i = 0; i < 5; i++) {
 		iterator.next();
+
+		// show off arrangeByFilename
+		if (i == 2)
+		    continue;
+
 		if (!iterator.shouldSkip()) {
-		    OutputDocument out = iterator.getOutputDocument();
+		    OutputDocument out = iterator.getOutputDocument("page" + i + ".txt");
 		    out.println(i + "");
-		    
+
 		    // uncomment this line to see atomic file writing
 		    // even when exceptions are generated
-//		    throw new RuntimeException();
-		    
-		    // comment out the close line to see unclosed file detection
+		    // throw new RuntimeException();
+
+		    // comment out the close line to see unclosed file
+                        // detection
 		    out.close();
 		} else {
 		    System.out.println("Skipping existing file.");

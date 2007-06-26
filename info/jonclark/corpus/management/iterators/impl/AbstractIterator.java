@@ -5,6 +5,7 @@ package info.jonclark.corpus.management.iterators.impl;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Logger;
 
 import info.jonclark.corpus.management.documents.OutputDocument;
@@ -15,6 +16,7 @@ import info.jonclark.stat.RemainingTimeEstimator;
 import info.jonclark.stat.SecondTimer;
 import info.jonclark.util.ShutdownHook;
 import info.jonclark.util.TimeLength;
+import info.jonclark.util.FormatUtils;
 
 public class AbstractIterator implements CorpusIterator {
 
@@ -27,6 +29,10 @@ public class AbstractIterator implements CorpusIterator {
     protected int nFileIndex = -1;
     protected int nTotalFiles = 0;
     protected int nNextFileIndex = -1;
+
+    // status information
+    private long lastUpdate = -1;
+    private long updateInterval = 15 * 1000; // update every 15 sec
 
     // time monitoring
     private static final int EVENT_WINDOW = 500;
@@ -57,7 +63,7 @@ public class AbstractIterator implements CorpusIterator {
     private ShutdownHook hook = new ShutdownHook() {
 	@Override
 	public void run() {
-	    if(validate()) {
+	    if (validate()) {
 		log.info("Unclosed files detected and deleted.");
 	    }
 	}
@@ -77,4 +83,24 @@ public class AbstractIterator implements CorpusIterator {
 	return est.getRemainingTime(nRemaining);
     }
 
+    /**
+         * Synchronously updates the user about the status of this run with
+         * information about estimated completion time, etc. IF the update
+         * interval has expired
+         */
+    protected void updateStatus() {
+	timer.go();
+	est.recordEvent();
+	
+	if(lastUpdate == -1) {
+	    lastUpdate = System.currentTimeMillis();
+	} else if (System.currentTimeMillis() - lastUpdate >= updateInterval) {
+	    log.info("Elapsed time: " + getElapsedTime().toStringMultipleUnits(2) + "\n"
+		    + " Est. Remaining time: " + getRemainingTime().toStringMultipleUnits(2) + "\n"
+		    + " Est. Time Completion: "
+		    + FormatUtils.formatFullDate(new Date(getEstimatedCompletionTime())));
+
+	    lastUpdate = System.currentTimeMillis();
+	}
+    }
 }

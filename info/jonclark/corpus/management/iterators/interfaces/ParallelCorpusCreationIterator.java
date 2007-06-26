@@ -3,6 +3,7 @@ package info.jonclark.corpus.management.iterators.interfaces;
 import java.io.IOException;
 
 import info.jonclark.corpus.management.documents.OutputDocument;
+import info.jonclark.corpus.management.etc.BadFilenameException;
 
 public interface ParallelCorpusCreationIterator extends CorpusIterator {
 
@@ -28,13 +29,13 @@ public interface ParallelCorpusCreationIterator extends CorpusIterator {
          */
     public boolean shouldSkip();
     
-    public boolean shouldSkip(String docName);
+    public boolean shouldSkip(String docName) throws BadFilenameException;
 
     public OutputDocument getOutputDocumentE() throws IOException;
 
-    public OutputDocument getOutputDocumentE(String docName) throws IOException;
+    public OutputDocument getOutputDocumentE(String docName) throws IOException, BadFilenameException;
 
     public OutputDocument getOutputDocumentF() throws IOException;
 
-    public OutputDocument getOutputDocumentF(String docName) throws IOException;
+    public OutputDocument getOutputDocumentF(String docName) throws IOException, BadFilenameException;
 }

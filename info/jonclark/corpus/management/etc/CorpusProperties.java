@@ -14,12 +14,30 @@ public class CorpusProperties {
 	return StringUtils.forceSuffix("run." + runName, ".");
     }
 
+    public static String getRunName(String runNamespace) {
+	String runName = StringUtils.substringAfter(runNamespace, "run.");
+	runName = StringUtils.removeTrailingString(runName, ".");
+	return runName;
+    }
+
     public static String getRunSetNamespace(Properties props, String runSetName) {
 	return StringUtils.forceSuffix("runSet." + runSetName, ".");
     }
 
+    public static String getRunSetName(String runSetNamespace) {
+	String runSetName = StringUtils.substringAfter(runSetNamespace, "runSet.");
+	runSetName = StringUtils.removeTrailingString(runSetName, ".");
+	return runSetName;
+    }
+
     public static String getCorpusNamespace(Properties props, String corpusName) {
 	return StringUtils.forceSuffix("corpus." + corpusName, ".");
+    }
+
+    public static String getCorpusName(String corpusNamespace) {
+	String corpusName = StringUtils.substringAfter(corpusNamespace, "corpus.");
+	corpusName = StringUtils.removeTrailingString(corpusName, ".");
+	return corpusName;
     }
 
     public static String[] getRunsInRunSet(Properties props, String runsetNamespace)
@@ -89,8 +107,8 @@ public class CorpusProperties {
     public static boolean getAutoNumberArrangeByFilename(Properties props, String namespace)
 	    throws CorpusManException {
 	namespace = StringUtils.forceSuffix(namespace, ".");
-	String inputRunKey = props.getProperty(namespace + "autonumber.arrangeByFilename", "false");
-	String value = props.getProperty(inputRunKey);
+	String inputRunKey = namespace + "autonumber.arrangeByFilename";
+	String value = props.getProperty(inputRunKey, "false");
 	return Boolean.parseBoolean(value);
     }
 
@@ -265,5 +283,17 @@ public class CorpusProperties {
 	    throws CorpusManException {
 	String desiredParallelDirF = CorpusProperties.getParallelF(props, outputRunName);
 	return CorpusProperties.getParallelIndex(props, corpusName, desiredParallelDirF);
+    }
+
+    public static boolean getArrangeByFilename(Properties props, String corpusName)
+	    throws CorpusManException {
+	String corpusNamespace = getCorpusNamespace(props, corpusName);
+	String key = PropertyUtils.getPropertyInNamespaceThatEndsWith(props, corpusNamespace,
+		"autonumber.arrangeByFilename");
+	if (key == null)
+	    throw new CorpusManException(
+		    "Property autonumber.arrangeByFilename not defined for corups: " + corpusName);
+	String value = props.getProperty(key);
+	return Boolean.parseBoolean(value);
     }
 }

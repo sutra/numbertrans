@@ -8,6 +8,7 @@ import info.jonclark.corpus.management.directories.CorpusDirectoryFactory;
 import info.jonclark.corpus.management.directories.CorpusQuery;
 import info.jonclark.corpus.management.directories.CorpusQuery.Statistic;
 import info.jonclark.corpus.management.documents.OutputDocument;
+import info.jonclark.corpus.management.etc.BadFilenameException;
 import info.jonclark.corpus.management.etc.CorpusManException;
 import info.jonclark.corpus.management.etc.CorpusManRuntimeException;
 import info.jonclark.corpus.management.etc.CorpusProperties;
@@ -29,12 +30,13 @@ public class SimpleUniCorpusCreationIterator extends AbstractIterator implements
     private final File rootFile;
     private final String outputRunName;
     private final FileNamer namer;
-    
+    private final boolean arrangeByFilename;
+
     private boolean checkedShouldSkip = false;
 
     // the parallel directory we're currdntly iterating through
     private final int nParallel;
-    
+
     private static final Logger log = LogUtils.getLogger();
 
     /**
@@ -52,6 +54,7 @@ public class SimpleUniCorpusCreationIterator extends AbstractIterator implements
 	this.rootFile = CorpusProperties.getCorpusRootDirectoryFile(props, corpusName);
 	this.rootDirectory = CorpusDirectoryFactory.getCorpusRootDirectory(props, corpusName);
 	this.outputRunName = StringUtils.removeTrailingString(outputRunName, ".");
+	this.arrangeByFilename = CorpusProperties.getArrangeByFilename(props, corpusName);
 
 	if (CorpusProperties.hasNodeFilenamePattern(props, outputRunName))
 	    this.namer = new FileNamer(props, runNamespace);
@@ -98,17 +101,25 @@ public class SimpleUniCorpusCreationIterator extends AbstractIterator implements
 	    throw new CorpusManRuntimeException(
 		    "You must specify a filename pattern use the auto-naming feature.");
 
-	return getOutputDocument(namer.getFilename(nFileIndex));
+	try {
+	    return getOutputDocument(namer.getFilename(nFileIndex));
+	} catch (BadFilenameException e) {
+	    throw new CorpusManRuntimeException(e);
+	}
     }
 
-    public OutputDocument getOutputDocument(String docName) throws IOException {
+    public OutputDocument getOutputDocument(String docName) throws IOException,
+	    BadFilenameException {
 	if (nFileIndex == -1)
 	    throw new CorpusManRuntimeException("You must call next() first.");
-	if(!checkedShouldSkip)
+	if (!checkedShouldSkip)
 	    log.warning("shouldSkip() was not checked.");
 
 	CorpusQuery query = new CorpusQuery(nParallel, outputRunName, docName, nFileIndex,
 		CorpusQuery.Statistic.NONE);
+	if (arrangeByFilename)
+	    query.fileIndex = namer.getIndexFromFilename(docName);
+
 	File file = rootDirectory.getNextFileForCreation(query, rootFile);
 
 	if (!file.getParentFile().exists())
@@ -128,6 +139,8 @@ public class SimpleUniCorpusCreationIterator extends AbstractIterator implements
     public void next() {
 	super.nFileIndex++;
 	checkedShouldSkip = false;
+	
+	super.updateStatus();
 
 	boolean unclean = super.validate();
 	if (unclean) {
@@ -138,20 +151,27 @@ public class SimpleUniCorpusCreationIterator extends AbstractIterator implements
     public void setExpectedDocumentCount(int count) {
 	super.nTotalFiles = count;
     }
-    
+
     public boolean shouldSkip() {
-	return shouldSkip(namer.getFilename(nFileIndex));
+	try {
+	    return shouldSkip(namer.getFilename(nFileIndex));
+	} catch (BadFilenameException e) {
+	    throw new CorpusManRuntimeException(e);
+	}
     }
 
-    public boolean shouldSkip(String docName) {
+    public boolean shouldSkip(String docName) throws BadFilenameException {
 	checkedShouldSkip = true;
-	
+
 	CorpusQuery query = new CorpusQuery(nParallel, outputRunName, docName, nFileIndex,
 		CorpusQuery.Statistic.NONE);
 	query.simulate = true;
+	if (arrangeByFilename)
+	    query.fileIndex = namer.getIndexFromFilename(docName);
+
 	File file = rootDirectory.getNextFileForCreation(query, rootFile);
-	
-	if(file.exists()) {
+
+	if (file.exists()) {
 	    // we're going to skip this file, so go ahead and update
 	    // counts in the directory structure
 	    query.simulate = false;

@@ -18,7 +18,7 @@ public class UniTransformTest implements UniCorpusTransformRun {
 
     private static final Logger log = LogUtils.getLogger();
     
-    public UniTransformTest(Properties props) {
+    public UniTransformTest(Properties props, String runName, String corpusName) {
 
     }
 

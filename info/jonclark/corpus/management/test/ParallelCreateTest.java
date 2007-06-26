@@ -12,7 +12,7 @@ import java.util.Properties;
 
 public class ParallelCreateTest implements ParallelCorpusCreationRun {
 
-    public ParallelCreateTest(Properties props) {
+    public ParallelCreateTest(Properties props, String runName, String corpusName) {
 
     }
 

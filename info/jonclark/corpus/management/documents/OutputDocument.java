@@ -4,21 +4,26 @@
 package info.jonclark.corpus.management.documents;
 
 import info.jonclark.corpus.management.etc.CorpusManRuntimeException;
+import info.jonclark.io.LineWriter;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 
 /**
  * Abstracts the location of a corpus document from the user so that tasks such
  * as distributed processing become easy.
  */
-public class OutputDocument {
+public class OutputDocument implements LineWriter {
 
     private PrintWriter writer;
-    private final File file;
     private boolean closed = true;
+    protected final File file;
 
     public OutputDocument(File file) {
 	// TODO: Handle GZIP
@@ -52,10 +57,26 @@ public class OutputDocument {
 	open();
 	this.writer.println(line);
     }
+    
+    public void copyFrom(InputDocument doc) throws IOException {
+	boolean wasClosed = closed;
+	
+	closed = false;
+	final FileChannel sourceChannel = new FileInputStream(doc.file).getChannel();
+	final FileChannel destinationChannel = new FileOutputStream(this.file).getChannel();
+
+	sourceChannel.transferTo(0, sourceChannel.size(), destinationChannel);
+
+	sourceChannel.close();
+	destinationChannel.close();
+	
+	closed = wasClosed;
+    }
 
     public void close() {
 	closed = true;
-	writer.close();
+	if(writer != null)
+	    writer.close();
     }
 
     public boolean isClosed() {

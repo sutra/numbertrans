@@ -18,7 +18,7 @@ public class ParallelAlignTest implements ParallelCorpusAlignmentRun {
 
     private static final Logger log = LogUtils.getLogger();
 
-    public ParallelAlignTest(Properties props) {
+    public ParallelAlignTest(Properties props, String runName, String corpusName) {
 
     }
 

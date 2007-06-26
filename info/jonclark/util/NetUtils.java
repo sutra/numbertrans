@@ -36,6 +36,15 @@ import java.util.zip.*;
  */
 public class NetUtils {
 
+    public static String getStreamAsString(InputStream stream) throws IOException {
+	BufferedReader in = new BufferedReader(new InputStreamReader(stream));
+	String line;
+	StringBuilder builder = new StringBuilder();
+	while ((line = in.readLine()) != null)
+	    builder.append(line + "\n");
+	return builder.toString();
+    }
+
     /**
          * Get an input stream for the data at a given URL
          * 
@@ -48,6 +57,8 @@ public class NetUtils {
 	URL url = new URL(urlToRetrieve);
 	URLConnection conn = url.openConnection();
 	InputStream in = conn.getInputStream();
+
+	// TODO: Make ourselves look like IE or mozilla
 
 	// Handle the file type correctly
 	String encoding = conn.getContentEncoding();
@@ -104,8 +115,7 @@ public class NetUtils {
 
 	// now trying opening a zip file like the PG thing
 
-	InputStream stream = NetUtils
-		.getUrlStream("http://www.gutenberg.org/feeds/catalog.rdf.zip");
+	InputStream stream = NetUtils.getUrlStream("http://www.gutenberg.org/feeds/catalog.rdf.zip");
 	BufferedReader in = new BufferedReader(new InputStreamReader(stream));
 	String line;
 	while ((line = in.readLine()) != null) {

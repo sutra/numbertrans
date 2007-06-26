@@ -24,7 +24,7 @@ public class AutoNumberCorpusDirectory extends AbstractCorpusDirectory {
     private final int nFilesPerDirectory;
     private final DecimalFormat format;
 
-    private final HashMap<File, AutoNumberData> dirs = new HashMap<File, AutoNumberData>();
+    private final HashMap<File, AutoNumberData> dirsByFile = new HashMap<File, AutoNumberData>();
 
     private class AutoNumberData implements Cloneable {
 	public int nCurrentSubdir = -1;
@@ -92,24 +92,28 @@ public class AutoNumberCorpusDirectory extends AbstractCorpusDirectory {
     @Override
     public File getNextFileForCreation(CorpusQuery query, File autonumberDirectory) {
 
-	AutoNumberData data = dirs.get(autonumberDirectory);
+	AutoNumberData data = dirsByFile.get(autonumberDirectory);
 	if (data == null) {
 	    // create a new data object with an "infinite" number of files
 	    // which forces the creation of the first directory
 	    data = new AutoNumberData();
-	    if (!query.simulate)
-		dirs.put(autonumberDirectory, data);
-	    
+	    if (!query.simulate) {
+		dirsByFile.put(autonumberDirectory, data);
+	    }
 	} else if (query.simulate) {
 	    // don't mess up our real data if we're just simulating
 	    data = data.clone();
 	}
 
 	if (arrangeByFilename) {
-	    // TODO: test me
-	    // use query.fileNumber to implement this... maybe
-	    // that idea probably needs to be rearchitected
-	    throw new RuntimeException("Unimplemented");
+	    // determine the directory based on the file index
+	    int index = query.getFileIndex();
+	    assert index != CorpusQuery.NO_INDEX : "File index not set in query.";
+	    int remainder = (index % nFilesPerDirectory);
+	    int nDirectory = index - remainder;
+	    String directoryName = format.format(nDirectory);
+	    File subdir = new File(autonumberDirectory, directoryName);
+	    return getChild().getNextFileForCreation(query, subdir);
 	} else {
 	    if (data.nFilesInCurrentSubdir >= nFilesPerDirectory) {
 		// create new directory
@@ -119,9 +123,9 @@ public class AutoNumberCorpusDirectory extends AbstractCorpusDirectory {
 		String directoryName = format.format(data.nCurrentSubdir);
 		data.currentSubdir = new File(autonumberDirectory, directoryName);
 	    }
-	}
 
-	data.nFilesInCurrentSubdir++;
-	return getChild().getNextFileForCreation(query, data.currentSubdir);
+	    data.nFilesInCurrentSubdir++;
+	    return getChild().getNextFileForCreation(query, data.currentSubdir);
+	}
     }
 }

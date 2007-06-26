@@ -9,8 +9,8 @@ import info.jonclark.corpus.management.iterators.interfaces.CorpusIterator;
  * The user should never implement a CorpusRun directly, but instead choose one
  * of its subinterfaces.
  * <p>
- * The implementing class must define a constructor having one argument of type
- * Properties.
+ * The implementing class must define a constructor having three arguments of
+ * types Properties (props), String (runName), String (corpusName)
  * 
  * @param <T>
  *                The iterator type which this run will use

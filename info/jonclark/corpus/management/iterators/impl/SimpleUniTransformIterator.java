@@ -40,6 +40,8 @@ public class SimpleUniTransformIterator extends AbstractIterator implements
     private int[] desiredParallelIndexes;
     private int currentParallelIndex;
     
+    private int filesMidpoint;
+    
     protected SimpleUniTransformIterator(Properties props, String outputRunName)
 	    throws CorpusManException {
 	String corpusName = CorpusProperties.getCorpusNameFromRun(props, outputRunName);
@@ -77,9 +79,12 @@ public class SimpleUniTransformIterator extends AbstractIterator implements
 		allFiles.addAll(rootDirectory.getDocuments(fileQuery, rootFile));
 	    }
 	    super.nTotalFiles = allFiles.size();
+	    this.filesMidpoint = super.nTotalFiles / 2;
 	} catch (IOException e) {
 	    throw new CorpusManException(e);
 	}
+	
+	super.nNextFileIndex = findNext();
     }
 
     public InputDocument getInputDocument() {
@@ -126,12 +131,18 @@ public class SimpleUniTransformIterator extends AbstractIterator implements
     }
 
     public boolean hasNext() {
-	return nNextFileIndex != -1;
+	return (nNextFileIndex != -1);
     }
 
     public void next() {
 	super.nFileIndex = super.nNextFileIndex;
 	super.nNextFileIndex = findNext();
+	this.currentInputFile = allFiles.get(nFileIndex);
+	
+	super.updateStatus();
+	
+	if(nFileIndex > this.filesMidpoint)
+	    this.currentParallelIndex = this.desiredParallelIndexes[1];
 
 	boolean unclean = validate();
 	if (unclean) {

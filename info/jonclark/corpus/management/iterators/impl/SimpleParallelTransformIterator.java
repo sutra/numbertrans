@@ -158,6 +158,8 @@ public class SimpleParallelTransformIterator extends AbstractIterator implements
     public void next() {
 	super.nFileIndex = super.nNextFileIndex;
 	super.nNextFileIndex = findNext();
+	
+	super.updateStatus();
 
 	boolean unclean = validate();
 	if (unclean) {

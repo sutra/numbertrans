@@ -14,4 +14,8 @@ public class CorpusManRuntimeException extends RuntimeException {
     public CorpusManRuntimeException(String message, Throwable cause) {
 	super(message, cause);
     }
+    
+    public CorpusManRuntimeException(Throwable cause) {
+	super(cause);
+    }
 }
