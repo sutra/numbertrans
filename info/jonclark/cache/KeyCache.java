@@ -29,6 +29,7 @@ package info.jonclark.cache;
 
 import info.jonclark.util.StringUtils;
 
+import java.lang.ref.SoftReference;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -42,133 +43,134 @@ import java.util.logging.Logger;
  * @author Jonathan Clark
  */
 public class KeyCache<K, V> {
-    private int nHits = 0;
-    private int nMisses = 0;
-    private int nQueries = 0;
+	private int nHits = 0;
+	private int nMisses = 0;
+	private int nQueries = 0;
 
-    private final int nMinHistory;
-    private final int nMaxHistory;
+	private final int nMinHistory;
+	private final int nMaxHistory;
 
-    private int nHistoryIterator = 0;
-    private final K[] recentKeys;
-    private final V[] recentValues;
+	private int nHistoryIterator = 0;
+	private final K[] recentKeys;
+	private final V[] recentValues;
 
-    private final HashMap<K, V> hash;
-    private final CacheGenerator<K, V> generator;
+	private final HashMap<K, SoftReference<V>> hash;
+	private final CacheGenerator<K, V> generator;
 
-    private final Logger log;
-    private final String cacheName;
+	private final Logger log;
+	private final String cacheName;
 
-    private static final int DEFAULT_MIN_HISTORY = 100;
-    private static final int DEFAULT_MAX_HISTORY = 1024;
-    private static final int DEFAULT_LOG_FREQUENCY = 100;
-    private static final String DEFAULT_CACHE_NAME = "KEY_CACHE";
+	private static final int DEFAULT_MIN_HISTORY = 100;
+	private static final int DEFAULT_MAX_HISTORY = 1024;
+	private static final int DEFAULT_LOG_FREQUENCY = 100;
+	private static final String DEFAULT_CACHE_NAME = "KEY_CACHE";
 
-    public KeyCache(CacheGenerator<K, V> generator, final int nMinHistory, final int nMaxHistory,
-	    String cacheName, Logger log) {
-	assert nMinHistory < nMaxHistory : "nMinHistory < nMaxHistory";
-	assert generator != null;
-	assert log != null;
+	public KeyCache(CacheGenerator<K, V> generator, final int nMinHistory, final int nMaxHistory,
+			String cacheName, Logger log) {
+		assert nMinHistory < nMaxHistory : "nMinHistory < nMaxHistory";
+		assert generator != null;
+		assert log != null;
 
-	this.nMinHistory = nMinHistory;
-	this.nMaxHistory = nMaxHistory;
-	this.generator = generator;
-	this.log = log;
-	this.cacheName = cacheName;
+		this.nMinHistory = nMinHistory;
+		this.nMaxHistory = nMaxHistory;
+		this.generator = generator;
+		this.log = log;
+		this.cacheName = cacheName;
 
-	recentKeys = createKeyArray(nMinHistory);
-	recentValues = createValueArray(nMinHistory);
+		recentKeys = createKeyArray(nMinHistory);
+		recentValues = createValueArray(nMinHistory);
 
-	hash = new HashMap<K, V>(nMaxHistory);
-    }
-
-    public KeyCache(CacheGenerator<K, V> generator, Logger log) {
-	this(generator, DEFAULT_MIN_HISTORY, DEFAULT_MAX_HISTORY, DEFAULT_CACHE_NAME, log);
-    }
-
-    /**
-         * Get a value for a given key. First, the cache will be searched for
-         * the key. If it is not cached, the CacheGenerator will be called to
-         * generate the value.
-         * 
-         * @param key
-         *                The key for which we wish to get a value.
-         * @return The value corresponding to the key.
-         * @throws Exception
-         *                 If an error is encountered while generating a new
-         *                 cache value.
-         */
-    public V getValue(final K key) throws Exception {
-	nQueries++;
-	if (nQueries % DEFAULT_LOG_FREQUENCY == 0) {
-	    log.info(cacheName + ": " + getStats());
+		hash = new HashMap<K, SoftReference<V>>(nMaxHistory);
 	}
 
-	if (hash.containsKey(key)) {
-	    nHits++;
-	    return hash.get(key);
-	} else {
-	    nMisses++;
+	public KeyCache(CacheGenerator<K, V> generator, Logger log) {
+		this(generator, DEFAULT_MIN_HISTORY, DEFAULT_MAX_HISTORY, DEFAULT_CACHE_NAME, log);
+	}
 
-	    // Flush cache if overflowing
-	    if (hash.size() >= nMaxHistory)
-		flushStaleCache();
-
-	    final V value = generator.getUncachedValue(key);
-	    synchronized (hash) {
-		hash.put(key, value);
-
-		if (nMinHistory > 0) {
-		    recentKeys[nHistoryIterator] = key;
-		    recentValues[nHistoryIterator] = value;
-		    nHistoryIterator++;
-		    nHistoryIterator %= nMinHistory;
+	/**
+	 * Get a value for a given key. First, the cache will be searched for the
+	 * key. If it is not cached, the CacheGenerator will be called to generate
+	 * the value.
+	 * 
+	 * @param key
+	 *            The key for which we wish to get a value.
+	 * @return The value corresponding to the key.
+	 * @throws Exception
+	 *             If an error is encountered while generating a new cache
+	 *             value.
+	 */
+	public V getValue(final K key) throws Exception {
+		nQueries++;
+		if (nQueries % DEFAULT_LOG_FREQUENCY == 0) {
+			log.info(cacheName + ": " + getStats());
 		}
-	    }
 
-	    return value;
+		SoftReference<V> ref = hash.get(key);
+		if (ref != null && ref.get() != null) {
+			nHits++;
+			return ref.get();
+		} else {
+			nMisses++;
+
+			// Flush cache if overflowing
+			if (hash.size() >= nMaxHistory)
+				flushStaleCache();
+
+			final V value = generator.getUncachedValue(key);
+			synchronized (hash) {
+				hash.put(key, new SoftReference<V>(value));
+
+				if (nMinHistory > 0) {
+					recentKeys[nHistoryIterator] = key;
+					recentValues[nHistoryIterator] = value;
+					nHistoryIterator++;
+					nHistoryIterator %= nMinHistory;
+				}
+			}
+
+			return value;
+		}
 	}
-    }
 
-    /**
-         * Get a string with statistics about the performance of this KeyCache.
-         */
-    public String getStats() {
-	return nQueries + " queries, " + nHits + " hits, " + nMisses + " misses, "
-		+ StringUtils.getPercentage(nHits, nQueries) + " % hits";
-    }
-
-    /**
-         * A quick hack to get around limitations in Java generics. Contains
-         * warning suppression to one line.
-         */
-    @SuppressWarnings("unchecked")
-    private K[] createKeyArray(final int nSize) {
-	return (K[]) new Object[nSize];
-    }
-
-    /**
-         * A quick hack to get around limitations in Java generics. Contains
-         * warning suppression to one line.
-         */
-    @SuppressWarnings("unchecked")
-    private V[] createValueArray(final int nSize) {
-	return (V[]) new Object[nSize];
-    }
-
-    /**
-         * Clear the current contents of the cache and repopulate with recent
-         * history.
-         */
-    private void flushStaleCache() {
-	synchronized (hash) {
-	    log.info(cacheName + ": Flushing cache; " + getStats());
-
-	    // Clear all entries, then replace recent ones
-	    hash.clear();
-	    for (int i = 0; i < nMinHistory; i++)
-		if (recentKeys[i] != null)
-		    hash.put(recentKeys[i], recentValues[i]);
+	/**
+	 * Get a string with statistics about the performance of this KeyCache.
+	 */
+	public String getStats() {
+		return nQueries + " queries, " + nHits + " hits, " + nMisses + " misses, "
+				+ StringUtils.getPercentage(nHits, nQueries) + " % hits";
 	}
-    } // end flushStaleCache()
+
+	/**
+	 * A quick hack to get around limitations in Java generics. Contains warning
+	 * suppression to one line.
+	 */
+	@SuppressWarnings("unchecked")
+	private K[] createKeyArray(final int nSize) {
+		return (K[]) new Object[nSize];
+	}
+
+	/**
+	 * A quick hack to get around limitations in Java generics. Contains warning
+	 * suppression to one line.
+	 */
+	@SuppressWarnings("unchecked")
+	private V[] createValueArray(final int nSize) {
+		return (V[]) new Object[nSize];
+	}
+
+	/**
+	 * Clear the current contents of the cache and repopulate with recent
+	 * history.
+	 */
+	private void flushStaleCache() {
+		synchronized (hash) {
+			log.info(cacheName + ": Flushing cache; " + getStats());
+
+			// Clear all entries, then replace recent ones
+			hash.clear();
+			for (int i = 0; i < nMinHistory; i++)
+				if (recentKeys[i] != null)
+					hash.put(recentKeys[i], new SoftReference<V>(recentValues[i]));
+		}
+	} // end flushStaleCache()
 }
