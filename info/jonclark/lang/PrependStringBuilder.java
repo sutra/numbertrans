@@ -35,108 +35,123 @@ import info.jonclark.util.StringUtils;
  */
 public class PrependStringBuilder {
 
-    /**
-         * The characters of our String.
-         */
-    private char value[];
+	/**
+	 * The characters of our String.
+	 */
+	private char value[];
+	private boolean reversed = false;
 
-    /**
-         * How many characters have been used.
-         */
-    private int count = 0;
+	/**
+	 * How many characters have been used.
+	 */
+	private int count = 0;
 
-    /**
-         * Constructs a string builder with no characters in it and an initial
-         * capacity of 16 characters.
-         */
-    public PrependStringBuilder() {
-	this(16);
-    }
-
-    /**
-         * Constructs a string builder with no characters in it and an initial
-         * capacity specified by the <code>capacity</code> argument.
-         * 
-         * @param capacity
-         *                the initial capacity.
-         * @throws NegativeArraySizeException
-         *                 if the <code>capacity</code> argument is less than
-         *                 <code>0</code>.
-         */
-    public PrependStringBuilder(int capacity) {
-	value = new char[capacity];
-    }
-
-    /**
-         * Constructs a string builder initialized to the contents of the
-         * specified string. The initial capacity of the string builder is
-         * <code>16</code> plus the length of the string argument.
-         * 
-         * @param str
-         *                the initial contents of the buffer.
-         * @throws NullPointerException
-         *                 if <code>str</code> is <code>null</code>
-         */
-    public PrependStringBuilder(String str) {
-	this(str.length() + 16);
-	prepend(str);
-    }
-
-    public PrependStringBuilder prepend(String str) {
-	if (str == null)
-	    str = "null";
-
-	int len = str.length();
-	if (len == 0)
-	    return this;
-
-	int newCount = count + len;
-	if (newCount > value.length)
-	    expandCapacity(newCount);
-
-	// we must reverse everything coming in, since it will be reversed again
-	// on its way out.
-	str.getChars(0, len, value, count);
-	StringUtils.reverse(value, count, count + len);
-	count = newCount;
-	return this;
-    }
-    
-    public PrependStringBuilder prepend(char c) {
-	int len = 1;
-
-	int newCount = count + len;
-	if (newCount > value.length)
-	    expandCapacity(newCount);
-
-	value[count] = c;
-	count = newCount;
-	return this;
-    }
-
-    /**
-         * This implements the expansion semantics of ensureCapacity with no
-         * size check or synchronization.
-         */
-    private void expandCapacity(int minimumCapacity) {
-	int newCapacity = (value.length + 1) * 2;
-	if (newCapacity < 0) {
-	    newCapacity = Integer.MAX_VALUE;
-	} else if (minimumCapacity > newCapacity) {
-	    newCapacity = minimumCapacity;
+	/**
+	 * Constructs a string builder with no characters in it and an initial
+	 * capacity of 16 characters.
+	 */
+	public PrependStringBuilder() {
+		this(16);
 	}
-	char newValue[] = new char[newCapacity];
-	System.arraycopy(value, 0, newValue, 0, count);
-	value = newValue;
-    }
 
-    public int length() {
-	return count;
-    }
-    
-    public String toString() {
-        // Create a copy, don't share the array
-	StringUtils.reverse(value, 0, count);
-	return new String(value, 0, count);
-    }
+	/**
+	 * Constructs a string builder with no characters in it and an initial
+	 * capacity specified by the <code>capacity</code> argument.
+	 * 
+	 * @param capacity
+	 *            the initial capacity.
+	 * @throws NegativeArraySizeException
+	 *             if the <code>capacity</code> argument is less than
+	 *             <code>0</code>.
+	 */
+	public PrependStringBuilder(int capacity) {
+		value = new char[capacity];
+	}
+
+	/**
+	 * Constructs a string builder initialized to the contents of the specified
+	 * string. The initial capacity of the string builder is <code>16</code>
+	 * plus the length of the string argument.
+	 * 
+	 * @param str
+	 *            the initial contents of the buffer.
+	 * @throws NullPointerException
+	 *             if <code>str</code> is <code>null</code>
+	 */
+	public PrependStringBuilder(String str) {
+		this(str.length() + 16);
+		prepend(str);
+	}
+
+	public PrependStringBuilder prepend(String str) {
+
+		if (str == null)
+			str = "null";
+
+		int len = str.length();
+		if (len == 0)
+			return this;
+
+		if (reversed) {
+			StringUtils.reverse(value, 0, count);
+			reversed = false;
+		}
+
+		int newCount = count + len;
+		if (newCount > value.length)
+			expandCapacity(newCount);
+
+		// we must reverse everything coming in, since it will be reversed again
+		// on its way out.
+		str.getChars(0, len, value, count);
+		StringUtils.reverse(value, count, count + len);
+		count = newCount;
+		return this;
+	}
+
+	public PrependStringBuilder prepend(char c) {
+		int len = 1;
+		
+		if (reversed) {
+			StringUtils.reverse(value, 0, count);
+			reversed = false;
+		}
+
+		int newCount = count + len;
+		if (newCount > value.length)
+			expandCapacity(newCount);
+
+		value[count] = c;
+		count = newCount;
+		return this;
+	}
+
+	/**
+	 * This implements the expansion semantics of ensureCapacity with no size
+	 * check or synchronization.
+	 */
+	private void expandCapacity(int minimumCapacity) {
+		int newCapacity = (value.length + 1) * 2;
+		if (newCapacity < 0) {
+			newCapacity = Integer.MAX_VALUE;
+		} else if (minimumCapacity > newCapacity) {
+			newCapacity = minimumCapacity;
+		}
+		char newValue[] = new char[newCapacity];
+		System.arraycopy(value, 0, newValue, 0, count);
+		value = newValue;
+	}
+
+	public int length() {
+		return count;
+	}
+
+	public String toString() {
+		// Create a copy, don't share the array
+		if (!reversed) {
+			StringUtils.reverse(value, 0, count);
+			reversed = true;
+		}
+		return new String(value, 0, count);
+	}
 }

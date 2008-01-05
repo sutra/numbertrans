@@ -27,10 +27,10 @@
  */
 package net.sourceforge.numbertrans.languages.roman;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
+import net.sourceforge.numbertrans.framework.base.AbstractNumber;
 import net.sourceforge.numbertrans.framework.base.NumberMatch;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
-import net.sourceforge.numbertrans.framework.base.GeneralNumber.Context;
+import net.sourceforge.numbertrans.framework.base.AbstractNumber.Context;
 import net.sourceforge.numbertrans.framework.parser.NumberParser;
 
 /**
@@ -67,13 +67,13 @@ public class RomanCardinalParser extends NumberParser {
     }
 
     @Override
-    public GeneralNumber getNumberFromFind(NumberMatch find) {
+    public AbstractNumber getNumberFromFind(NumberMatch find) {
 	// TODO Auto-generated method stub
 	return null;
     }
 
     @Override
-    public GeneralNumber getNumberFromString(String strNumber) throws NumberFormatException {
+    public AbstractNumber getNumberFromString(String strNumber) throws NumberFormatException {
 	int totalValue = 0;
 	int localValue = 0;
 	int prevDigit = 0;

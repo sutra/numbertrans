@@ -40,6 +40,8 @@ public class UniCreateTest implements UniCorpusCreationRun {
 		    System.out.println("Skipping existing file.");
 		}
 	    }
+	    
+	    iterator.finish();
 	} catch (Exception e) {
 	    throw new CorpusManException(e);
 	}

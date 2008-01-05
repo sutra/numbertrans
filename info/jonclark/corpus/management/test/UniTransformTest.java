@@ -37,6 +37,8 @@ public class UniTransformTest implements UniCorpusTransformRun {
 		    out.println(line);
 		out.close();
 	    }
+	    
+	    iterator.finish();
 	} catch (IOException e) {
 	    throw new CorpusManException(e);
 	}

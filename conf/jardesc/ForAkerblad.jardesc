@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<jardesc>
+    <jar path="/home/jon/workspace/akerblad/lib/JonClarkDotInfo.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/numbertrans/conf/jardesc/ForAkerblad.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
+        <javaElement handleIdentifier="=numbertrans/&lt;info.jonclark.stat"/>
+        <javaElement handleIdentifier="=numbertrans/&lt;info.jonclark.util"/>
+        <javaElement handleIdentifier="=numbertrans/&lt;info.jonclark.properties"/>
+        <javaElement handleIdentifier="=numbertrans/&lt;info.jonclark.lang"/>
+        <javaElement handleIdentifier="=numbertrans/&lt;info.jonclark.log"/>
+        <javaElement handleIdentifier="=numbertrans/&lt;info.jonclark.io"/>
+    </selectedElements>
+</jardesc>

@@ -38,7 +38,7 @@ import info.jonclark.lang.TokenArray;
 public class NumberMatch {
     private final IntRange range;
     private final TokenArray matchingTokens;
-    private final GeneralNumber.Context context;
+    private final AbstractNumber.Context context;
 
     /**
          * Create a new NumberMatch object.
@@ -53,7 +53,7 @@ public class NumberMatch {
          *                Cardinal, Ordinal, Decimal)
          */
     public NumberMatch(final IntRange range, final String[] sourceTokens,
-	    final GeneralNumber.Context context) {
+	    final AbstractNumber.Context context) {
 	this.range = range;
 	this.context = context;
 	matchingTokens = new TokenArray(sourceTokens, range);
@@ -63,7 +63,7 @@ public class NumberMatch {
          * Get the context in which this number was found. (e.g. Cardinal,
          * Ordinal, Decimal)
          */
-    public GeneralNumber.Context getContext() {
+    public AbstractNumber.Context getContext() {
 	return context;
     }
 

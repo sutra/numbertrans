@@ -7,17 +7,16 @@ import info.jonclark.corpus.management.directories.AbstractCorpusDirectory;
 import info.jonclark.corpus.management.directories.CorpusDirectoryFactory;
 import info.jonclark.corpus.management.directories.CorpusQuery;
 import info.jonclark.corpus.management.documents.InputDocument;
+import info.jonclark.corpus.management.documents.MetaDocument;
 import info.jonclark.corpus.management.documents.OutputDocument;
 import info.jonclark.corpus.management.etc.CorpusManException;
 import info.jonclark.corpus.management.etc.CorpusManRuntimeException;
 import info.jonclark.corpus.management.etc.CorpusProperties;
 import info.jonclark.corpus.management.iterators.interfaces.ParallelCorpusTransformIterator;
-import info.jonclark.lang.Pair;
 import info.jonclark.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -27,7 +26,9 @@ public class SimpleParallelTransformIterator extends AbstractIterator implements
     protected final AbstractCorpusDirectory rootDirectory;
     protected final File rootFile;
     protected final String outputRunName;
-    private final String inputRunName;
+
+    private final String inputRunNameE;
+    private final String inputRunNameF;
 
     private final int eParallel;
     private final int fParallel;
@@ -35,11 +36,10 @@ public class SimpleParallelTransformIterator extends AbstractIterator implements
     protected final List<File> eParallelFiles;
     protected final List<File> fParallelFiles;
 
-    private ArrayList<Pair<OutputDocument, File>> currentOutputs = new ArrayList<Pair<OutputDocument, File>>(
-	    3);
-
     protected SimpleParallelTransformIterator(Properties props, String outputRunName)
 	    throws CorpusManException {
+	super(props, outputRunName);
+
 	String corpusName = CorpusProperties.getCorpusNameFromRun(props, outputRunName);
 	this.rootFile = CorpusProperties.getCorpusRootDirectoryFile(props, corpusName);
 	this.rootDirectory = CorpusDirectoryFactory.getCorpusRootDirectory(props, corpusName);
@@ -48,14 +48,15 @@ public class SimpleParallelTransformIterator extends AbstractIterator implements
 	this.outputRunName = outputRunName;
 
 	// Get the input run
-	this.inputRunName = CorpusProperties.getInputRunName(props, outputRunName);
+	this.inputRunNameE = CorpusProperties.getInputRunNameE(props, outputRunName);
+	this.inputRunNameF = CorpusProperties.getInputRunNameF(props, outputRunName);
 
 	this.eParallel = CorpusProperties.getParallelIndexE(props, corpusName, outputRunName);
 	this.fParallel = CorpusProperties.getParallelIndexF(props, corpusName, outputRunName);
 
 	try {
-	    this.eParallelFiles = loadParallelFiles(props, corpusName, eParallel);
-	    this.fParallelFiles = loadParallelFiles(props, corpusName, eParallel);
+	    this.eParallelFiles = loadParallelFiles(props, corpusName, inputRunNameE, eParallel);
+	    this.fParallelFiles = loadParallelFiles(props, corpusName, inputRunNameF, fParallel);
 	    super.nNextFileIndex = findNext();
 
 	} catch (IOException e) {
@@ -63,8 +64,8 @@ public class SimpleParallelTransformIterator extends AbstractIterator implements
 	}
     }
 
-    private List<File> loadParallelFiles(Properties props, String corpusName, int nParallel)
-	    throws IOException, CorpusManException {
+    private List<File> loadParallelFiles(Properties props, String corpusName, String inputRunName,
+	    int nParallel) throws IOException, CorpusManException {
 
 	CorpusQuery fileQuery = new CorpusQuery(nParallel, inputRunName, CorpusQuery.ALL_FILES,
 		CorpusQuery.NO_INDEX, CorpusQuery.Statistic.DOCUMENT_COUNT);
@@ -80,22 +81,25 @@ public class SimpleParallelTransformIterator extends AbstractIterator implements
 	return parallelFiles;
     }
 
-    public InputDocument getInputDocumentE() {
-	return getInputDocument(eParallelFiles);
+    public InputDocument getInputDocumentE() throws IOException {
+	return getInputDocument(eParallelFiles, inputRunNameE);
     }
 
-    public InputDocument getInputDocumentF() {
-	return getInputDocument(fParallelFiles);
+    public InputDocument getInputDocumentF() throws IOException {
+	return getInputDocument(fParallelFiles, inputRunNameF);
     }
 
-    private InputDocument getInputDocument(List<File> parallelFiles) {
+    private InputDocument getInputDocument(List<File> parallelFiles, String inputRunName)
+	    throws IOException {
 	if (nFileIndex == -1)
 	    throw new CorpusManRuntimeException("You must call next() first.");
 
 	// TODO: Get one file at a time instead of just wailing on memory with
 	// our array
-	File file = parallelFiles.get(nFileIndex);
-	return new InputDocument(file);
+	File inputFile = parallelFiles.get(nFileIndex);
+
+	MetaDocument metadoc = super.getMetaFileFromInputFile(inputFile, inputRunName);
+	return new InputDocument(inputFile, metadoc, inputEncoding);
     }
 
     public OutputDocument getOutputDocumentE() throws IOException {
@@ -114,22 +118,19 @@ public class SimpleParallelTransformIterator extends AbstractIterator implements
 	File currentInputFile = parallelFiles.get(nFileIndex);
 	CorpusQuery query = new CorpusQuery(nParallel, outputRunName, currentInputFile.getName(),
 		nFileIndex, CorpusQuery.Statistic.NONE);
-	File file = rootDirectory.getNextFileForCreation(query, rootFile);
+	File outputFile = rootDirectory.getNextFileForCreation(query, rootFile);
+	createParent(outputFile);
 
-	if (!file.getParentFile().exists())
-	    if (!file.getParentFile().mkdirs())
-		throw new IOException("Could not create parent directory for file: "
-			+ file.getAbsolutePath());
-
-	OutputDocument output = new OutputDocument(file);
-	currentOutputs.add(new Pair<OutputDocument, File>(output, file));
+	MetaDocument metadoc = super.getMetaFileFromOutputFile(outputFile, outputRunName);
+	OutputDocument output = new OutputDocument(outputFile, metadoc, outputEncoding);
+	super.addMonitorOutput(output, outputFile);
 	return output;
     }
 
     private int findNext() {
 	int i = super.nFileIndex + 1;
 	while (i < eParallelFiles.size()) {
-	    
+
 	    // we assume that if one output file exists, they both do
 	    // WARNING: This assumption fails for the case of alignment
 	    File currentInputFile = eParallelFiles.get(i);
@@ -137,17 +138,17 @@ public class SimpleParallelTransformIterator extends AbstractIterator implements
 		    currentInputFile.getName(), nFileIndex, CorpusQuery.Statistic.NONE);
 	    query.simulate = true;
 	    File file = rootDirectory.getNextFileForCreation(query, rootFile);
-	    if(!file.exists()) {
+	    if (!file.exists()) {
 		return i;
 	    } else {
 		// we're skipping this file, update counts
 		query.simulate = false;
 		rootDirectory.getNextFileForCreation(query, rootFile);
 	    }
-	    
+
 	    i++;
 	}
-	
+
 	return -1;
     }
 
@@ -158,7 +159,7 @@ public class SimpleParallelTransformIterator extends AbstractIterator implements
     public void next() {
 	super.nFileIndex = super.nNextFileIndex;
 	super.nNextFileIndex = findNext();
-	
+
 	super.updateStatus();
 
 	boolean unclean = validate();

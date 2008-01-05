@@ -28,27 +28,27 @@
 
 package net.sourceforge.numbertrans.ui;
 
-
-import javax.swing.JApplet;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.TextArea;
-
-import javax.swing.JPanel;
 import java.awt.Rectangle;
+import java.awt.TextArea;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.AbstractAction;
-import javax.swing.JLabel;
-import javax.swing.JComboBox;
+import javax.swing.JApplet;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
+import net.sourceforge.numbertrans.framework.base.AbstractNumber;
 import net.sourceforge.numbertrans.framework.parser.NumberParser;
 import net.sourceforge.numbertrans.framework.scribe.NumberScribe;
-import net.sourceforge.numbertrans.framework.scribe.NumberScribe.Form;
+import net.sourceforge.numbertrans.framework.scribe.CardinalScribe.Form;
 import net.sourceforge.numbertrans.languages.arabic.HinduArabicCardinalParser;
 import net.sourceforge.numbertrans.languages.arabic.HinduArabicCardinalScribe;
 import net.sourceforge.numbertrans.languages.bengali.BengaliCardinalParser;
@@ -87,298 +87,337 @@ import net.sourceforge.numbertrans.languages.tibetan.TibetanCardinalScribe;
 
 public class NumberTranslationApplet extends JApplet {
 
-    private static final long serialVersionUID = -1281996307622163206L;
-    private JPanel jPanel = null;
-    private TextArea textInput = null;
-    private TextArea textOutput = null;
-    private JLabel jLabel = null;
-    private JLabel jLabel1 = null;
-    private JLabel jLabel11 = null;
-    private JLabel labelSupportedTypes = null;
-    private JComboBox comboInputLanguage = null;
-    private JComboBox comboOutputLanguage = null;
-    private JButton butGo = null;
+	private static final long serialVersionUID = -1281996307622163206L;
+	private JPanel jPanel = null;
+	private TextArea textInput = null;
+	private TextArea textOutput = null;
+	private JLabel jLabel = null;
+	private JLabel jLabel1 = null;
+	private JLabel jLabel11 = null;
+	private JLabel labelSupportedTypes = null;
+	private JComboBox comboInputLanguage = null;
+	private JComboBox comboOutputLanguage = null;
+	private JComboBox comboOutputForm = null;
+	private JButton butGo = null;
+	
+	private NumberParser parser = null;
+	private NumberScribe scribe = null;
 
-    public static final String HINDU_ARABIC_CARDINAL = "Hindu-Arabic Cardinal Number";
-    public static final String BENGALI_CARDINAL = "Bengali Cardinal Number";
-    public static final String CHINESE_CARDINAL = "Chinese Cardinal Number";
-    public static final String CHINESE_FRACTION = "Chinese Fraction";
-    public static final String ENGLISH_CARDINAL = "English Cardinal Number";
-    public static final String ENGLISH_FRACTION = "English Fraction";
-    public static final String ENGLISH_ORDINAL = "English Ordinal";
-    public static final String GUJARATI_CARDINAL = "Gujarati Cardinal Number";
-    public static final String GURUMUKHI_CARDINAL = "Gurumukhi Cardinal Number";
-    public static final String JAPANESE_CARDINAL = "Japanese Cardinal Number";
-    public static final String JAPANESE_FRACTION = "Japanese Fraction";
-    public static final String KANNADA_CARDINAL = "Kannada Cardinal Number";
-    public static final String KOREAN_CARDINAL = "Korean Cardinal Number";
-    public static final String MALAYALAM_CARDINAL = "Malayalam Cardinal Number";
-    public static final String ORIYA_CARDINAL = "Oriya Cardinal Number";
-    public static final String ROMAN_CARDINAL = "Roman Numeral";
-    public static final String TAMIL_CARDINAL = "Tamil Cardinal Number";
-    public static final String TELUGU_CARDINAL = "Telugu Cardinal Number";
-    public static final String THAI_CARDINAL = "Thai Cardinal Number";
-    public static final String TIBETAN_CARDINAL = "Tibetan Cardinal Number";
+	public static final String HINDU_ARABIC_CARDINAL = "Hindu-Arabic Cardinal Number";
+	public static final String BENGALI_CARDINAL = "Bengali Cardinal Number";
+	public static final String CHINESE_CARDINAL = "Chinese Cardinal Number";
+	public static final String CHINESE_FRACTION = "Chinese Fraction";
+	public static final String ENGLISH_CARDINAL = "English Cardinal Number";
+	public static final String ENGLISH_FRACTION = "English Fraction";
+	public static final String ENGLISH_ORDINAL = "English Ordinal";
+	public static final String GUJARATI_CARDINAL = "Gujarati Cardinal Number";
+	public static final String GURUMUKHI_CARDINAL = "Gurumukhi Cardinal Number";
+	public static final String JAPANESE_CARDINAL = "Japanese Cardinal Number";
+	public static final String JAPANESE_FRACTION = "Japanese Fraction";
+	public static final String KANNADA_CARDINAL = "Kannada Cardinal Number";
+	public static final String KOREAN_CARDINAL = "Korean Cardinal Number";
+	public static final String MALAYALAM_CARDINAL = "Malayalam Cardinal Number";
+	public static final String ORIYA_CARDINAL = "Oriya Cardinal Number";
+	public static final String ROMAN_CARDINAL = "Roman Numeral";
+	public static final String TAMIL_CARDINAL = "Tamil Cardinal Number";
+	public static final String TELUGU_CARDINAL = "Telugu Cardinal Number";
+	public static final String THAI_CARDINAL = "Thai Cardinal Number";
+	public static final String TIBETAN_CARDINAL = "Tibetan Cardinal Number";
 
-    /**
-         * This method initializes
-         */
-    public NumberTranslationApplet() {
-	super();
-
-    }
-
-    /**
-         * This method initializes this
-         */
-    public void init() {
-	this.setSize(new Dimension(700, 400));
-	this.setContentPane(getJPanel());
-
-    }
-
-    /**
-         * This method initializes jPanel
-         * 
-         * @return javax.swing.JPanel
-         */
-    private JPanel getJPanel() {
-	if (jPanel == null) {
-	    labelSupportedTypes = new JLabel();
-	    labelSupportedTypes.setBounds(new Rectangle(181, 31, 250, 16));
-	    labelSupportedTypes.setText("Cardinals");
-	    jLabel11 = new JLabel();
-	    jLabel11.setBounds(new Rectangle(16, 270, 74, 16));
-	    jLabel11.setText("Output:");
-	    jLabel1 = new JLabel();
-	    jLabel1.setBounds(new Rectangle(21, 81, 78, 16));
-	    jLabel1.setText("Input:");
-	    jLabel = new JLabel();
-	    jLabel.setBounds(new Rectangle(10, 30, 157, 16));
-	    jLabel.setText("Supported Number Types:");
-	    jPanel = new JPanel();
-	    jPanel.setLayout(null);
-	    jPanel.add(getTextInput(), null);
-	    jPanel.add(getTextOutput(), null);
-	    jPanel.add(jLabel, null);
-	    jPanel.add(jLabel1, null);
-	    jPanel.add(jLabel11, null);
-	    jPanel.add(labelSupportedTypes, null);
-	    jPanel.add(getComboInputLanguage(), null);
-	    jPanel.add(getComboOutputLanguage(), null);
-	    jPanel.add(getButGo(), null);
-	    jPanel.setBackground(Color.WHITE);
+	/**
+	 * This method initializes
+	 */
+	public NumberTranslationApplet() {
 	}
-	return jPanel;
-    }
 
-    /**
-         * This method initializes textInput
-         * 
-         * @return javax.swing.JTextArea
-         */
-    private TextArea getTextInput() {
-	if (textInput == null) {
-	    textInput = new TextArea();
-	    textInput.setBounds(new Rectangle(103, 74, 342, 105));
-	    textInput.setFont(new Font(null, Font.BOLD, 20));
+	/**
+	 * This method initializes this
+	 */
+	public void init() {
+		this.setSize(new Dimension(700, 400));
+		this.setContentPane(getJPanel());
+		
+		comboInputLanguage.setSelectedItem(ENGLISH_CARDINAL);
+		updateInputLanguage();
+		updateOutputLanguage();
 	}
-	return textInput;
-    }
 
-    /**
-         * This method initializes textOutput
-         * 
-         * @return javax.swing.JTextArea
-         */
-    private TextArea getTextOutput() {
-	if (textOutput == null) {
-	    textOutput = new TextArea();
-	    textOutput.setBounds(new Rectangle(104, 264, 338, 101));
-	    textOutput.setFont(new Font(null, Font.BOLD, 20));
-	}
-	return textOutput;
-    }
-
-    /**
-         * This method initializes comboInputLanguage
-         * 
-         * @return javax.swing.JComboBox
-         */
-    private JComboBox getComboInputLanguage() {
-	if (comboInputLanguage == null) {
-	    comboInputLanguage = new JComboBox();
-	    comboInputLanguage.setBounds(new Rectangle(456, 83, 225, 25));
-
-	    comboInputLanguage.addItem(HINDU_ARABIC_CARDINAL);
-	    comboInputLanguage.addItem(BENGALI_CARDINAL);
-	    comboInputLanguage.addItem(CHINESE_CARDINAL);
-	    comboInputLanguage.addItem(CHINESE_FRACTION);
-	    comboInputLanguage.addItem(ENGLISH_CARDINAL);
-	    comboInputLanguage.addItem(ENGLISH_FRACTION);
-	    comboInputLanguage.addItem(GUJARATI_CARDINAL);
-	    comboInputLanguage.addItem(GURUMUKHI_CARDINAL);
-	    comboInputLanguage.addItem(JAPANESE_FRACTION);
-	    comboInputLanguage.addItem(KANNADA_CARDINAL);
-	    comboInputLanguage.addItem(MALAYALAM_CARDINAL);
-	    comboInputLanguage.addItem(ORIYA_CARDINAL);
-	    comboInputLanguage.addItem(ROMAN_CARDINAL);
-	    comboInputLanguage.addItem(TAMIL_CARDINAL);
-	    comboInputLanguage.addItem(TELUGU_CARDINAL);
-	    comboInputLanguage.addItem(THAI_CARDINAL);
-	    comboInputLanguage.addItem(TIBETAN_CARDINAL);
-	}
-	return comboInputLanguage;
-    }
-
-    /**
-         * This method initializes comboOutputLanguage
-         * 
-         * @return javax.swing.JComboBox
-         */
-    private JComboBox getComboOutputLanguage() {
-	if (comboOutputLanguage == null) {
-	    comboOutputLanguage = new JComboBox();
-	    comboOutputLanguage.setBounds(new Rectangle(458, 281, 225, 25));
-
-	    comboOutputLanguage.addItem(HINDU_ARABIC_CARDINAL);
-	    comboOutputLanguage.addItem(BENGALI_CARDINAL);
-	    comboOutputLanguage.addItem(CHINESE_FRACTION);
-	    comboOutputLanguage.addItem(ENGLISH_CARDINAL);
-	    comboOutputLanguage.addItem(ENGLISH_FRACTION);
-	    comboOutputLanguage.addItem(ENGLISH_ORDINAL);
-	    comboOutputLanguage.addItem(GUJARATI_CARDINAL);
-	    comboOutputLanguage.addItem(GURUMUKHI_CARDINAL);
-	    comboOutputLanguage.addItem(JAPANESE_CARDINAL);
-	    comboOutputLanguage.addItem(JAPANESE_FRACTION);
-	    comboOutputLanguage.addItem(KANNADA_CARDINAL);
-	    comboOutputLanguage.addItem(KOREAN_CARDINAL);
-	    comboOutputLanguage.addItem(MALAYALAM_CARDINAL);
-	    comboOutputLanguage.addItem(ORIYA_CARDINAL);
-	    comboOutputLanguage.addItem(ROMAN_CARDINAL);
-	    comboOutputLanguage.addItem(TAMIL_CARDINAL);
-	    comboOutputLanguage.addItem(TELUGU_CARDINAL);
-	    comboOutputLanguage.addItem(THAI_CARDINAL);
-	    comboOutputLanguage.addItem(TIBETAN_CARDINAL);
-	}
-	return comboOutputLanguage;
-    }
-
-    /**
-         * This method initializes butGo
-         * 
-         * @return javax.swing.JButton
-         */
-    private JButton getButGo() {
-	if (butGo == null) {
-	    butGo = new JButton(new AbstractAction() {
-		private static final long serialVersionUID = 681759442161710474L;
-
-		public void actionPerformed(ActionEvent e) {
-		    doTranslation();
+	/**
+	 * This method initializes jPanel
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanel() {
+		if (jPanel == null) {
+			labelSupportedTypes = new JLabel();
+			labelSupportedTypes.setBounds(new Rectangle(181, 31, 250, 16));
+			labelSupportedTypes.setText("Cardinals");
+			jLabel11 = new JLabel();
+			jLabel11.setBounds(new Rectangle(16, 270, 74, 16));
+			jLabel11.setText("Output:");
+			jLabel1 = new JLabel();
+			jLabel1.setBounds(new Rectangle(21, 81, 78, 16));
+			jLabel1.setText("Input:");
+			jLabel = new JLabel();
+			jLabel.setBounds(new Rectangle(10, 30, 157, 16));
+			jLabel.setText("Supported Number Types:");
+			jPanel = new JPanel();
+			jPanel.setLayout(null);
+			jPanel.add(getTextInput(), null);
+			jPanel.add(getTextOutput(), null);
+			jPanel.add(jLabel, null);
+			jPanel.add(jLabel1, null);
+			jPanel.add(jLabel11, null);
+			jPanel.add(labelSupportedTypes, null);
+			jPanel.add(getComboInputLanguage(), null);
+			jPanel.add(getComboOutputLanguage(), null);
+			jPanel.add(getComboOutputForm(), null);
+			jPanel.add(getButGo(), null);
+			jPanel.setBackground(Color.WHITE);
 		}
-	    });
-	    butGo.setBounds(new Rectangle(200, 200, 98, 27));
-	    butGo.setText("Translate");
+		return jPanel;
 	}
-	return butGo;
-    }
 
-    public void doTranslation() {
-	NumberParser parser = null;
-	NumberScribe scribe = null;
-
-	Object selectedInput = comboInputLanguage.getSelectedItem();
-	if (selectedInput.equals(HINDU_ARABIC_CARDINAL)) {
-	    parser = new HinduArabicCardinalParser();
-	} else if (selectedInput.equals(BENGALI_CARDINAL)) {
-	    parser = new BengaliCardinalParser();
-	} else if (selectedInput.equals(CHINESE_CARDINAL)) {
-	    parser = new ChineseCardinalParser();
-	} else if (selectedInput.equals(CHINESE_FRACTION)) {
-	    parser = new ChineseFractionParser();
-	}  else if (selectedInput.equals(ENGLISH_CARDINAL)) {
-	    parser = new EnglishCardinalParser();
-	} else if (selectedInput.equals(ENGLISH_FRACTION)) {
-	    parser = new EnglishFractionParser();
-	} else if (selectedInput.equals(GUJARATI_CARDINAL)) {
-	    parser = new GujaratiCardinalParser();
-	} else if (selectedInput.equals(GURUMUKHI_CARDINAL)) {
-	    parser = new GurumukhiCardinalParser();
-	} else if (selectedInput.equals(JAPANESE_FRACTION)) {
-	    parser = new JapaneseFractionParser();
-	} else if (selectedInput.equals(KANNADA_CARDINAL)) {
-	    parser = new KannadaCardinalParser();
-	} else if (selectedInput.equals(MALAYALAM_CARDINAL)) {
-	    parser = new MalayalamCardinalParser();
-	} else if (selectedInput.equals(ORIYA_CARDINAL)) {
-	    parser = new OriyaCardinalParser();
-	} else if (selectedInput.equals(ROMAN_CARDINAL)) {
-	    parser = new RomanCardinalParser();
-	} else if (selectedInput.equals(TAMIL_CARDINAL)) {
-	    parser = new TamilCardinalParser();
-	} else if (selectedInput.equals(TELUGU_CARDINAL)) {
-	    parser = new TeluguCardinalParser();
-	} else if (selectedInput.equals(THAI_CARDINAL)) {
-	    parser = new ThaiCardinalParser();
-	} else if (selectedInput.equals(TIBETAN_CARDINAL)) {
-	    parser = new TibetanCardinalParser();
-	} else {
-	    assert false : "No input language selected.";
+	/**
+	 * This method initializes textInput
+	 * 
+	 * @return javax.swing.JTextArea
+	 */
+	private TextArea getTextInput() {
+		if (textInput == null) {
+			textInput = new TextArea();
+			textInput.setBounds(new Rectangle(103, 74, 342, 105));
+			textInput.setFont(new Font(null, Font.BOLD, 20));
+		}
+		return textInput;
 	}
-	assert parser != null : "No parser selected.";
 
-	Object selectedOutput = comboOutputLanguage.getSelectedItem();
-	if (selectedOutput.equals(HINDU_ARABIC_CARDINAL)) {
-	    scribe = new HinduArabicCardinalScribe(Form.SHORT,
-		    HinduArabicCardinalScribe.DigitSet.OTTOMAN_TURKISH_DIGITS);
-	} else if (selectedOutput.equals(BENGALI_CARDINAL)) {
-	    scribe = new BengaliCardinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(ENGLISH_CARDINAL)) {
-	    scribe = new EnglishCardinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(ENGLISH_FRACTION)) {
-	    scribe = new EnglishFractionScribe(Form.SHORT);
-	} else if (selectedOutput.equals(ENGLISH_ORDINAL)) {
-	    scribe = new EnglishOrdinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(GUJARATI_CARDINAL)) {
-	    scribe = new GujaratiCardinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(GURUMUKHI_CARDINAL)) {
-	    scribe = new GurumukhiCardinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(JAPANESE_CARDINAL)) {
-	    scribe = new JapaneseCardinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(JAPANESE_FRACTION)) {
-	    scribe = new JapaneseFractionScribe(Form.SHORT);
-	} else if (selectedOutput.equals(KANNADA_CARDINAL)) {
-	    scribe = new KannadaCardinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(KOREAN_CARDINAL)) {
-	    scribe = new KoreanCardinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(MALAYALAM_CARDINAL)) {
-	    scribe = new MalayalamCardinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(ORIYA_CARDINAL)) {
-	    scribe = new OriyaCardinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(ROMAN_CARDINAL)) {
-	    scribe = new RomanCardinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(TAMIL_CARDINAL)) {
-	    scribe = new TamilCardinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(TELUGU_CARDINAL)) {
-	    scribe = new TeluguCardinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(THAI_CARDINAL)) {
-	    scribe = new ThaiCardinalScribe(Form.SHORT);
-	} else if (selectedOutput.equals(TIBETAN_CARDINAL)) {
-	    scribe = new TibetanCardinalScribe(Form.SHORT);
-	} else {
-	    assert false : "No output language selected.";
+	/**
+	 * This method initializes textOutput
+	 * 
+	 * @return javax.swing.JTextArea
+	 */
+	private TextArea getTextOutput() {
+		if (textOutput == null) {
+			textOutput = new TextArea();
+			textOutput.setBounds(new Rectangle(104, 264, 338, 101));
+			textOutput.setFont(new Font(null, Font.BOLD, 20));
+		}
+		return textOutput;
 	}
-	assert scribe != null : "No scribe selected.";
 
-	final String input = textInput.getText();
-	assert input != null;
-	assert input.length() > 0;
+	private JComboBox getComboOutputForm() {
+		if (comboOutputForm == null) {
+			comboOutputForm = new JComboBox();
+			comboOutputForm.setBounds(new Rectangle(480, 315, 175, 25));
+		}
+		return comboOutputForm;
+	}
 
-	final GeneralNumber number = parser.getNumberFromString(input);
-	final String result = scribe.getNumberString(number);
+	private void updateInputLanguage() {
+		Object selectedInput = comboInputLanguage.getSelectedItem();
+		if (selectedInput.equals(HINDU_ARABIC_CARDINAL)) {
+			parser = new HinduArabicCardinalParser();
+		} else if (selectedInput.equals(BENGALI_CARDINAL)) {
+			parser = new BengaliCardinalParser();
+		} else if (selectedInput.equals(CHINESE_CARDINAL)) {
+			parser = new ChineseCardinalParser();
+		} else if (selectedInput.equals(CHINESE_FRACTION)) {
+			parser = new ChineseFractionParser();
+		} else if (selectedInput.equals(ENGLISH_CARDINAL)) {
+			parser = new EnglishCardinalParser();
+		} else if (selectedInput.equals(ENGLISH_FRACTION)) {
+			parser = new EnglishFractionParser();
+		} else if (selectedInput.equals(GUJARATI_CARDINAL)) {
+			parser = new GujaratiCardinalParser();
+		} else if (selectedInput.equals(GURUMUKHI_CARDINAL)) {
+			parser = new GurumukhiCardinalParser();
+		} else if (selectedInput.equals(JAPANESE_FRACTION)) {
+			parser = new JapaneseFractionParser();
+		} else if (selectedInput.equals(KANNADA_CARDINAL)) {
+			parser = new KannadaCardinalParser();
+		} else if (selectedInput.equals(MALAYALAM_CARDINAL)) {
+			parser = new MalayalamCardinalParser();
+		} else if (selectedInput.equals(ORIYA_CARDINAL)) {
+			parser = new OriyaCardinalParser();
+		} else if (selectedInput.equals(ROMAN_CARDINAL)) {
+			parser = new RomanCardinalParser();
+		} else if (selectedInput.equals(TAMIL_CARDINAL)) {
+			parser = new TamilCardinalParser();
+		} else if (selectedInput.equals(TELUGU_CARDINAL)) {
+			parser = new TeluguCardinalParser();
+		} else if (selectedInput.equals(THAI_CARDINAL)) {
+			parser = new ThaiCardinalParser();
+		} else if (selectedInput.equals(TIBETAN_CARDINAL)) {
+			parser = new TibetanCardinalParser();
+		} else {
+			assert false : "No input language selected.";
+		}
+		assert parser != null : "No parser selected.";
+	}
 
-	textOutput.setText(result);
-    }
+	private void updateOutputLanguage() {
+		Object selectedOutput = comboOutputLanguage.getSelectedItem();
+		
+		if (selectedOutput.equals(HINDU_ARABIC_CARDINAL)) {
+			scribe =
+					new HinduArabicCardinalScribe(
+							HinduArabicCardinalScribe.DigitSet.OTTOMAN_TURKISH_DIGITS);
+		} else if (selectedOutput.equals(BENGALI_CARDINAL)) {
+			scribe = new BengaliCardinalScribe();
+		} else if (selectedOutput.equals(ENGLISH_CARDINAL)) {
+			scribe = new EnglishCardinalScribe();
+		} else if (selectedOutput.equals(ENGLISH_FRACTION)) {
+			scribe = new EnglishFractionScribe();
+		} else if (selectedOutput.equals(ENGLISH_ORDINAL)) {
+			scribe = new EnglishOrdinalScribe();
+		} else if (selectedOutput.equals(GUJARATI_CARDINAL)) {
+			scribe = new GujaratiCardinalScribe();
+		} else if (selectedOutput.equals(GURUMUKHI_CARDINAL)) {
+			scribe = new GurumukhiCardinalScribe();
+		} else if (selectedOutput.equals(JAPANESE_CARDINAL)) {
+			scribe = new JapaneseCardinalScribe();
+		} else if (selectedOutput.equals(JAPANESE_FRACTION)) {
+			scribe = new JapaneseFractionScribe();
+		} else if (selectedOutput.equals(KANNADA_CARDINAL)) {
+			scribe = new KannadaCardinalScribe();
+		} else if (selectedOutput.equals(KOREAN_CARDINAL)) {
+			scribe = new KoreanCardinalScribe();
+		} else if (selectedOutput.equals(MALAYALAM_CARDINAL)) {
+			scribe = new MalayalamCardinalScribe();
+		} else if (selectedOutput.equals(ORIYA_CARDINAL)) {
+			scribe = new OriyaCardinalScribe();
+		} else if (selectedOutput.equals(ROMAN_CARDINAL)) {
+			scribe = new RomanCardinalScribe();
+		} else if (selectedOutput.equals(TAMIL_CARDINAL)) {
+			scribe = new TamilCardinalScribe();
+		} else if (selectedOutput.equals(TELUGU_CARDINAL)) {
+			scribe = new TeluguCardinalScribe();
+		} else if (selectedOutput.equals(THAI_CARDINAL)) {
+			scribe = new ThaiCardinalScribe();
+		} else if (selectedOutput.equals(TIBETAN_CARDINAL)) {
+			scribe = new TibetanCardinalScribe();
+		} else {
+			assert false : "No output language selected.";
+		}
+		assert scribe != null : "No scribe selected.";
+		
+		updateOutputForms();
+	}
+
+	private void updateOutputForms() {
+		comboOutputForm.removeAllItems();
+		for(final Form form : scribe.getSupportedForms()) {
+			comboOutputForm.addItem(form);
+		}
+	}
+
+	/**
+	 * This method initializes comboInputLanguage
+	 * 
+	 * @return javax.swing.JComboBox
+	 */
+	private JComboBox getComboInputLanguage() {
+		if (comboInputLanguage == null) {
+			comboInputLanguage = new JComboBox();
+			comboInputLanguage.setBounds(new Rectangle(456, 83, 225, 25));
+
+			comboInputLanguage.addItem(HINDU_ARABIC_CARDINAL);
+			comboInputLanguage.addItem(BENGALI_CARDINAL);
+			comboInputLanguage.addItem(CHINESE_CARDINAL);
+			comboInputLanguage.addItem(CHINESE_FRACTION);
+			comboInputLanguage.addItem(ENGLISH_CARDINAL);
+			comboInputLanguage.addItem(ENGLISH_FRACTION);
+			comboInputLanguage.addItem(GUJARATI_CARDINAL);
+			comboInputLanguage.addItem(GURUMUKHI_CARDINAL);
+			comboInputLanguage.addItem(JAPANESE_FRACTION);
+			comboInputLanguage.addItem(KANNADA_CARDINAL);
+			comboInputLanguage.addItem(MALAYALAM_CARDINAL);
+			comboInputLanguage.addItem(ORIYA_CARDINAL);
+			comboInputLanguage.addItem(ROMAN_CARDINAL);
+			comboInputLanguage.addItem(TAMIL_CARDINAL);
+			comboInputLanguage.addItem(TELUGU_CARDINAL);
+			comboInputLanguage.addItem(THAI_CARDINAL);
+			comboInputLanguage.addItem(TIBETAN_CARDINAL);
+
+			comboInputLanguage.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent arg) {
+					updateInputLanguage();
+				}
+			});
+		}
+		return comboInputLanguage;
+	}
+
+	/**
+	 * This method initializes comboOutputLanguage
+	 * 
+	 * @return javax.swing.JComboBox
+	 */
+	private JComboBox getComboOutputLanguage() {
+		if (comboOutputLanguage == null) {
+			comboOutputLanguage = new JComboBox();
+			comboOutputLanguage.setBounds(new Rectangle(458, 281, 225, 25));
+
+			comboOutputLanguage.addItem(HINDU_ARABIC_CARDINAL);
+			comboOutputLanguage.addItem(BENGALI_CARDINAL);
+			comboOutputLanguage.addItem(CHINESE_FRACTION);
+			comboOutputLanguage.addItem(ENGLISH_CARDINAL);
+			comboOutputLanguage.addItem(ENGLISH_FRACTION);
+			comboOutputLanguage.addItem(ENGLISH_ORDINAL);
+			comboOutputLanguage.addItem(GUJARATI_CARDINAL);
+			comboOutputLanguage.addItem(GURUMUKHI_CARDINAL);
+			comboOutputLanguage.addItem(JAPANESE_CARDINAL);
+			comboOutputLanguage.addItem(JAPANESE_FRACTION);
+			comboOutputLanguage.addItem(KANNADA_CARDINAL);
+			comboOutputLanguage.addItem(KOREAN_CARDINAL);
+			comboOutputLanguage.addItem(MALAYALAM_CARDINAL);
+			comboOutputLanguage.addItem(ORIYA_CARDINAL);
+			comboOutputLanguage.addItem(ROMAN_CARDINAL);
+			comboOutputLanguage.addItem(TAMIL_CARDINAL);
+			comboOutputLanguage.addItem(TELUGU_CARDINAL);
+			comboOutputLanguage.addItem(THAI_CARDINAL);
+			comboOutputLanguage.addItem(TIBETAN_CARDINAL);
+
+			comboOutputLanguage.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent arg) {
+					updateOutputLanguage();
+				}
+			});
+		}
+		return comboOutputLanguage;
+	}
+
+	/**
+	 * This method initializes butGo
+	 * 
+	 * @return javax.swing.JButton
+	 */
+	private JButton getButGo() {
+		if (butGo == null) {
+			butGo = new JButton(new AbstractAction() {
+				private static final long serialVersionUID = 681759442161710474L;
+
+				public void actionPerformed(ActionEvent e) {
+					doTranslation();
+				}
+			});
+			butGo.setBounds(new Rectangle(200, 200, 98, 27));
+			butGo.setText("Translate");
+		}
+		return butGo;
+	}
+
+	public void doTranslation() {
+		final String input = textInput.getText();
+		assert input != null;
+		assert input.length() > 0;
+
+		Form form = (Form) comboOutputForm.getSelectedItem();
+		final AbstractNumber number = parser.getNumberFromString(input);
+		final String result = scribe.getNumberString(number, form);
+
+		textOutput.setText(result);
+	}
 
 } // @jve:decl-index=0:visual-constraint="10,10"

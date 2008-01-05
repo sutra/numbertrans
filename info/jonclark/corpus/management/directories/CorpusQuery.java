@@ -6,10 +6,10 @@ public class CorpusQuery {
     public static final String NO_FILE_NAME = "NO_FILE";
     public static final String ALL_FILES = "ALL_FILES";
 
-    private final int nParallel;
-    private final String runName;
+    public int nParallel;
+    public String runName;
     public int fileIndex;
-    private final String fileName;
+    public String fileName;
     
     /* Only simulate creating the file, don't update any counts */
     public boolean simulate = false;
@@ -18,7 +18,7 @@ public class CorpusQuery {
 	NONE, DOCUMENT_COUNT, PARALLEL_COUNT
     };
     
-    private final Statistic stat;
+    public Statistic stat;
 
     public CorpusQuery(int nParallel, String runName, String fileName, int fileIndex,
 	    Statistic stat) {

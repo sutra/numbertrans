@@ -41,6 +41,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Matcher;
@@ -232,6 +233,28 @@ public class FileUtils {
 		return root.listFiles(filter);
 	}
 
+	public static File[] getFilesWithExt(File root, boolean scanSubdirs, String... exts)
+			throws IOException {
+
+		if (scanSubdirs) {
+			
+			ArrayList<File> files = new ArrayList<File>();
+			ArrayList<File> subdirs = getSubdirectoriesRecursively(root);
+			
+			for(final File subdir : subdirs) {
+				for(final File file : getFilesWithExt(subdir, exts)) {
+					files.add(file);
+				}
+			}
+			
+			return files.toArray(new File[files.size()]);
+			
+		} else {
+			return getFilesWithExt(root, exts);
+		}
+
+	}
+
 	public static boolean isAbsoltePath(String path) {
 		return (path.length() >= 1 && path.charAt(0) == '/')
 				|| (path.length() >= 2 && path.charAt(1) == ':');
@@ -262,22 +285,27 @@ public class FileUtils {
 		}
 
 		String[] wildcardTokens = StringUtils.tokenize(wildcard, "/");
+		Pattern[] patterns = new Pattern[wildcardTokens.length];
+		for (int i = 0; i < patterns.length; i++)
+			patterns[i] = Pattern.compile(wildcardTokens[i]);
+
 		ArrayList<File> files = new ArrayList<File>();
-		getFilesFromWildcardRecursively(wildcardTokens, files, parentDirectory, 0);
+		getFilesFromWildcardRecursively(patterns, wildcardTokens, files, parentDirectory, 0);
 		return files.toArray(new File[files.size()]);
 	}
 
-	private static void getFilesFromWildcardRecursively(String[] wildcardTokens,
-			final ArrayList<File> files, File parentDirectory, int depth) throws IOException {
+	private static void getFilesFromWildcardRecursively(Pattern[] patterns,
+			String[] wildcardTokens, final ArrayList<File> files, File parentDirectory, int depth)
+			throws IOException {
 
 		if (!parentDirectory.isDirectory()) {
 			throw new IOException("Not a valid directory: " + parentDirectory.getAbsolutePath());
 		}
 
-		final Pattern pattern = Pattern.compile(wildcardTokens[depth]);
+		final Pattern pattern = patterns[depth];
 		final String currentToken = wildcardTokens[depth];
 
-		if (depth == wildcardTokens.length - 1) {
+		if (depth == patterns.length - 1) {
 			// this is the farthest node we care about
 			// so start adding files
 
@@ -325,12 +353,13 @@ public class FileUtils {
 									+ parentDirectory.getAbsolutePath());
 
 				for (final File result : results) {
-					getFilesFromWildcardRecursively(wildcardTokens, files, result, depth + 1);
+					getFilesFromWildcardRecursively(patterns, wildcardTokens, files, result,
+							depth + 1);
 				}
 			} else {
 				// this is a literal
 				File result = new File(parentDirectory, currentToken);
-				getFilesFromWildcardRecursively(wildcardTokens, files, result, depth + 1);
+				getFilesFromWildcardRecursively(patterns, wildcardTokens, files, result, depth + 1);
 			}
 		}
 
@@ -361,9 +390,29 @@ public class FileUtils {
 		};
 
 		File[] files = root.listFiles(filter);
-		if(files == null)
-		    throw new IOException("IO Error or not a valid path: " + root.getAbsolutePath());
+		if (files == null)
+			throw new IOException("IO Error or not a valid path: " + root.getAbsolutePath());
 		return files;
+	}
+
+	/**
+	 * NOTE: The root directory is included in the returned list.
+	 * 
+	 * @param root
+	 * @return
+	 * @throws IOException
+	 */
+	public static ArrayList<File> getSubdirectoriesRecursively(File root) throws IOException {
+		ArrayList<File> allSubdirs = new ArrayList<File>();
+		allSubdirs.add(root);
+
+		for (int i = 0; i < allSubdirs.size(); i++) {
+			for(final File subdir : getSubdirectories(allSubdirs.get(i))) {
+				allSubdirs.add(subdir);
+			}
+		}
+
+		return allSubdirs;
 	}
 
 	public static void saveTextFileFromStream(final File file, final InputStream inStream)
@@ -389,8 +438,22 @@ public class FileUtils {
 	}
 
 	public static String getFileAsString(final File file) throws IOException {
-		final StringBuilder builder = new StringBuilder(100000);
+		final StringBuilder builder = new StringBuilder((int) file.length());
 		final BufferedReader in = new BufferedReader(new FileReader(file));
+
+		String line;
+		while ((line = in.readLine()) != null) {
+			builder.append(line + "\n");
+		}
+		in.close();
+
+		return builder.toString();
+	}
+
+	public static String getFileAsString(final File file, Charset encoding) throws IOException {
+		final StringBuilder builder = new StringBuilder((int) file.length());
+		final BufferedReader in =
+				new BufferedReader(new InputStreamReader(new FileInputStream(file), encoding));
 
 		String line;
 		while ((line = in.readLine()) != null) {
@@ -413,7 +476,8 @@ public class FileUtils {
 	}
 
 	/**
-	 * Returns a new file in the same directory as the original, but with a new extension
+	 * Returns a new file in the same directory as the original, but with a new
+	 * extension
 	 * 
 	 * @param file
 	 * @param newExt
@@ -423,9 +487,10 @@ public class FileUtils {
 		String newName = StringUtils.substringBefore(file.getName(), ".") + newExt;
 		return new File(file.getParentFile(), newName);
 	}
-	
+
 	/**
-	 * Returns a new file with the same name as the original, but in a different directory
+	 * Returns a new file with the same name as the original, but in a different
+	 * directory
 	 * 
 	 * @param file
 	 * @param newDir

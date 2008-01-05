@@ -40,8 +40,9 @@ public class ReEncoder implements UniCorpusTransformRun {
     }
 
     public void processCorpus(UniCorpusTransformIterator iterator) throws CorpusManException {
-	while (iterator.hasNext()) {
-	    try {
+	try {
+	    while (iterator.hasNext()) {
+
 		iterator.next();
 
 		InputDocument in = iterator.getInputDocument();
@@ -49,15 +50,17 @@ public class ReEncoder implements UniCorpusTransformRun {
 
 		String line;
 		while ((line = in.readLine()) != null) {
-		    // switch encoding
-		    out.println(new String(line.getBytes(decodeCharset), encodeCharset));
+		    // switch encoding via reader
+		    out.println(line);
 		}
 
 		in.close();
 		out.close();
-	    } catch (IOException e) {
-		throw new CorpusManException(e);
+
 	    }
+	    iterator.finish();
+	} catch (IOException e) {
+	    throw new CorpusManException(e);
 	}
     }
 

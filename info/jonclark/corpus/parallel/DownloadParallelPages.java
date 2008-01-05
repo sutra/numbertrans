@@ -5,6 +5,7 @@ package info.jonclark.corpus.parallel;
 
 import info.jonclark.corpus.management.documents.OutputDocument;
 import info.jonclark.corpus.management.etc.CorpusManException;
+import info.jonclark.corpus.management.etc.CorpusManRuntimeException;
 import info.jonclark.corpus.management.iterators.interfaces.ParallelCorpusCreationIterator;
 import info.jonclark.corpus.management.runs.ParallelCorpusCreationRun;
 import info.jonclark.util.FormatUtils;
@@ -31,7 +32,7 @@ public class DownloadParallelPages implements ParallelCorpusCreationRun {
 
     public DownloadParallelPages(Properties props) throws IOException {
 	String urlFile = props.getProperty("downloadParallelPages.urlFile");
-	
+
 	final BufferedReader in = new BufferedReader(new FileReader(urlFile));
 	String line = in.readLine();
 	while (line != null) {
@@ -49,13 +50,14 @@ public class DownloadParallelPages implements ParallelCorpusCreationRun {
     public void processCorpus(ParallelCorpusCreationIterator iterator) throws CorpusManException {
 	int nGoodPageCount = 0;
 	int nBadPageCount = 0;
-	
+
 	for (int i = 1; i <= englishUrls.size(); i++) {
 	    iterator.next();
 	    try {
 		System.out.println("Downloading page pair " + i + " of " + englishUrls.size() + "("
-			+ nGoodPageCount + " good pages and " + nBadPageCount
-			+ " bad pages)");
+			+ nGoodPageCount + " good pages and " + nBadPageCount + " bad pages)");
+
+		// TODO: Add encoding detection here.
 
 		String strE = NetUtils.getStreamAsString(NetUtils.getUrlStream(englishUrls.get(i - 1)));
 		String strF = NetUtils.getStreamAsString(NetUtils.getUrlStream(foreignUrls.get(i - 1)));
@@ -65,7 +67,6 @@ public class DownloadParallelPages implements ParallelCorpusCreationRun {
 		f.println(strF);
 		e.close();
 		f.close();
-		
 
 		nGoodPageCount++;
 		Thread.sleep(1000);
@@ -75,9 +76,14 @@ public class DownloadParallelPages implements ParallelCorpusCreationRun {
 		;
 	    }
 	}
+	
+	try {
+	    iterator.finish();
+	} catch (IOException e) {
+	    throw new CorpusManRuntimeException(e);
+	}
 
 	System.out.println("Download complete. (" + nGoodPageCount + " good pages and "
 		+ nBadPageCount + " bad pages); time: " + FormatUtils.formatFullDate(new Date()));
     }
 }
-

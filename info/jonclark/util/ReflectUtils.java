@@ -61,12 +61,12 @@ public class ReflectUtils {
 
     public static String getCallingClassName() {
 	final StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-	if (stack.length >= 5) {
-	    return stack[4].getClassName();
-	} else {
-	    return "Top of call stack: No caller";
+		if (stack.length >= 5) {
+			return stack[4].getClassName();
+		} else {
+			return "Top of call stack: No caller";
+		}
 	}
-    }
 
     public static String getCallingMethodName() {
 	final StackTraceElement[] stack = Thread.currentThread().getStackTrace();

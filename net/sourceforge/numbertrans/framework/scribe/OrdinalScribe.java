@@ -27,34 +27,44 @@
  */
 package net.sourceforge.numbertrans.framework.scribe;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.sourceforge.numbertrans.framework.base.AbstractNumber;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
+import net.sourceforge.numbertrans.framework.scribe.CardinalScribe.Form;
 
 /**
  * An interface for classes that support the generation of ordinal numbers in
  * some target language.
  */
-public abstract class OrdinalScribe extends NumberScribe {
-    
-    public OrdinalScribe(Form form) {
-	super(form);
-    }
-    
-    @Override
-    public String getNumberString(GeneralNumber number) {
-	assert number instanceof WholeNumber;
-	return getOrdinalString((WholeNumber)number);	
-    }
+public abstract class OrdinalScribe implements NumberScribe {
 
-    /**
-         * Get a string representation of an whole number in a target language
-         * in ordinal form
-         * 
-         * @param number
-         *                The whole number that should be converted to string
-         *                form
-         * @return The string representation of this whole number in ordinal
-         *         form in the target langauge
-         */
-    public abstract String getOrdinalString(WholeNumber number);
+	public String getNumberString(AbstractNumber number, Form form) {
+		assert number instanceof WholeNumber;
+		return getOrdinalString((WholeNumber) number, form);
+	}
+	
+	public List<String> getAllNumberStrings(AbstractNumber number) {
+		assert number instanceof WholeNumber;
+		WholeNumber whole = (WholeNumber) number;
+		
+		ArrayList<String> list = new ArrayList<String>();
+		for(final Form form : getSupportedForms()) {
+			list.add(getOrdinalString(whole, form));
+		}
+		return list;
+	}
+
+
+	/**
+	 * Get a string representation of an whole number in a target language in
+	 * ordinal form
+	 * 
+	 * @param number
+	 *            The whole number that should be converted to string form
+	 * @return The string representation of this whole number in ordinal form in
+	 *         the target langauge
+	 */
+	public abstract String getOrdinalString(WholeNumber number, Form form);
 }

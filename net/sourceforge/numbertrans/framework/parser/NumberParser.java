@@ -27,54 +27,55 @@
  */
 package net.sourceforge.numbertrans.framework.parser;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
+import net.sourceforge.numbertrans.framework.base.AbstractNumber;
 import net.sourceforge.numbertrans.framework.base.NumberMatch;
+import net.sourceforge.numbertrans.framework.scribe.CardinalScribe.Form;
 
 /**
  * Inspect an isolated number in some source language
  */
-public abstract class NumberParser<T extends GeneralNumber> {
+public abstract class NumberParser<T extends AbstractNumber> {
 
-    /**
-         * Get a <code>Number</code> from a string known to be a number. If
-         * the string is not a number, this method will throw a
-         * <code>NumberFormatException</code>.
-         * 
-         * @param strNumber
-         * @return
-         * @throws NumberFormatException
-         */
-    public abstract T getNumberFromString(String strNumber) throws NumberFormatException;
+	/**
+	 * Get a <code>Number</code> from a string known to be a number. If the
+	 * string is not a number, this method will throw a
+	 * <code>NumberFormatException</code>.
+	 * 
+	 * @param strNumber
+	 * @return
+	 * @throws NumberFormatException
+	 */
+	public abstract T getNumberFromString(String strNumber) throws NumberFormatException;
 
-    /**
-         * Get a <code>Number</code> from a <code>NumberMatch</code>.
-         * 
-         * @param find
-         * @return
-         */
-    public abstract T getNumberFromFind(NumberMatch find);
+	/**
+	 * Get a <code>Number</code> from a <code>NumberMatch</code>.
+	 * 
+	 * @param find
+	 * @return
+	 */
+	public abstract T getNumberFromFind(NumberMatch find);
 
-    /**
-         * Get the value of a character known to be a digit. If the character is
-         * not a digit, this method will throw s NumberFormatException.
-         * 
-         * @param c
-         * @return
-         * @throws NumberFormatException
-         */
-    public abstract long getCharacterValue(char c) throws NumberFormatException;
+	/**
+	 * Get the value of a character known to be a digit. If the character is not
+	 * a digit, this method will throw s NumberFormatException.
+	 * 
+	 * @param c
+	 * @return
+	 * @throws NumberFormatException
+	 */
+	public abstract long getCharacterValue(char c) throws NumberFormatException;
 
-    /**
-         * Count the number of digits having value zero at the beginning of the
-         * given string.
-         * 
-         * @param str
-         * @return
-         */
-    public int countLeadingZeros(final String str) {
-	int count = 0;
-	for (int i = 0; i < str.length() && getCharacterValue(str.charAt(i)) == 0; i++)
-	    count++;
-	return count;
-    }
+	/**
+	 * Count the number of digits having value zero at the beginning of the
+	 * given string.
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public int countLeadingZeros(final String str) {
+		int count = 0;
+		for (int i = 0; i < str.length() && getCharacterValue(str.charAt(i)) == 0; i++)
+			count++;
+		return count;
+	}
 }

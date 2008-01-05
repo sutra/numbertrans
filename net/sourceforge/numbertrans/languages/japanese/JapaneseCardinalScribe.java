@@ -29,23 +29,23 @@ package net.sourceforge.numbertrans.languages.japanese;
 
 import net.sourceforge.numbertrans.framework.base.MyriadNumeralSet;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
-import net.sourceforge.numbertrans.framework.base.GeneralNumber.Context;
+import net.sourceforge.numbertrans.framework.base.AbstractNumber.Context;
 import net.sourceforge.numbertrans.framework.scribe.MyriadCardinalScribe;
 
 public class JapaneseCardinalScribe extends MyriadCardinalScribe {
 
-    public static final MyriadNumeralSet numerals = new MyriadNumeralSet(
-	    new String[] {"〇","一","二","三","四","五","六","七","八","九"},
-	    new String[] {"十","百","千","万"}	    
-    );
-    
-    public JapaneseCardinalScribe(Form form) {
-	super(form, numerals);
-    }
-    
-    public static void main(String[] args) throws Exception {
-	JapaneseCardinalScribe scribe = new JapaneseCardinalScribe(Form.SHORT);
-	System.out.println(scribe.getCardinalString(new WholeNumber(1111, 0, Context.CARDINAL)));
-    }
-    
+	public static final MyriadNumeralSet numerals =
+			new MyriadNumeralSet(new String[] { "〇", "一", "二", "三", "四", "五", "六", "七", "八", "九" },
+					new String[] { "十", "百", "千", "万" });
+
+	public JapaneseCardinalScribe() {
+		super(numerals);
+	}
+
+	public static void main(String[] args) throws Exception {
+		JapaneseCardinalScribe scribe = new JapaneseCardinalScribe();
+		System.out.println(scribe.getCardinalString(new WholeNumber(1111, 0, Context.CARDINAL),
+				Form.SHORT));
+	}
+
 }

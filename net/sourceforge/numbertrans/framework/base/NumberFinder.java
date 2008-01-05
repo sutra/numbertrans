@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006, Jonathan Clark <jon_DOT_h_DOT_clark_AT_gmail_DOT_com> 
+ * Copyright (c) 2007, Jonathan Clark <jon_DOT_h_DOT_clark_AT_gmail_DOT_com> 
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification,
@@ -27,8 +27,6 @@
  */
 package net.sourceforge.numbertrans.framework.base;
 
-import info.jonclark.lang.LongRange;
-
 /**
  * An abstract class to examines a string in some source language and identifies
  * numbers. Finders for all languages should inherit from this class.
@@ -42,54 +40,24 @@ import info.jonclark.lang.LongRange;
  * choose how aggressive to be in tuning the precision versus recall of this
  * class.
  */
-public abstract class NumberFinder {
-
-    private final Retokenizer tokenizer;
+public interface NumberFinder {
 
     /**
-         * Numbers that should not be considered numbers by this finder.
-         * Example: 1-3 in Chinese since these can be parts of pronouns.
-         */
-    protected final LongRange[] unsafeNumbers;
-
-    public NumberFinder(final LongRange[] unsafeNumbers, final Retokenizer tokenizer) {
-	this.unsafeNumbers = unsafeNumbers;
-	this.tokenizer = tokenizer;
-    }
+     * Returns true if the given string is unambiguously a number regardless of
+     * context.
+     * 
+     * @param strToCheck
+     * @return
+     */
+    public boolean isNumberAlways(String strToCheck);
 
     /**
-         * Determine if this number occurs in the list of "unsafe" numbers
-         * 
-         * @param number
-         *                The whole number to be tested
-         * @return True if this number should NOT be identified as a number
-         */
-    public boolean isUnsafeNumber(WholeNumber number) {
-	for (int i = 0; i < unsafeNumbers.length; i++)
-	    if (unsafeNumbers[i].isInRange(number.getValue()))
-		return true;
-	return false;
-    }
+     * Returns true if the given string can be a number in some context.
+     * 
+     * @param strToCheck
+     * @return
+     */
+    public boolean isNumberSometimes(String strToCheck);
 
-    /**
-         * Get a tokenizer/retokenizer that will produce an array of tokens
-         * compatible with this <code>NumberFinder</code>
-         */
-    public Retokenizer getTokenizer() {
-	return tokenizer;
-    }
-
-    /**
-         * A convenience method that starts finding from the beginning of the
-         * token array. See the documentation for
-         * <code>nextMatch(String, int)</code> for more details.
-         * 
-         * @param tokens The array of tokens to examine
-         * @return 
-         */
-    public NumberMatch nextMatch(final String[] tokens) {
-	return nextMatch(tokens, 0);
-    }
-
-    public abstract NumberMatch nextMatch(final String[] tokens, int nBeginIndex);
+    public NumberMatch nextMatch(final String[] tokens, int nBeginIndex);
 }

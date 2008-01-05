@@ -27,23 +27,21 @@
  */
 package net.sourceforge.numbertrans.framework.scribe;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
+import java.util.List;
+
+import net.sourceforge.numbertrans.framework.base.AbstractNumber;
+import net.sourceforge.numbertrans.framework.scribe.CardinalScribe.Form;
 
 /**
  * An abstract class from which all number scribes should inherit. Its main
  * purpose is to define the way in which the number form will be chosen. (Number
  * form meaning either short form [100], long form [one hundred], etc.)
  */
-public abstract class NumberScribe {
-    public enum Form { SHORT, LONG }
+public interface NumberScribe {
     
-    protected final Form form;
+    public String getNumberString(AbstractNumber number, Form form);
     
-    public NumberScribe(final Form form) {
-	this.form = form;
-    }
+    public List<String> getAllNumberStrings(AbstractNumber number);
     
-    public abstract String getNumberString(GeneralNumber number);
-    
-    public abstract Form[] getSupportedForms();
+    public Form[] getSupportedForms();
 }

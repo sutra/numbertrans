@@ -156,8 +156,16 @@ public class JapaneseTokenizer implements Tokenizer, ParallelCorpusTransformRun 
 	    } else {
 		// all other unknown characters will be single tokens
 		nEnd = nBegin + 1;
-		if (!Character.isSpaceChar(input.charAt(nBegin)))
-		    tokens.add(input.charAt(nBegin) + "");
+		if (!Character.isWhitespace(input.charAt(nBegin))) {
+		    String c = input.charAt(nBegin) + "";
+		    if (c.trim().equals("")) {
+			log.warning("Character trims to empty?!?! (ignoring) char=" + c);
+		    } else {
+			assert !Character.isSpaceChar(c.charAt(0)) : "Adding blank token via space char";
+			assert c.trim().equals(c) : "Untrimmed chunk";
+			tokens.add(c);
+		    }
+		}
 
 		log.fine("Unknown code point: " + codePoint + " = "
 			+ new String(Character.toChars(codePoint)));
@@ -173,6 +181,7 @@ public class JapaneseTokenizer implements Tokenizer, ParallelCorpusTransformRun 
     private static void addChunk(ArrayList<String> tokens, String chunk, boolean tokenizeChars) {
 	if (tokenizeChars) {
 	    for (int i = 0; i < chunk.length(); i++) {
+		assert !chunk.trim().equals("") : "Character trims to empty?!?!";
 		assert !Character.isSpaceChar(chunk.charAt(i)) : "Adding blank token via space char";
 		assert chunk.trim().equals(chunk) : "Untrimmed chunk";
 		tokens.add(chunk.charAt(i) + "");
@@ -361,6 +370,8 @@ public class JapaneseTokenizer implements Tokenizer, ParallelCorpusTransformRun 
 		outE.close();
 		outF.close();
 	    }
+
+	    iterator.finish();
 	} catch (IOException e) {
 	    throw new CorpusManException(e);
 	}

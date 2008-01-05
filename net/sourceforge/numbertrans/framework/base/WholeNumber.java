@@ -31,7 +31,7 @@ package net.sourceforge.numbertrans.framework.base;
  * A generic representation of a whole number (one with no decimal or fractional
  * part).
  */
-public class WholeNumber extends GeneralNumber {
+public class WholeNumber extends AbstractNumber {
     private final long value;
 
     public WholeNumber(final long value, final int nLeadingZeros, final Context context) {

@@ -30,13 +30,13 @@ package net.sourceforge.numbertrans.languages.gujarati;
 import net.sourceforge.numbertrans.framework.parser.CharacterMappedCardinalParser;
 
 public class GujaratiCardinalParser extends CharacterMappedCardinalParser {
- 
-    public static final char[] DIGITS = {'૦','૧','૨','૩','૪','૫','૬','૭','૮','૯'};
 
-    /**
-         * Create a new <code>GujaratiCardinalParser</code> object.
-         */
-    public GujaratiCardinalParser() {
-	super(DIGITS);
-    }
+	public static final char[] DIGITS = { '૦', '૧', '૨', '૩', '૪', '૫', '૬', '૭', '૮', '૯' };
+
+	/**
+	 * Create a new <code>GujaratiCardinalParser</code> object.
+	 */
+	public GujaratiCardinalParser() {
+		super(DIGITS);
+	}
 }

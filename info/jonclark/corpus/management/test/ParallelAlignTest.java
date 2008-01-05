@@ -49,6 +49,7 @@ public class ParallelAlignTest implements ParallelCorpusAlignmentRun {
 		jout.close();
 		aout.close();
 	    }
+	    iterator.finish();
 	} catch (IOException e) {
 	    throw new CorpusManException(e);
 	}

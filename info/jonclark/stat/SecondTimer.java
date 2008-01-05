@@ -145,7 +145,8 @@ public class SecondTimer {
     public void go() {
         if(catchOverlappingGo && startDate != 0)
             throw new RuntimeException("Overlapping go detected.");
-        startDate = System.currentTimeMillis();
+        else if(startDate == 0)
+            startDate = System.currentTimeMillis();
     }
     
     /**

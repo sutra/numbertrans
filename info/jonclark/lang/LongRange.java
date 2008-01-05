@@ -27,6 +27,8 @@
  */
 package info.jonclark.lang;
 
+import info.jonclark.util.StringUtils;
+
 /**
  * This class holds 2 longs. Simple, right?
  * <p>
@@ -47,7 +49,7 @@ public class LongRange {
     public long length() {
 	return last - first;
     }
-    
+
     public boolean isInRange(long n) {
 	return n >= first && n <= last;
     }
@@ -60,8 +62,26 @@ public class LongRange {
 	    return false;
 	}
     }
-    
+
+    /**
+     * Parses a long range of either the form "x-y" or "x"
+     * 
+     * @param str
+     * @return
+     */
+    public static LongRange parseLongRange(String str) {
+	if (str.contains("-")) {
+	    String[] tokens = StringUtils.split(str, "-", 2);
+	    long first = Long.parseLong(tokens[0].trim());
+	    long second = Long.parseLong(tokens[1].trim());
+	    return new LongRange(first, second);
+	} else {
+	    long x = Long.parseLong(str.trim());
+	    return new LongRange(x, x);
+	}
+    }
+
     public String toString() {
-	return first + "-" + last; 
+	return first + "-" + last;
     }
 }

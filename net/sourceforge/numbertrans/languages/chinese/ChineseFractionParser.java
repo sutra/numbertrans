@@ -31,7 +31,7 @@ import info.jonclark.util.StringUtils;
 import net.sourceforge.numbertrans.framework.base.FractionalNumber;
 import net.sourceforge.numbertrans.framework.base.NumberMatch;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
-import net.sourceforge.numbertrans.framework.base.GeneralNumber.Context;
+import net.sourceforge.numbertrans.framework.base.AbstractNumber.Context;
 import net.sourceforge.numbertrans.framework.parser.NumberParser;
 
 public class ChineseFractionParser extends NumberParser<FractionalNumber> {

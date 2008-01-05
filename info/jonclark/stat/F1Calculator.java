@@ -55,6 +55,12 @@ public class F1Calculator {
 	totalPercentDiffSum += confidence;
 	classConfidenceSums[nClassFired] += confidence;
     }
+    
+    public void addOutcome(int nClassFired, int nClassExpected) {
+	double[] outcome = new double[classNames.length];
+	outcome[nClassFired] = 1.0;
+	addOutcome(outcome, nClassExpected);
+    }
 
     protected ArrayList<Integer> getExpectedOutcomes() {
 	return expectedOutcomes;

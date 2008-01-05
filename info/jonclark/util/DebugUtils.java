@@ -31,34 +31,40 @@ import java.util.logging.Logger;
 
 public class DebugUtils {
 
-    /**
-         * Determine if the assert keyword is enabled for this Virtual Machine.
-         * That is, "was the -ea option passed on startup?"
-         */
-    public static boolean isAssertEnabled() {
-	try {
-	    assert false;
-	} catch (AssertionError e) {
-	    return true;
-	}
-	return false;
-    }
+	private static boolean assertEnabled = false;
+	private static boolean assertEvaluated = false;
 
-    /**
-         * Logs a message giving the current status of the assert keyword and
-         * provides user with information about what this means.
-         * 
-         * @param log
-         *                The logger to which the message will be added.
-         */
-    public static void logAssertStatus(Logger log) {
-	if (isAssertEnabled()) {
-	    log.info("The assert keyword is ENABLED.\n This is good for debugging, "
-		    + "but could result in degraded program performance.");
-	} else {
-	    log.info("The assert keyword is **DISABLED**.\n This is good for distribution,"
-		    + "but could result in undetected errors. Asserts can be enabled by"
-		    + "passing the -ea option to java.");
+	/**
+	 * Determine if the assert keyword is enabled for this Virtual Machine. That
+	 * is, "was the -ea option passed on startup?"
+	 */
+	public static boolean isAssertEnabled() {
+		if (!assertEvaluated) {
+			assertEvaluated = true;
+			try {
+				assert false;
+			} catch (AssertionError e) {
+				assertEnabled = true;
+			}
+		}
+		return assertEnabled; 
 	}
-    }
+
+	/**
+	 * Logs a message giving the current status of the assert keyword and
+	 * provides user with information about what this means.
+	 * 
+	 * @param log
+	 *            The logger to which the message will be added.
+	 */
+	public static void logAssertStatus(Logger log) {
+		if (isAssertEnabled()) {
+			log.info("The assert keyword is ENABLED.\n This is good for debugging, "
+					+ "but could result in degraded program performance.");
+		} else {
+			log.info("The assert keyword is **DISABLED**.\n This is good for distribution,"
+					+ "but could result in undetected errors. Asserts can be enabled by"
+					+ "passing the -ea option to java.");
+		}
+	}
 }

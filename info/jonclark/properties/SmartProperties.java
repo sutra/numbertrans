@@ -52,6 +52,10 @@ public class SmartProperties {
 
     private static final long POLLING_INTERVAL = 5000;
 
+    public SmartProperties(Properties props) {
+	this.props = props;
+    }
+    
     public SmartProperties(String file) throws FileNotFoundException, IOException,
 	    PropertiesException {
 	this(new File(file), true);

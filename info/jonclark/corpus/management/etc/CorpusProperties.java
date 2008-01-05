@@ -6,6 +6,8 @@ import info.jonclark.util.ArrayUtils;
 import info.jonclark.util.StringUtils;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.util.Properties;
 
 public class CorpusProperties {
@@ -74,6 +76,36 @@ public class CorpusProperties {
 		outputRunNamespace, ".inputRun");
 	if (inputRunKey == null)
 	    throw new CorpusManException("No input run specified for output run: " + outputRunName);
+	String inputRunName = props.getProperty(inputRunKey).trim();
+	return inputRunName;
+    }
+
+    /**
+         * Gets the E input run name for a parallel run. If no input run
+         * specific to E is specified, returns the inputRun name.
+         */
+    public static String getInputRunNameE(Properties props, String outputRunName)
+	    throws CorpusManException {
+	String outputRunNamespace = getRunNamespace(props, outputRunName);
+	String inputRunKey = PropertyUtils.getPropertyInNamespaceThatEndsWith(props,
+		outputRunNamespace, ".inputRun.e");
+	if (inputRunKey == null)
+	    return getInputRunName(props, outputRunName);
+	String inputRunName = props.getProperty(inputRunKey).trim();
+	return inputRunName;
+    }
+
+    /**
+         * Gets the F input run name for a parallel run. If no input run
+         * specific to F is specified, returns the inputRun name.
+         */
+    public static String getInputRunNameF(Properties props, String outputRunName)
+	    throws CorpusManException {
+	String outputRunNamespace = getRunNamespace(props, outputRunName);
+	String inputRunKey = PropertyUtils.getPropertyInNamespaceThatEndsWith(props,
+		outputRunNamespace, ".inputRun.f");
+	if (inputRunKey == null)
+	    return getInputRunName(props, outputRunName);
 	String inputRunName = props.getProperty(inputRunKey).trim();
 	return inputRunName;
     }
@@ -295,5 +327,39 @@ public class CorpusProperties {
 		    "Property autonumber.arrangeByFilename not defined for corups: " + corpusName);
 	String value = props.getProperty(key);
 	return Boolean.parseBoolean(value);
+    }
+
+    public static Charset getInputEncoding(Properties props, String runName)
+	    throws CorpusManException {
+	String runNamespace = getRunNamespace(props, runName);
+	String charsetName = props.getProperty(runNamespace + "inputEncoding");
+	if (charsetName == null)
+	    return Charset.defaultCharset();
+
+	try {
+	    return Charset.forName(charsetName);
+	} catch (IllegalCharsetNameException e) {
+	    throw new CorpusManException(e);
+	}
+    }
+
+    public static Charset getOutputEncoding(Properties props, String runName)
+	    throws CorpusManException {
+	String runNamespace = getRunNamespace(props, runName);
+	String charsetName = props.getProperty(runNamespace + "outputEncoding");
+	if (charsetName == null)
+	    return Charset.defaultCharset();
+
+	try {
+	    return Charset.forName(charsetName);
+	} catch (IllegalCharsetNameException e) {
+	    throw new CorpusManException(e);
+	}
+    }
+
+    public static boolean hasInputEncoding(Properties props, String runName) {
+	String runNamespace = getRunNamespace(props, runName);
+	String charsetName = props.getProperty(runNamespace + "inputEncoding");
+	return (charsetName != null);
     }
 }

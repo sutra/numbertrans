@@ -30,7 +30,7 @@ package net.sourceforge.numbertrans.framework.parser;
 
 import java.util.Hashtable;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
+import net.sourceforge.numbertrans.framework.base.AbstractNumber;
 import net.sourceforge.numbertrans.framework.base.NumberMatch;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
 
@@ -133,14 +133,14 @@ public class MyriadCardinalParser extends NumberParser<WholeNumber> {
 
 	final long value = toLong(strNumber);
 	final int nLeadingZeros = countLeadingZeros(strNumber);
-	return new WholeNumber(value, nLeadingZeros, GeneralNumber.Context.CARDINAL);
+	return new WholeNumber(value, nLeadingZeros, AbstractNumber.Context.CARDINAL);
     }
 
     @Override
     public WholeNumber getNumberFromFind(NumberMatch find) {
 	// We don't have to do as much checking here since we're certain of the
 	// context from the find.
-	assert find.getContext() == GeneralNumber.Context.CARDINAL;
+	assert find.getContext() == AbstractNumber.Context.CARDINAL;
 
 	final TokenArray arr = find.getMatchingTokens();
 	assert arr.length() == 1 : "More than one matching token for cardinal number";

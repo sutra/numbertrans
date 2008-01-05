@@ -27,33 +27,35 @@
  */
 package net.sourceforge.numbertrans.languages.english;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
+import net.sourceforge.numbertrans.framework.base.AbstractNumber;
 import net.sourceforge.numbertrans.framework.base.NumberMatch;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
 import net.sourceforge.numbertrans.framework.parser.NumberParser;
 
 public class EnglishCardinalParser extends NumberParser<WholeNumber> {
 
-    @Override
-    public long getCharacterValue(char c) {
-	if (c >= '0' && c <= '9') {
-	    return c - '0';
-	} else {
-	    throw new NumberFormatException("Character is not a digit: " + c);
+	@Override
+	public long getCharacterValue(char c) {
+		if (c >= '0' && c <= '9') {
+			return c - '0';
+		} else {
+			throw new NumberFormatException("Character is not a digit: " + c);
+		}
 	}
-    }
 
-    @Override
-    public WholeNumber getNumberFromFind(NumberMatch find) {
-	// TODO Auto-generated method stub
-	return null;
-    }
+	@Override
+	public WholeNumber getNumberFromFind(NumberMatch find) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public WholeNumber getNumberFromString(String strNumber) throws NumberFormatException {
-	long value = Long.parseLong(strNumber);
-	final int nLeadingZeros = countLeadingZeros(strNumber);
-	return new WholeNumber(value, nLeadingZeros, GeneralNumber.Context.CARDINAL);
-    }
+	@Override
+	public WholeNumber getNumberFromString(String strNumber) throws NumberFormatException {
+		// TODO: support long-form numbers
+		
+		long value = Long.parseLong(strNumber);
+		final int nLeadingZeros = countLeadingZeros(strNumber);
+		return new WholeNumber(value, nLeadingZeros, AbstractNumber.Context.CARDINAL);
+	}
 
 }

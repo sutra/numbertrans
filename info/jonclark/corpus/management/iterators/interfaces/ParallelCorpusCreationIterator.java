@@ -1,9 +1,10 @@
 package info.jonclark.corpus.management.iterators.interfaces;
 
-import java.io.IOException;
-
+import info.jonclark.corpus.management.documents.MetaDocument;
 import info.jonclark.corpus.management.documents.OutputDocument;
 import info.jonclark.corpus.management.etc.BadFilenameException;
+
+import java.io.IOException;
 
 public interface ParallelCorpusCreationIterator extends CorpusIterator {
 
@@ -16,11 +17,6 @@ public interface ParallelCorpusCreationIterator extends CorpusIterator {
          *                created
          */
     public void setExpectedDocumentCount(int count);
-
-    /**
-         * Must be called BEFORE the next document is read.
-         */
-    public void next();
 
     /**
          * Returns true if we should skip the creation of output documents for

@@ -28,8 +28,6 @@
 package net.sourceforge.numbertrans.languages.korean;
 
 import net.sourceforge.numbertrans.framework.base.MyriadNumeralSet;
-import net.sourceforge.numbertrans.framework.base.WholeNumber;
-import net.sourceforge.numbertrans.framework.base.GeneralNumber.Context;
 import net.sourceforge.numbertrans.framework.scribe.MyriadCardinalScribe;
 
 /**
@@ -38,37 +36,35 @@ import net.sourceforge.numbertrans.framework.scribe.MyriadCardinalScribe;
  * @author Jonathan
  */
 public class KoreanCardinalScribe extends MyriadCardinalScribe {
-    
-    // TODO: Re-engineer MyriadNumeral Set to not use arrays
 
-    public static final MyriadNumeralSet NATIVE_KOREAN_NUMERALS = new MyriadNumeralSet(
-	    new String[] {null, "하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟", "아홉" },
-	    new String[] {"열", "온", "즈믄","드먼"}
-	    );
-    
-    public static final MyriadNumeralSet SINO_HANGUL_KOREAN_NUMERALS = new MyriadNumeralSet(
-	    new String[] {"영", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구" },
-	    new String[] {"십", "백", "천","만"}
-	    );
-    
-    // sinoHangul  = 10^8 = 억
+	// TODO: Re-engineer MyriadNumeral Set to not use arrays
 
-    // TODO: Add north korean alternatives
-    
-    public KoreanCardinalScribe(Form form) {
-	super(form, SINO_HANGUL_KOREAN_NUMERALS);
-	
-	// need to allow special cases for korean native 20, 30, etc.
-    }
-    
-    /**
-     * 
-     * @param form
-     * @param koreanNumeralSet Either NATIVE_KOREAN_NUMERALS or SINO_HANGUL_KOREAN_NUMERALS
-     */
-    public KoreanCardinalScribe(Form form, MyriadNumeralSet koreanNumeralSet) {
-	super(form, koreanNumeralSet);
-	
-	// need to allow special cases for korean native 20, 30, etc.
-    }
+	public static final MyriadNumeralSet NATIVE_KOREAN_NUMERALS =
+			new MyriadNumeralSet(new String[] { null, "하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟",
+					"아홉" }, new String[] { "열", "온", "즈믄", "드먼" });
+
+	public static final MyriadNumeralSet SINO_HANGUL_KOREAN_NUMERALS =
+			new MyriadNumeralSet(new String[] { "영", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구" },
+					new String[] { "십", "백", "천", "만" });
+
+	// sinoHangul = 10^8 = 억
+
+	// TODO: Add north korean alternatives
+
+	public KoreanCardinalScribe() {
+		super(SINO_HANGUL_KOREAN_NUMERALS);
+
+		// need to allow special cases for korean native 20, 30, etc.
+	}
+
+	/**
+	 * @param form
+	 * @param koreanNumeralSet
+	 *            Either NATIVE_KOREAN_NUMERALS or SINO_HANGUL_KOREAN_NUMERALS
+	 */
+	public KoreanCardinalScribe(Form form, MyriadNumeralSet koreanNumeralSet) {
+		super(koreanNumeralSet);
+
+		// need to allow special cases for korean native 20, 30, etc.
+	}
 }

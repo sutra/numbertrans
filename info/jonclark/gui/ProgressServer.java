@@ -192,7 +192,7 @@ public class ProgressServer extends SimpleServer {
 	// GuiUtils.setNativeLookAndFeel();
 	LogUtils.logAll();
 
-	Properties props = PropertyUtils.getProperties("conf/notifyServer.properties");
+	Properties props = PropertyUtils.getProperties("conf/clientserver/notifyServer.properties");
 	ProgressServer prog = new ProgressServer(props);
     }
 }

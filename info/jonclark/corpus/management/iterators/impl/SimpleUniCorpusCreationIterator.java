@@ -7,6 +7,7 @@ import info.jonclark.corpus.management.directories.AbstractCorpusDirectory;
 import info.jonclark.corpus.management.directories.CorpusDirectoryFactory;
 import info.jonclark.corpus.management.directories.CorpusQuery;
 import info.jonclark.corpus.management.directories.CorpusQuery.Statistic;
+import info.jonclark.corpus.management.documents.MetaDocument;
 import info.jonclark.corpus.management.documents.OutputDocument;
 import info.jonclark.corpus.management.etc.BadFilenameException;
 import info.jonclark.corpus.management.etc.CorpusManException;
@@ -14,7 +15,6 @@ import info.jonclark.corpus.management.etc.CorpusManRuntimeException;
 import info.jonclark.corpus.management.etc.CorpusProperties;
 import info.jonclark.corpus.management.etc.FileNamer;
 import info.jonclark.corpus.management.iterators.interfaces.UniCorpusCreationIterator;
-import info.jonclark.lang.Pair;
 import info.jonclark.log.LogUtils;
 import info.jonclark.util.StringUtils;
 
@@ -40,14 +40,15 @@ public class SimpleUniCorpusCreationIterator extends AbstractIterator implements
     private static final Logger log = LogUtils.getLogger();
 
     /**
-         * A constructor for use by the IteratorFactory <br>
-         * If the namer is left null, we assume no autonaming is possible
-         * 
-         * @throws CorpusManException
-         * @throws IOException
-         */
+     * A constructor for use by the IteratorFactory <br>
+     * If the namer is left null, we assume no autonaming is possible
+     * 
+     * @throws CorpusManException
+     * @throws IOException
+     */
     protected SimpleUniCorpusCreationIterator(Properties props, String outputRunName)
 	    throws CorpusManException {
+	super(props, outputRunName);
 
 	String runNamespace = CorpusProperties.getRunNamespace(props, outputRunName);
 	String corpusName = CorpusProperties.getCorpusNameFromRun(props, outputRunName);
@@ -55,6 +56,9 @@ public class SimpleUniCorpusCreationIterator extends AbstractIterator implements
 	this.rootDirectory = CorpusDirectoryFactory.getCorpusRootDirectory(props, corpusName);
 	this.outputRunName = StringUtils.removeTrailingString(outputRunName, ".");
 	this.arrangeByFilename = CorpusProperties.getArrangeByFilename(props, corpusName);
+
+	if (CorpusProperties.hasInputEncoding(props, outputRunName))
+	    throw new CorpusManException("Input encodings are not supported for Creation runs.");
 
 	if (CorpusProperties.hasNodeFilenamePattern(props, outputRunName))
 	    this.namer = new FileNamer(props, runNamespace);
@@ -94,8 +98,8 @@ public class SimpleUniCorpusCreationIterator extends AbstractIterator implements
     // }
 
     /**
-         * Actually creates the output file
-         */
+     * Actually creates the output file
+     */
     public OutputDocument getOutputDocument() throws IOException {
 	if (namer == null)
 	    throw new CorpusManRuntimeException(
@@ -120,26 +124,23 @@ public class SimpleUniCorpusCreationIterator extends AbstractIterator implements
 	if (arrangeByFilename)
 	    query.fileIndex = namer.getIndexFromFilename(docName);
 
-	File file = rootDirectory.getNextFileForCreation(query, rootFile);
+	File outputFile = rootDirectory.getNextFileForCreation(query, rootFile);
+	createParent(outputFile);
 
-	if (!file.getParentFile().exists())
-	    if (!file.getParentFile().mkdirs())
-		throw new IOException("Could not create parent directory for file: "
-			+ file.getAbsolutePath());
-
-	OutputDocument output = new OutputDocument(file);
-	currentOutputs.add(new Pair<OutputDocument, File>(output, file));
+	MetaDocument metadoc = super.getMetaFileFromOutputFile(outputFile, outputRunName);
+	OutputDocument output = new OutputDocument(outputFile, metadoc, outputEncoding);
+	super.addMonitorOutput(output, outputFile);
 	return output;
     }
 
     /**
-         * Moves to the next set of output documents, but does not actually
-         * create any documents. Should be called AFTER each pair is added.
-         */
+     * Moves to the next set of output documents, but does not actually create
+     * any documents. Should be called AFTER each pair is added.
+     */
     public void next() {
 	super.nFileIndex++;
 	checkedShouldSkip = false;
-	
+
 	super.updateStatus();
 
 	boolean unclean = super.validate();

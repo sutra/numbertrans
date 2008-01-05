@@ -27,7 +27,7 @@
  */
 package net.sourceforge.numbertrans.framework.parser;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
+import net.sourceforge.numbertrans.framework.base.AbstractNumber;
 import net.sourceforge.numbertrans.framework.base.NumberMatch;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
 import net.sourceforge.numbertrans.framework.parser.NumberParser;
@@ -91,7 +91,7 @@ public class CharacterMappedCardinalParser extends NumberParser<WholeNumber> {
 	final long value = Long.parseLong(strResult);
 
 	final int nLeadingZeros = countLeadingZeros(strNumber);
-	return new WholeNumber(value, nLeadingZeros, GeneralNumber.Context.CARDINAL);
+	return new WholeNumber(value, nLeadingZeros, AbstractNumber.Context.CARDINAL);
     }
 
 }

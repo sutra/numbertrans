@@ -27,17 +27,73 @@
  */
 package info.jonclark.util;
 
+import java.util.List;
+
 /**
  * @author Jonathan
  */
 public class MathUtils {
-    private static final double LOG_BASE10_OF_2 = Math.log10(2.0);
-    
-    public static double log2(double a) {
-	return Math.log10(a) / LOG_BASE10_OF_2;
-    }
-    
-    public static double logBase(double a, double base) {
-	return Math.log10(a) / Math.log10(base);
-    }
+	private static final double LOG_BASE10_OF_2 = Math.log10(2.0);
+
+	public static double log2(double a) {
+		return Math.log10(a) / LOG_BASE10_OF_2;
+	}
+
+	public static double logBase(double a, double base) {
+		return Math.log10(a) / Math.log10(base);
+	}
+
+	public static int min(List<Integer> list) {
+		int min = Integer.MAX_VALUE;
+		for (final int n : list) {
+			min = Math.min(min, n);
+		}
+		return min;
+	}
+
+	public static int max(List<Integer> list) {
+		int max = Integer.MIN_VALUE;
+		for (final int n : list) {
+			max = Math.max(max, n);
+		}
+		return max;
+	}
+	
+	public static int max(int[] list) {
+		int max = Integer.MIN_VALUE;
+		for (final int n : list) {
+			max = Math.max(max, n);
+		}
+		return max;
+	}
+	
+	public static int min(int[] list) {
+		int min = Integer.MAX_VALUE;
+		for (final int n : list) {
+			min = Math.min(min, n);
+		}
+		return min;
+	}
+
+	public static double midpoint(List<Integer> list) {
+		int min = Integer.MAX_VALUE;
+		int max = Integer.MIN_VALUE;
+		for (final int n : list) {
+			max = Math.max(max, n);
+			min = Math.min(min, n);
+		}
+		return ((double) (min + max)) / 2;
+	}
+
+	public static double midpoint(double min, double max) {
+		return (min + max) / 2;
+	}
+
+	public static double average(List<Integer> list) {
+		int sum = 0;
+		for (final int n : list) {
+			sum += n;
+		}
+		return (double) sum / (double) list.size();
+	}
 }

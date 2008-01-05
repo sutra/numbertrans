@@ -32,7 +32,7 @@ package net.sourceforge.numbertrans.framework.base;
  * A generic representation of a number with a decimal part (a portion beyond a
  * decimal point that must be rational).
  */
-public class DecimalNumber extends GeneralNumber {
+public class DecimalNumber extends AbstractNumber {
     private final double value;
 
     public DecimalNumber(final double value, final int nLeadingZeros, final Context context) {

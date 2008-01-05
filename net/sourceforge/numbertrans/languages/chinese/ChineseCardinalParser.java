@@ -34,120 +34,119 @@ import net.sourceforge.numbertrans.framework.parser.MyriadCardinalParser;
  */
 public class ChineseCardinalParser extends MyriadCardinalParser {
 
-    private final boolean useTraditional;
-    private final boolean useSimplified;
+	private final boolean useTraditional;
+	private final boolean useSimplified;
 
-    public ChineseCardinalParser() {
-	this(true, true);
-    }
-    
-    public ChineseCardinalParser(boolean useTraditional, boolean useSimplified) {
-	this.useTraditional = useTraditional;
-	this.useSimplified = useSimplified;
-	
-	addFinancialCharacters();
-	addStandardCharacters();
-	addObsoleteCharacters();
-	addPhoneNumberCharacters();
-	addVerticalCharacters();
-    }
-
-    private void addFinancialCharacters() {
-	values.put('零', 0L);
-	values.put('壹', 1L);
-	if (useTraditional)
-	    values.put('貳', 2L);
-	if (useSimplified)
-	    values.put('贰', 2L);
-	if (useTraditional)
-	    values.put('叄', 3L);
-	if (useSimplified)
-	    values.put('叁', 3L);
-
-	values.put('肆', 4L);
-	values.put('伍', 5L);
-	values.put('陸', 6L);
-	values.put('柒', 7L);
-	values.put('捌', 8L);
-	values.put('玖', 9L);
-	values.put('拾', 10L);
-	values.put('什', 10L);
-
-	values.put('念', 20L);
-	values.put('佰', 100L);
-	values.put('仟', 1000L);
-	values.put('萬', 10000L);
-	values.put('億', 100000000L);
-	values.put('兆', 1000000000000L);
-	values.put('京', 10000000000000000L);
-    }
-
-    private void addStandardCharacters() {
-	values.put('〇', 0L);
-	values.put('一', 1L);
-	values.put('二', 2L);
-	values.put('三', 3L);
-	values.put('四', 4L);
-	values.put('五', 5L);
-	values.put('六', 6L);
-	values.put('七', 7L);
-	values.put('八', 8L);
-	values.put('九', 9L);
-	values.put('十', 10L);
-
-	values.put('廿', 20L);
-	values.put('卄', 20L);
-	values.put('卅', 30L);
-	values.put('卌', 40L);
-
-	values.put('百', 100L);
-	values.put('千', 1000L);
-
-	if (useTraditional)
-	    values.put('萬', 10000L);
-	if (useSimplified)
-	    values.put('万', 10000L);
-	if (useTraditional)
-	    values.put('億', 100000000L);
-	if (useSimplified)
-	    values.put('亿', 100000000L);
-
-	// very large numbers
-	values.put('兆', 1000000000000L);
-	values.put('京', 10000000000000000L);
-
-	// also
-	values.put('兩', 2L);
-	values.put('參', 3L);
-
-	// before measure words
-	values.put('两', 2L);
-	values.put('参', 3L);
-    }
-
-    private void addObsoleteCharacters() {
-	values.put('弌', 1L);
-	values.put('弍', 2L);
-	values.put('弎', 2L);
-    }
-    
-    private void addVerticalCharacters() {
-	values.put('〡', 1L);
-	values.put('〢', 2L);
-	values.put('〣', 2L);
-    }
-
-    /**
-         * These characters, meaning "the smallest" are used in phone numbers,
-         * room numbers, etc. to prevent confusion between similar sounding
-         * words.
-         */
-    private void addPhoneNumberCharacters() {
-	if (useTraditional) {
-	    values.put('么', 1L);
+	public ChineseCardinalParser() {
+		this(true, true);
 	}
-	if (useSimplified) {
-	    values.put('幺', 1L);
+
+	public ChineseCardinalParser(boolean useTraditional, boolean useSimplified) {
+		this.useTraditional = useTraditional;
+		this.useSimplified = useSimplified;
+
+		addFinancialCharacters();
+		addStandardCharacters();
+		addObsoleteCharacters();
+		addPhoneNumberCharacters();
+		addVerticalCharacters();
 	}
-    }
+
+	private void addFinancialCharacters() {
+		values.put('零', 0L);
+		values.put('壹', 1L);
+		if (useTraditional)
+			values.put('貳', 2L);
+		if (useSimplified)
+			values.put('贰', 2L);
+		if (useTraditional)
+			values.put('叄', 3L);
+		if (useSimplified)
+			values.put('叁', 3L);
+
+		values.put('肆', 4L);
+		values.put('伍', 5L);
+		values.put('陸', 6L);
+		values.put('柒', 7L);
+		values.put('捌', 8L);
+		values.put('玖', 9L);
+		values.put('拾', 10L);
+		values.put('什', 10L);
+
+		values.put('念', 20L);
+		values.put('佰', 100L);
+		values.put('仟', 1000L);
+		values.put('萬', 10000L);
+		values.put('億', 100000000L);
+		values.put('兆', 1000000000000L);
+		values.put('京', 10000000000000000L);
+	}
+
+	private void addStandardCharacters() {
+		values.put('〇', 0L);
+		values.put('一', 1L);
+		values.put('二', 2L);
+		values.put('三', 3L);
+		values.put('四', 4L);
+		values.put('五', 5L);
+		values.put('六', 6L);
+		values.put('七', 7L);
+		values.put('八', 8L);
+		values.put('九', 9L);
+		values.put('十', 10L);
+
+		values.put('廿', 20L);
+		values.put('卄', 20L);
+		values.put('卅', 30L);
+		values.put('卌', 40L);
+
+		values.put('百', 100L);
+		values.put('千', 1000L);
+
+		if (useTraditional)
+			values.put('萬', 10000L);
+		if (useSimplified)
+			values.put('万', 10000L);
+		if (useTraditional)
+			values.put('億', 100000000L);
+		if (useSimplified)
+			values.put('亿', 100000000L);
+
+		// very large numbers
+		values.put('兆', 1000000000000L);
+		values.put('京', 10000000000000000L);
+
+		// also
+		values.put('兩', 2L);
+		values.put('參', 3L);
+
+		// before measure words
+		values.put('两', 2L);
+		values.put('参', 3L);
+	}
+
+	private void addObsoleteCharacters() {
+		values.put('弌', 1L);
+		values.put('弍', 2L);
+		values.put('弎', 2L);
+	}
+
+	private void addVerticalCharacters() {
+		values.put('〡', 1L);
+		values.put('〢', 2L);
+		values.put('〣', 2L);
+	}
+
+	/**
+	 * These characters, meaning "the smallest" are used in phone numbers, room
+	 * numbers, etc. to prevent confusion between similar sounding words.
+	 */
+	private void addPhoneNumberCharacters() {
+		if (useTraditional) {
+			values.put('么', 1L);
+		}
+		if (useSimplified) {
+			values.put('幺', 1L);
+		}
+	}
 }

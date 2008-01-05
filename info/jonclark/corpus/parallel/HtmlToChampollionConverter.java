@@ -97,14 +97,15 @@ public class HtmlToChampollionConverter implements UniCorpusTransformRun {
 		builder.append(lines[j] + "\n");
 	    }
 	}
-	
+
 	String plainText = builder.toString();
 	return plainText;
     }
 
     public void processCorpus(UniCorpusTransformIterator iterator) throws CorpusManException {
-	while (iterator.hasNext()) {
-	    try {
+	try {
+	    while (iterator.hasNext()) {
+
 		iterator.next();
 
 		InputDocument in = iterator.getInputDocument();
@@ -116,9 +117,11 @@ public class HtmlToChampollionConverter implements UniCorpusTransformRun {
 
 		in.close();
 		out.close();
-	    } catch (IOException e) {
-		throw new CorpusManException(e);
+
 	    }
+	    iterator.finish();
+	} catch (IOException e) {
+	    throw new CorpusManException(e);
 	}
     }
 

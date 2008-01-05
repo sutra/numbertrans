@@ -45,7 +45,7 @@ public class GurumukhiCardinalScribe extends CharacterMappedCardinalScribe {
          *                CardinalScribe. See the documentation for
          *                <code>Form</code> for more details.
          */
-    public GurumukhiCardinalScribe(Form form) {
-	super(form, DIGITS);
+    public GurumukhiCardinalScribe() {
+	super(DIGITS);
     }
 }

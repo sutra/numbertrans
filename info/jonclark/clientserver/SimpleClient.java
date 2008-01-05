@@ -151,6 +151,11 @@ public class SimpleClient implements ClientInterface {
 	out.println(str);
 	out.flush();
     }
+    
+    public OutputStream getRawOutputStream() throws IOException {
+    	assert out != null : "Not connected.";
+    	return sock.getOutputStream();
+        }
 
     /**
          * Close our connection to the server

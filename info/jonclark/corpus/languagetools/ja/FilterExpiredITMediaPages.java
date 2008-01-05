@@ -6,18 +6,18 @@ package info.jonclark.corpus.languagetools.ja;
 import info.jonclark.corpus.management.documents.InputDocument;
 import info.jonclark.corpus.management.documents.OutputDocument;
 import info.jonclark.corpus.management.etc.CorpusManException;
-import info.jonclark.corpus.management.iterators.interfaces.UniCorpusTransformIterator;
-import info.jonclark.corpus.management.runs.UniCorpusTransformRun;
+import info.jonclark.corpus.management.iterators.interfaces.ParallelCorpusTransformIterator;
+import info.jonclark.corpus.management.runs.ParallelCorpusTransformRun;
+import info.jonclark.log.LogUtils;
 import info.jonclark.util.FileUtils;
 import info.jonclark.util.StringUtils;
-import info.jonclark.log.LogUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-public class FilterExpiredITMediaPages implements UniCorpusTransformRun {
+public class FilterExpiredITMediaPages implements ParallelCorpusTransformRun {
 
     private static final Logger log = LogUtils.getLogger();
 
@@ -25,25 +25,27 @@ public class FilterExpiredITMediaPages implements UniCorpusTransformRun {
 
     }
 
-    public void processCorpus(UniCorpusTransformIterator iterator) throws CorpusManException {
+    public void processCorpus(ParallelCorpusTransformIterator iterator) throws CorpusManException {
 	int nExpired = 0;
 
 	while (iterator.hasNext()) {
 	    try {
 		iterator.next();
 
-		InputDocument in = iterator.getInputDocument();
-		OutputDocument out = iterator.getOutputDocument();
+		InputDocument inE = iterator.getInputDocumentE();
+		InputDocument inF = iterator.getInputDocumentF();
+		OutputDocument outE = iterator.getOutputDocumentE();
+		OutputDocument outF = iterator.getOutputDocumentF();
 
-		String html = in.getWholeFile();
+		String html = inF.getWholeFile();
 		if (!html.contains("<TITLE>Expired</TITLE>")) {
-		    out.copyFrom(in);
+		    outE.copyFrom(inE);
+		    outF.copyFrom(inF);
 		} else {
 		    nExpired++;
 		}
-
-		in.close();
-		out.close();
+		
+		iterator.finish();
 	    } catch (IOException e) {
 		throw new CorpusManException(e);
 	    }
@@ -87,3 +89,4 @@ public class FilterExpiredITMediaPages implements UniCorpusTransformRun {
 	System.out.println("Done. " + nExpired + " expired pages");
     }
 }
+

@@ -34,6 +34,8 @@ public class ParallelCreateTest implements ParallelCorpusCreationRun {
 		} else {
 		    System.out.println("Skipping existing file.");
 		}
+		
+		iterator.finish();
 	    }
 	} catch (Exception e) {
 	    throw new CorpusManException(e);

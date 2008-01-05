@@ -3,9 +3,8 @@
  */
 package info.jonclark.corpus.management.iterators.impl;
 
-import info.jonclark.corpus.management.directories.AbstractCorpusDirectory;
-import info.jonclark.corpus.management.directories.CorpusDirectoryFactory;
 import info.jonclark.corpus.management.directories.CorpusQuery;
+import info.jonclark.corpus.management.documents.MetaDocument;
 import info.jonclark.corpus.management.documents.OutputDocument;
 import info.jonclark.corpus.management.etc.BadFilenameException;
 import info.jonclark.corpus.management.etc.CorpusManException;
@@ -13,9 +12,7 @@ import info.jonclark.corpus.management.etc.CorpusManRuntimeException;
 import info.jonclark.corpus.management.etc.CorpusProperties;
 import info.jonclark.corpus.management.etc.FileNamer;
 import info.jonclark.corpus.management.iterators.interfaces.ParallelCorpusCreationIterator;
-import info.jonclark.lang.Pair;
 import info.jonclark.log.LogUtils;
-import info.jonclark.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,9 +22,6 @@ import java.util.logging.Logger;
 public class SimpleParallelCreationIterator extends AbstractIterator implements
 	ParallelCorpusCreationIterator {
 
-    private final AbstractCorpusDirectory rootDirectory;
-    private final File rootFile;
-    private final String outputRunName;
     private final FileNamer namer;
 
     private final int eParallel;
@@ -39,22 +33,21 @@ public class SimpleParallelCreationIterator extends AbstractIterator implements
     private static final Logger log = LogUtils.getLogger();
 
     /**
-         * A constructor for use by the IteratorFactory <br>
-         * If the namer is left null, we assume no autonaming is possible
-         * 
-         * @throws CorpusManException
-         */
+     * A constructor for use by the IteratorFactory <br>
+     * If the namer is left null, we assume no autonaming is possible
+     * 
+     * @throws CorpusManException
+     */
     protected SimpleParallelCreationIterator(Properties props, String outputRunName)
 	    throws CorpusManException {
+	super(props, outputRunName);
 
 	String runNamespace = CorpusProperties.getRunNamespace(props, outputRunName);
 	String corpusName = CorpusProperties.getCorpusNameFromRun(props, outputRunName);
-	this.rootFile = CorpusProperties.getCorpusRootDirectoryFile(props, corpusName);
-	this.rootDirectory = CorpusDirectoryFactory.getCorpusRootDirectory(props, corpusName);
 	this.arrangeByFilename = CorpusProperties.getArrangeByFilename(props, corpusName);
 
-	outputRunName = StringUtils.removeTrailingString(outputRunName, ".");
-	this.outputRunName = outputRunName;
+	if (CorpusProperties.hasInputEncoding(props, outputRunName))
+	    throw new CorpusManException("Input encodings are not supported for Creation runs.");
 
 	this.eParallel = CorpusProperties.getParallelIndexE(props, corpusName, outputRunName);
 	this.fParallel = CorpusProperties.getParallelIndexF(props, corpusName, outputRunName);
@@ -78,15 +71,12 @@ public class SimpleParallelCreationIterator extends AbstractIterator implements
 	if (arrangeByFilename)
 	    query.fileIndex = namer.getIndexFromFilename(docName);
 
-	File file = rootDirectory.getNextFileForCreation(query, rootFile);
+	File outputFile = rootDirectory.getNextFileForCreation(query, rootFile);
+	createParent(outputFile);
 
-	if (!file.getParentFile().exists())
-	    if (!file.getParentFile().mkdirs())
-		throw new IOException("Could not create parent directory for file: "
-			+ file.getAbsolutePath());
-
-	OutputDocument output = new OutputDocument(file);
-	currentOutputs.add(new Pair<OutputDocument, File>(output, file));
+	MetaDocument metadoc = super.getMetaFileFromOutputFile(outputFile, outputRunName);
+	OutputDocument output = new OutputDocument(outputFile, metadoc, outputEncoding);
+	super.addMonitorOutput(output, outputFile);
 	return output;
     }
 
@@ -95,13 +85,13 @@ public class SimpleParallelCreationIterator extends AbstractIterator implements
     }
 
     /**
-         * Moves to the next set of output documents, but does not actually
-         * create any documents. Should be called AFTER each pair is added.
-         */
+     * Moves to the next set of output documents, but does not actually create
+     * any documents. Should be called AFTER each pair is added.
+     */
     public void next() {
 	super.nFileIndex++;
 	checkedShouldSkip = false;
-	
+
 	super.updateStatus();
 
 	boolean unclean = validate();
@@ -178,5 +168,4 @@ public class SimpleParallelCreationIterator extends AbstractIterator implements
 	    return false;
 	}
     }
-
 }

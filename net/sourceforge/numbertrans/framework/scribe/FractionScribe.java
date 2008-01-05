@@ -27,33 +27,42 @@
  */
 package net.sourceforge.numbertrans.framework.scribe;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.sourceforge.numbertrans.framework.base.AbstractNumber;
 import net.sourceforge.numbertrans.framework.base.FractionalNumber;
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
-import net.sourceforge.numbertrans.framework.base.WholeNumber;
+import net.sourceforge.numbertrans.framework.scribe.CardinalScribe.Form;
 
 /**
  * An interface for classes that support the generation of fractions in some
  * target language.
  */
-public abstract class FractionScribe extends NumberScribe {
-    
-    public FractionScribe(Form form) {
-	super(form);
-    }
-    
-    public String getNumberString(GeneralNumber number) {
-	assert number instanceof FractionalNumber;
-	return getFraction((FractionalNumber)number);	
-    }
+public abstract class FractionScribe implements NumberScribe {
 
-    /**
-     * Get a string representation of a fractional number in a target language
-     * 
-     * @param number
-     *                The fractional number that should be converted to string
-     *                form
-     * @return The string representation of this fractional number in the target
-     *         langauge
-     */
-    public abstract String getFraction(FractionalNumber number);
+	public String getNumberString(AbstractNumber number, Form form) {
+		assert number instanceof FractionalNumber;
+		return getFraction((FractionalNumber) number, form);
+	}
+	
+	public List<String> getAllNumberStrings(AbstractNumber number) {
+		assert number instanceof FractionalNumber;
+		FractionalNumber whole = (FractionalNumber) number;
+		
+		ArrayList<String> list = new ArrayList<String>();
+		for(final Form form : getSupportedForms()) {
+			list.add(getFraction(whole, form));
+		}
+		return list;
+	}
+
+	/**
+	 * Get a string representation of a fractional number in a target language
+	 * 
+	 * @param number
+	 *            The fractional number that should be converted to string form
+	 * @return The string representation of this fractional number in the target
+	 *         langauge
+	 */
+	public abstract String getFraction(FractionalNumber number, Form form);
 }

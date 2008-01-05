@@ -49,6 +49,7 @@ public class WordMutator {
     }
 
     public static void main(String... args) {
-	System.out.println(mutateSentence("yeaux. hi there. somebody in little rock thinks you're pretty cool. that somebody might be excited to see you tomorrow, too. - somebody"));
+//	System.out.println(mutateSentence("yeaux. hi there. somebody in little rock thinks you're pretty cool. that somebody might be excited to see you tomorrow, too. - somebody"));
+	System.out.println(mutateSentence("happy birthday."));
     }
 }

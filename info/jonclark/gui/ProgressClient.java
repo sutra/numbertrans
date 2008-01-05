@@ -27,14 +27,21 @@
  */
 package info.jonclark.gui;
 
-import info.jonclark.clientserver.*;
+import info.jonclark.clientserver.ClientInterface;
+import info.jonclark.clientserver.ConnectionException;
+import info.jonclark.clientserver.LazyClient;
+import info.jonclark.clientserver.ReconnectionListener;
 import info.jonclark.log.LogUtils;
 import info.jonclark.properties.PropertiesException;
 import info.jonclark.properties.PropertyUtils;
-import info.jonclark.util.*;
+import info.jonclark.util.StringUtils;
 
-import java.util.*;
-import java.util.logging.*;
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Logger;
 
 /**
  * A client program that sends the status of its progress to a

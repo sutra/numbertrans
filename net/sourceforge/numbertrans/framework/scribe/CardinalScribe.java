@@ -27,32 +27,45 @@
  */
 package net.sourceforge.numbertrans.framework.scribe;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.sourceforge.numbertrans.framework.base.AbstractNumber;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
 
 /**
  * An interface for classes that support the generation of cardinal numbers in
  * some target language.
  */
-public abstract class CardinalScribe extends NumberScribe {
+public abstract class CardinalScribe implements NumberScribe {
 
-    public CardinalScribe(Form form) {
-	super(form);
-    }
-    
-    public String getNumberString(GeneralNumber number) {
-	assert number instanceof WholeNumber;
-	return getCardinalString((WholeNumber)number);	
-    }
+	public enum Form {
+		LONG, SHORT, LONG_WITHOUT_HYPHEN, SHORT_WITH_COMMAS
+	};
 
-    /**
-         * Get a string representation of a whole number in a target language
-         * 
-         * @param number
-         *                The whole number that should be converted to string
-         *                form
-         * @return The string representation of this whole number in the target
-         *         langauge
-         */
-    public abstract String getCardinalString(WholeNumber number);
+	public String getNumberString(AbstractNumber number, Form form) {
+		assert number instanceof WholeNumber;
+		return getCardinalString((WholeNumber) number, form);
+	}
+	
+	public List<String> getAllNumberStrings(AbstractNumber number) {
+		assert number instanceof WholeNumber;
+		WholeNumber whole = (WholeNumber) number;
+		
+		ArrayList<String> list = new ArrayList<String>();
+		for(final Form form : getSupportedForms()) {
+			list.add(getCardinalString(whole, form));
+		}
+		return list;
+	}
+
+	/**
+	 * Get a string representation of a whole number in a target language
+	 * 
+	 * @param number
+	 *            The whole number that should be converted to string form
+	 * @return The string representation of this whole number in the target
+	 *         langauge
+	 */
+	public abstract String getCardinalString(WholeNumber number, Form form);
 }

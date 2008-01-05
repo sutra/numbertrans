@@ -33,7 +33,7 @@ package net.sourceforge.numbertrans.framework.base;
  * subclass that defines T. This allows for more accurate representations of
  * whole numbers vs. decimals vs. fractions.
  */
-public class GeneralNumber {
+public abstract class AbstractNumber {
 
     /**
          * CONTEXT_CARDINAL includes items that are counted in Chinese (i.e. The
@@ -46,7 +46,7 @@ public class GeneralNumber {
     protected final int nLeadingZeros;
     protected final Context context;
 
-    protected GeneralNumber(final int nLeadingZeros, final Context context) {
+    protected AbstractNumber(final int nLeadingZeros, final Context context) {
 	this.nLeadingZeros = nLeadingZeros;
 	this.context = context;
     }
@@ -59,8 +59,8 @@ public class GeneralNumber {
     }
 
     protected boolean equalsSuper(Object o) {
-	if (o instanceof GeneralNumber) {
-	    final GeneralNumber other = (GeneralNumber) o;
+	if (o instanceof AbstractNumber) {
+	    final AbstractNumber other = (AbstractNumber) o;
 	    return this.nLeadingZeros == other.nLeadingZeros && this.context == other.context;
 	} else {
 	    return false;

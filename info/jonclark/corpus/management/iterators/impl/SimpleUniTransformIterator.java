@@ -7,12 +7,12 @@ import info.jonclark.corpus.management.directories.AbstractCorpusDirectory;
 import info.jonclark.corpus.management.directories.CorpusDirectoryFactory;
 import info.jonclark.corpus.management.directories.CorpusQuery;
 import info.jonclark.corpus.management.documents.InputDocument;
+import info.jonclark.corpus.management.documents.MetaDocument;
 import info.jonclark.corpus.management.documents.OutputDocument;
 import info.jonclark.corpus.management.etc.CorpusManException;
 import info.jonclark.corpus.management.etc.CorpusManRuntimeException;
 import info.jonclark.corpus.management.etc.CorpusProperties;
 import info.jonclark.corpus.management.iterators.interfaces.UniCorpusTransformIterator;
-import info.jonclark.lang.Pair;
 import info.jonclark.util.ArrayUtils;
 import info.jonclark.util.StringUtils;
 
@@ -39,11 +39,13 @@ public class SimpleUniTransformIterator extends AbstractIterator implements
     private String[] desiredParallelDirs;
     private int[] desiredParallelIndexes;
     private int currentParallelIndex;
-    
-    private int filesMidpoint;
-    
+
+    private int foldSize;
+
     protected SimpleUniTransformIterator(Properties props, String outputRunName)
 	    throws CorpusManException {
+	super(props, outputRunName);
+
 	String corpusName = CorpusProperties.getCorpusNameFromRun(props, outputRunName);
 	this.rootFile = CorpusProperties.getCorpusRootDirectoryFile(props, corpusName);
 	this.rootDirectory = CorpusDirectoryFactory.getCorpusRootDirectory(props, corpusName);
@@ -72,28 +74,30 @@ public class SimpleUniTransformIterator extends AbstractIterator implements
 
 	try {
 	    for (int i = 0; i < desiredParallelIndexes.length; i++) {
-		CorpusQuery fileQuery = new CorpusQuery(i, inputRunName, CorpusQuery.ALL_FILES,
-			CorpusQuery.NO_INDEX, CorpusQuery.Statistic.NONE);
+		CorpusQuery fileQuery = new CorpusQuery(desiredParallelIndexes[i], inputRunName,
+			CorpusQuery.ALL_FILES, CorpusQuery.NO_INDEX, CorpusQuery.Statistic.NONE);
 
 		// now get all the files in this parallel
 		allFiles.addAll(rootDirectory.getDocuments(fileQuery, rootFile));
 	    }
 	    super.nTotalFiles = allFiles.size();
-	    this.filesMidpoint = super.nTotalFiles / 2;
+	    this.foldSize = super.nTotalFiles / desiredParallelIndexes.length;
 	} catch (IOException e) {
 	    throw new CorpusManException(e);
 	}
-	
+
 	super.nNextFileIndex = findNext();
     }
 
-    public InputDocument getInputDocument() {
+    public InputDocument getInputDocument() throws IOException {
 	if (nFileIndex == -1)
 	    throw new CorpusManRuntimeException("You must call next() first.");
 
 	// TODO: Get one file at a time instead of just wailing on memory with
 	// our array
-	return new InputDocument(currentInputFile);
+	
+	MetaDocument metadoc = super.getMetaFileFromInputFile(currentInputFile, inputRunName);
+	return new InputDocument(currentInputFile, metadoc, inputEncoding);
     }
 
     public OutputDocument getOutputDocument() throws IOException {
@@ -102,31 +106,28 @@ public class SimpleUniTransformIterator extends AbstractIterator implements
 
 	CorpusQuery query = new CorpusQuery(currentParallelIndex, outputRunName,
 		currentInputFile.getName(), nFileIndex, CorpusQuery.Statistic.NONE);
-	File file = rootDirectory.getNextFileForCreation(query, rootFile);
+	File outputFile = rootDirectory.getNextFileForCreation(query, rootFile);
+	createParent(outputFile);
 
-	if (!file.getParentFile().exists())
-	    if (!file.getParentFile().mkdirs())
-		throw new IOException("Could not create parent directory for file: "
-			+ file.getAbsolutePath());
-
-	OutputDocument output = new OutputDocument(file);
-	currentOutputs.add(new Pair<OutputDocument, File>(output, file));
+	MetaDocument metadoc = super.getMetaFileFromOutputFile(outputFile, outputRunName);
+	OutputDocument output = new OutputDocument(outputFile, metadoc, outputEncoding);
+	super.addMonitorOutput(output, outputFile);
 	return output;
     }
-    
+
     private int findNext() {
-	int i = super.nFileIndex+1;
+	int i = super.nFileIndex + 1;
 	while (i < allFiles.size()) {
 	    File currentInputFile = allFiles.get(i);
 	    CorpusQuery query = new CorpusQuery(currentParallelIndex, outputRunName,
 		    currentInputFile.getName(), nFileIndex, CorpusQuery.Statistic.NONE);
 	    File file = rootDirectory.getNextFileForCreation(query, rootFile);
-	    if(!file.exists())
+	    if (!file.exists())
 		return i;
-	    
+
 	    i++;
 	}
-	
+
 	return -1;
     }
 
@@ -138,10 +139,10 @@ public class SimpleUniTransformIterator extends AbstractIterator implements
 	super.nFileIndex = super.nNextFileIndex;
 	super.nNextFileIndex = findNext();
 	this.currentInputFile = allFiles.get(nFileIndex);
-	
+
 	super.updateStatus();
-	
-	if(nFileIndex > this.filesMidpoint)
+
+	if (nFileIndex >= this.foldSize)
 	    this.currentParallelIndex = this.desiredParallelIndexes[1];
 
 	boolean unclean = validate();

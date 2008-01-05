@@ -29,53 +29,52 @@ package net.sourceforge.numbertrans.languages.english;
 
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
 import net.sourceforge.numbertrans.framework.scribe.OrdinalScribe;
+import net.sourceforge.numbertrans.framework.scribe.CardinalScribe.Form;
 
 public class EnglishOrdinalScribe extends OrdinalScribe {
 
-    public EnglishOrdinalScribe(Form form) {
-	super(form);
-    }
-
-    public static final Form[] SUPPORTED_FORMS = { Form.SHORT };
-    protected static final EnglishCardinalScribe shortCardinalScribe = new EnglishCardinalScribe(
-	    Form.SHORT);
-
-    @Override
-    public String getOrdinalString(WholeNumber number) {
-	if (form == Form.SHORT) {
-	    String base = shortCardinalScribe.getCardinalString(number);
-	    String suffix;
-
-	    // handle the special cases of 11th, 12th, and 13th
-	    if (base.length() > 1 && base.charAt(base.length() - 2) == '1') {
-		suffix = "th";
-	    } else {
-
-		char lastChar = base.charAt(base.length() - 1);
-		switch (lastChar) {
-		case '1':
-		    suffix = "st";
-		    break;
-		case '2':
-		    suffix = "nd";
-		    break;
-		case '3':
-		    suffix = "rd";
-		    break;
-		default:
-		    suffix = "th";
-		    break;
-		}
-	    }
-
-	    return base + suffix;
-	} else {
-	    throw new RuntimeException("Unimplemented");
+	public EnglishOrdinalScribe() {
+		super();
 	}
-    }
 
-    @Override
-    public Form[] getSupportedForms() {
-	return SUPPORTED_FORMS;
-    }
+	public static final Form[] SUPPORTED_FORMS = { Form.SHORT };
+
+	protected static final EnglishCardinalScribe shortCardinalScribe = new EnglishCardinalScribe();
+
+	public String getOrdinalString(WholeNumber number, Form form) {
+		if (form == Form.SHORT) {
+			String base = shortCardinalScribe.getCardinalString(number, form);
+			String suffix;
+
+			// handle the special cases of 11th, 12th, and 13th
+			if (base.length() > 1 && base.charAt(base.length() - 2) == '1') {
+				suffix = "th";
+			} else {
+
+				char lastChar = base.charAt(base.length() - 1);
+				switch (lastChar) {
+				case '1':
+					suffix = "st";
+					break;
+				case '2':
+					suffix = "nd";
+					break;
+				case '3':
+					suffix = "rd";
+					break;
+				default:
+					suffix = "th";
+					break;
+				}
+			}
+
+			return base + suffix;
+		} else {
+			throw new RuntimeException("Unimplemented");
+		}
+	}
+
+	public Form[] getSupportedForms() {
+		return SUPPORTED_FORMS;
+	}
 }

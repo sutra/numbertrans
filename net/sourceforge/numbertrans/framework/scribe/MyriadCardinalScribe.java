@@ -33,55 +33,53 @@ import net.sourceforge.numbertrans.framework.base.WholeNumber;
 
 public class MyriadCardinalScribe extends CardinalScribe {
 
-    private MyriadNumeralSet numerals;
+	private MyriadNumeralSet numerals;
 
-    public MyriadCardinalScribe(Form form, MyriadNumeralSet numerals) {
-	super(form);
-	this.numerals = numerals;
-    }
-
-    @Override
-    public String getCardinalString(WholeNumber number) {
-	// TODO: years such as 2004
-	// TODO: leading zeros
-
-	final long actualValue = number.getValue();
-	final PrependStringBuilder builder = new PrependStringBuilder();
-
-	long totalValue = actualValue;
-	long localMultiplier = 1;
-	long bigMultiplier = 1;
-	while (totalValue > 0) {
-
-	    // TODO: properly handle "bigMultiplier" starting with "man"
-	    // character
-
-	    final int digit = (int) (totalValue % 10);
-	    builder.prepend(numerals.getDigit(digit));
-
-	    // update values for next iteration
-	    totalValue /= 10;
-	    localMultiplier *= 10;
-
-	    if (totalValue > 0) {
-		if (localMultiplier >= 10000) {
-		    bigMultiplier *= 10000;
-		    localMultiplier = 1;
-		    builder.prepend(numerals.getLargeNumber(bigMultiplier));
-		} else if (localMultiplier >= 10) {
-		    builder.prepend(numerals.getLargeNumber(localMultiplier));
-		}
-	    }
-
+	public MyriadCardinalScribe(MyriadNumeralSet numerals) {
+		this.numerals = numerals;
 	}
 
-	// get the result and reverse it, since we started from the opposite end
-	String result = builder.toString();
-	return result;
-    }
+	@Override
+	public String getCardinalString(WholeNumber number, Form form) {
+		// TODO: years such as 2004
+		// TODO: leading zeros
 
-    @Override
-    public Form[] getSupportedForms() {
-	return new Form[] { Form.SHORT };
-    }
+		final long actualValue = number.getValue();
+		final PrependStringBuilder builder = new PrependStringBuilder();
+
+		long totalValue = actualValue;
+		long localMultiplier = 1;
+		long bigMultiplier = 1;
+		while (totalValue > 0) {
+
+			// TODO: properly handle "bigMultiplier" starting with "man"
+			// character
+
+			final int digit = (int) (totalValue % 10);
+			builder.prepend(numerals.getDigit(digit));
+
+			// update values for next iteration
+			totalValue /= 10;
+			localMultiplier *= 10;
+
+			if (totalValue > 0) {
+				if (localMultiplier >= 10000) {
+					bigMultiplier *= 10000;
+					localMultiplier = 1;
+					builder.prepend(numerals.getLargeNumber(bigMultiplier));
+				} else if (localMultiplier >= 10) {
+					builder.prepend(numerals.getLargeNumber(localMultiplier));
+				}
+			}
+
+		}
+
+		// get the result and reverse it, since we started from the opposite end
+		String result = builder.toString();
+		return result;
+	}
+
+	public Form[] getSupportedForms() {
+		return new Form[] { Form.SHORT };
+	}
 }

@@ -29,26 +29,29 @@ package net.sourceforge.numbertrans.languages.japanese;
 
 import net.sourceforge.numbertrans.framework.base.FractionalNumber;
 import net.sourceforge.numbertrans.framework.scribe.FractionScribe;
+import net.sourceforge.numbertrans.framework.scribe.CardinalScribe.Form;
 
 public class JapaneseFractionScribe extends FractionScribe {
 
-    private final JapaneseCardinalScribe cardinalScribe;
+	private final JapaneseCardinalScribe cardinalScribe;
 
-    public JapaneseFractionScribe(Form form) {
-	super(form);
-	this.cardinalScribe = new JapaneseCardinalScribe(form);
-    }
+	public JapaneseFractionScribe() {
+		this.cardinalScribe = new JapaneseCardinalScribe();
+	}
 
-    @Override
-    public String getFraction(FractionalNumber number) {
-	final String numerator = cardinalScribe.getCardinalString(number.getNumerator());
-	final String denominator = cardinalScribe.getCardinalString(number.getDenominator());
-	return denominator + "分の" + numerator;
-    }
+	public String getFraction(FractionalNumber number, Form form) {
+		if (form != Form.SHORT)
+			throw new RuntimeException("Unsupported form : " + form);
 
-    @Override
-    public Form[] getSupportedForms() {
-	return new Form[] { Form.SHORT };
-    }
+		final String numerator =
+				cardinalScribe.getCardinalString(number.getNumerator(), Form.SHORT);
+		final String denominator =
+				cardinalScribe.getCardinalString(number.getDenominator(), Form.SHORT);
+		return denominator + "分の" + numerator;
+	}
+
+	public Form[] getSupportedForms() {
+		return new Form[] { Form.SHORT };
+	}
 
 }

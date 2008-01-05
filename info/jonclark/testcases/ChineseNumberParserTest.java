@@ -27,7 +27,7 @@
  */
 package info.jonclark.testcases;
 
-import net.sourceforge.numbertrans.framework.base.GeneralNumber;
+import net.sourceforge.numbertrans.framework.base.AbstractNumber;
 import net.sourceforge.numbertrans.framework.base.WholeNumber;
 import net.sourceforge.numbertrans.languages.chinese.ChineseCardinalParser;
 import junit.framework.TestCase;
@@ -37,13 +37,13 @@ public class ChineseNumberParserTest extends TestCase {
     final ChineseCardinalParser parser = new ChineseCardinalParser();
 
     public void testGetNumberFromString() {
-	assertEquals(new WholeNumber(123, 0, GeneralNumber.Context.CARDINAL), parser
+	assertEquals(new WholeNumber(123, 0, AbstractNumber.Context.CARDINAL), parser
 		.getNumberFromString("一百二十三"));
-	assertEquals(new WholeNumber(927, 0, GeneralNumber.Context.CARDINAL), parser
+	assertEquals(new WholeNumber(927, 0, AbstractNumber.Context.CARDINAL), parser
 		.getNumberFromString("九百二十七"));
-	assertEquals(new WholeNumber(2006, 0, GeneralNumber.Context.CARDINAL), parser
+	assertEquals(new WholeNumber(2006, 0, AbstractNumber.Context.CARDINAL), parser
 		.getNumberFromString("二零零六"));
-	assertEquals(new WholeNumber(6, 1, GeneralNumber.Context.CARDINAL), parser
+	assertEquals(new WholeNumber(6, 1, AbstractNumber.Context.CARDINAL), parser
 		.getNumberFromString("零六"));
 	
 	System.out.println(Integer.parseInt("༡൫"));

@@ -43,6 +43,8 @@ public class ParallelTransformTest implements ParallelCorpusTransformRun {
 		    jout.println(line);
 		jout.close();
 	    }
+	    
+	    iterator.finish();
 	} catch (IOException e) {
 	    throw new CorpusManException(e);
 	}	

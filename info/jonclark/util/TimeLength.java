@@ -242,8 +242,12 @@ public class TimeLength {
 	    return format.format(getInMillis()) + " milliseconds";
 	}
     }
-
+    
     public String toStringMultipleUnits(final int nMaxUnits) {
+	return toStringMultipleUnits(nMaxUnits, false);
+    }
+
+    public String toStringMultipleUnits(final int nMaxUnits, boolean includeMilliseconds) {
 	// this algorithm might already exist elsewhere
 	long millis = length;
 	long seconds = (millis / 1000);
@@ -284,9 +288,9 @@ public class TimeLength {
 	if (minutes > 0 && nActualUnits < nMaxUnits) {
 	    nActualUnits++;
 	    if (minutes == 1)
-		builder.append(hours + " minute, ");
+		builder.append(minutes + " minute, ");
 	    else
-		builder.append(hours + " minutes, ");
+		builder.append(minutes + " minutes, ");
 	}
 	if (seconds > 0 && nActualUnits < nMaxUnits) {
 	    nActualUnits++;
@@ -295,7 +299,7 @@ public class TimeLength {
 	    else
 		builder.append(seconds + " seconds, ");
 	}
-	if (millis > 0 && nActualUnits < nMaxUnits) {
+	if (millis > 0 && nActualUnits < nMaxUnits && includeMilliseconds) {
 	    nActualUnits++;
 	    if (millis == 1)
 		builder.append(millis + " millisecond, ");
@@ -340,7 +344,7 @@ public class TimeLength {
     public static void main(String args[]) throws Exception {
 	BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 	TimeLength t = TimeLength.parseTimeLength(in.readLine());
-	System.out.println(t.toString());
+	System.out.println(t);
 	System.out.println(t.toStringSingleUnit());
 	System.out.println(t.toStringMultipleUnits(3));
     }

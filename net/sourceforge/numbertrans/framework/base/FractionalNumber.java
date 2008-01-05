@@ -30,7 +30,7 @@ package net.sourceforge.numbertrans.framework.base;
 /**
  * A generic representation of a fractional number (which may be irrational).
  */
-public class FractionalNumber extends GeneralNumber {
+public class FractionalNumber extends AbstractNumber {
     private final WholeNumber numerator;
     private final WholeNumber denominator;
 

@@ -29,20 +29,20 @@ package net.sourceforge.numbertrans.languages.english;
 
 import net.sourceforge.numbertrans.framework.base.FractionalNumber;
 import net.sourceforge.numbertrans.framework.scribe.FractionScribe;
+import net.sourceforge.numbertrans.framework.scribe.CardinalScribe.Form;
 
 public class EnglishFractionScribe extends FractionScribe {
 
-    public EnglishFractionScribe(Form form) {
-	super(form);
-    }
+	public EnglishFractionScribe() {
+		super();
+	}
 
-    @Override
-    public String getFraction(FractionalNumber number) {
-	return number.getNumerator() + "/" + number.getDenominator();
-    }
+	@Override
+	public String getFraction(FractionalNumber number, Form form) {
+		return number.getNumerator() + "/" + number.getDenominator();
+	}
 
-    @Override
-    public Form[] getSupportedForms() {
-	return new Form[] { Form.SHORT };
-    }
+	public Form[] getSupportedForms() {
+		return new Form[] { Form.SHORT };
+	}
 }

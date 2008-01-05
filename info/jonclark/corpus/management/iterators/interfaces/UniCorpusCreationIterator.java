@@ -1,9 +1,10 @@
 package info.jonclark.corpus.management.iterators.interfaces;
 
-import java.io.IOException;
-
+import info.jonclark.corpus.management.documents.MetaDocument;
 import info.jonclark.corpus.management.documents.OutputDocument;
 import info.jonclark.corpus.management.etc.BadFilenameException;
+
+import java.io.IOException;
 
 public interface UniCorpusCreationIterator extends CorpusIterator {
 
@@ -24,11 +25,6 @@ public interface UniCorpusCreationIterator extends CorpusIterator {
     public boolean shouldSkip();
     
     public boolean shouldSkip(String docName) throws BadFilenameException;
-
-    /**
-         * Must be called BEFORE the next document is read.
-         */
-    public void next();
 
     /**
          * Gets the next OutputDocument for creation IFF a naming pattern has

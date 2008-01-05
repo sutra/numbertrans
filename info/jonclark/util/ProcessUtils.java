@@ -43,9 +43,11 @@ public class ProcessUtils {
 		runProcessWait(commandLine, false);
 	}
 
-	public static void runProcessWait(final String commandLine, boolean showOutput)
+	public static int runProcessWait(final String commandLine, boolean showOutput)
 			throws InterruptedException, IOException {
+	    
 		Process p = Runtime.getRuntime().exec(commandLine);
+		
 		if (showOutput) {
 			sendStreamTo(p.getErrorStream(), System.err);
 			sendStreamTo(p.getInputStream(), System.out);
@@ -53,7 +55,10 @@ public class ProcessUtils {
 			sendStreamToBlackHole(p.getErrorStream());
 			sendStreamToBlackHole(p.getInputStream());
 		}
-		p.wait();
+		
+		int n = p.waitFor();
+		p.destroy();
+		return n;
 	}
 
 	public static void sendStreamToBlackHole(final InputStream in) {
@@ -82,6 +87,7 @@ public class ProcessUtils {
 			try {
 				while (br.readLine() != null)
 					;
+				br.close();
 			} catch (IOException e) {
 				// we really don't care since this is a black hole
 				e.printStackTrace();
