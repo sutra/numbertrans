@@ -503,8 +503,8 @@ public class ArrayUtils {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> int indexOfMax(T[] arr, int n, Comparator<T> comparator) {
-		if (n > arr.length)
+	public static <T> int indexOfMax(List<T> arr, int n, Comparator<T> comparator) {
+		if (n > arr.size())
 			throw new IllegalArgumentException("n > arr.length: " + n);
 
 		T[] max = (T[]) new Object[n];
@@ -512,10 +512,10 @@ public class ArrayUtils {
 		for (int i = 0; i < n; i++)
 			max[i] = null;
 
-		for (int i = 0; i < arr.length; i++) {
+		for (int i = 0; i < arr.size(); i++) {
 			for (int j = 0; j < n; j++) {
 
-				if (max[j] == null || comparator.compare(arr[i], max[j]) > 0) {
+				if (max[j] == null || comparator.compare(arr.get(i), max[j]) > 0) {
 
 					// first copy all values less than this
 					for (int k = n - 1; k > j; k--) {
@@ -524,7 +524,7 @@ public class ArrayUtils {
 					}
 
 					// now insert our new "maximum" for this position
-					max[j] = arr[i];
+					max[j] = arr.get(i);
 					indexes[j] = i;
 					break;
 				}

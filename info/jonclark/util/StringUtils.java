@@ -134,8 +134,33 @@ public class StringUtils {
 		return str.substring(start + 1, end);
 	}
 
+	public static String substringBetweenMatching(String str, String open, String close)
+			throws ParseException {
+
+		int start = str.indexOf(open);
+		if (start == -1) {
+			throw new ParseException("String does not start with " + open + ": " + str, 0);
+		}
+		int end = findMatching(str, start, open, close);
+
+		assert end < str.length() : "Matching " + close + " out of range: " + end
+				+ " for string of length " + str.length();
+
+		return str.substring(start + 1, end);
+	}
+
 	public static int findMatching(String str, int start, char open, char close)
 			throws ParseException {
+
+		int n = indexOfMatching(str, start, open, close);
+
+		if (n == -1)
+			throw new ParseException("No matching " + close + " found for string: " + str, start);
+		else
+			return n;
+	}
+
+	public static int indexOfMatching(String str, int start, char open, char close) {
 
 		assert start > -1 : "Negative starting index: " + start;
 		assert str.charAt(start) == open : "Does not start with " + open + ": " + str;
@@ -153,7 +178,119 @@ public class StringUtils {
 				return i;
 		}
 
-		throw new ParseException("No matching " + close + " found for string: " + str, start);
+		return -1;
+	}
+
+	public static int indexOfMatching(String str, int start, String open, String close) {
+
+		assert start > -1 : "Negative starting index: " + start;
+		assert str.startsWith(open, start) : "Does not start with " + open + ": " + str;
+
+		int nUnclosed = 1;
+		for (int i = start + 1; i < str.length(); i++) {
+
+			if (str.startsWith(open, i)) {
+				nUnclosed++;
+				i += open.length() - 1;
+			} else if (str.startsWith(close, i)) {
+				nUnclosed--;
+				i += close.length() - 1;
+			}
+
+			if (nUnclosed == 0)
+				return i;
+		}
+
+		return -1;
+	}
+
+	public static int findMatching(String str, int start, String open, String close)
+			throws ParseException {
+
+		int n = indexOfMatching(str, start, open, close);
+		if (n == -1)
+			throw new ParseException("No matching " + close + " found for string: " + str, start);
+		else
+			return n;
+	}
+
+	/**
+	 * Replace matching elements. e.g. changing matching double quotes into
+	 * latex-style.
+	 * <p>
+	 * <b>WARNING:</b> This is currently not a very efficient algorithm,
+	 * especially for large strings!
+	 * 
+	 * @param str
+	 * @param open
+	 * @param close
+	 * @param replaceOpen
+	 * @param replaceClose
+	 * @return
+	 */
+	public static String replaceMatching(String str, String open, String close, String replaceOpen,
+			String replaceClose) {
+
+		int nPrev = 0;
+		int nBegin = str.indexOf(open);
+		while (nBegin != -1) {
+			int nMatch = indexOfMatching(str, nBegin, open, close);
+			if (nMatch == -1)
+				break;
+
+			str =
+					str.substring(nPrev, nBegin) + replaceOpen
+							+ str.substring(nBegin + open.length(), nMatch) + replaceClose
+							+ str.substring(nMatch + close.length());
+		}
+
+		return str;
+	}
+
+	/**
+	 * A quick and dirty way of doing context-sensitive variable substitutions.
+	 * 
+	 * @return
+	 * @throws ParseException
+	 * @throws TransformException
+	 */
+	public static String replaceBetweenMatching(String str, String open, String close,
+			boolean outputOpen, boolean outputClose, Transducer transducer)
+			throws TransformException {
+
+		if (!str.contains(open) || !str.contains(close)) {
+			return str;
+		}
+
+		StringBuilder builder = new StringBuilder();
+		int nBegin = str.indexOf(open);
+		int nEnd = 0;
+		while (nBegin != -1) {
+
+			// put everything else into the document
+			String unaffectedPortion = str.substring(nEnd, nBegin);
+			builder.append(unaffectedPortion);
+
+			// don't include opening tag in output
+			if (!outputOpen)
+				nBegin += open.length();
+
+			// find the end of this portion and loop over variable substitutions
+			nEnd = str.indexOf(close, nBegin);
+			if (nEnd == -1)
+				throw new TransformException("matching " + close + " not found after " + nBegin);
+
+			String between = str.substring(nBegin, nEnd);
+			String replacement = transducer.transform(between);
+			builder.append(replacement);
+
+			// don't include closing tag in output
+			if (!outputClose)
+				nEnd += close.length();
+
+			nBegin = str.indexOf(open, nEnd);
+		}
+		return builder.toString();
 	}
 
 	/**
