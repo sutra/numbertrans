@@ -270,8 +270,8 @@ public class FileUtils {
 
 		// change wildcards into regext format
 		wildcard = StringUtils.replaceFast(wildcard, ".", "\\.");
-		wildcard = StringUtils.replaceFast(wildcard, "*", ".+?");
 		wildcard = StringUtils.replaceFast(wildcard, "?", ".");
+		wildcard = StringUtils.replaceFast(wildcard, "*", ".+?");
 
 		// preserve the part of the path that tells us where to start
 		File parentDirectory;

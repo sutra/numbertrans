@@ -37,6 +37,7 @@ import java.text.SimpleDateFormat;
  * @author Jonathan
  */
 public class FormatUtils {
+	private static final SimpleDateFormat fTime = new SimpleDateFormat("hh:mm:ss aa");
 	private static final SimpleDateFormat fDateFull =
 			new SimpleDateFormat("EEEEEEEEE, MMMMMMMM dd, yyyy hh:mm:ss aa");
 	private static final SimpleDateFormat fDateLong = new SimpleDateFormat("MMMMMMMM dd, yyyy");
@@ -44,6 +45,10 @@ public class FormatUtils {
 	public static final DecimalFormat FORMAT_4DECIMALS = new DecimalFormat("#,###.####");
 	public static final DecimalFormat FORMAT_EXP = new DecimalFormat("0.0000E0");
 	public static final DecimalFormat FORMAT_WHOLE = new DecimalFormat("#,###");
+
+	public static String formatTime(final Date d) {
+		return fTime.format(d);
+	}
 
 	/**
 	 * Format date like as in this example: Wednesday, March 31, 2005 5:23:55 pm

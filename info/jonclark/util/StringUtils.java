@@ -290,6 +290,10 @@ public class StringUtils {
 
 			nBegin = str.indexOf(open, nEnd);
 		}
+		if (nEnd < str.length()) {
+			String leftovers = str.substring(nEnd);
+			builder.append(leftovers);
+		}
 		return builder.toString();
 	}
 
@@ -1212,14 +1216,20 @@ public class StringUtils {
 	 * @return
 	 */
 	public static String[] tokenize(String str, String delims, int nMaxSplits) {
-		StringTokenizer tok = new StringTokenizer(str, delims);
+		return tokenize(str, delims, nMaxSplits, false);
+	}
+
+	public static String[] tokenize(String str, String delims, int nMaxSplits, boolean returnDelims) {
+		StringTokenizer tok = new StringTokenizer(str, delims, returnDelims);
 		final int nReturnedTokens = Math.min(nMaxSplits, tok.countTokens());
 
 		int nCharIterator = 0;
 		String[] result = new String[nReturnedTokens];
 		for (int i = 0; i < nReturnedTokens - 1; i++) {
 			result[i] = tok.nextToken();
-			nCharIterator += result[i].length() + 1;
+			nCharIterator += result[i].length();
+			if (!returnDelims)
+				nCharIterator++;
 		}
 
 		if (nCharIterator < str.length())
@@ -1242,7 +1252,11 @@ public class StringUtils {
 		final StringBuilder builder = new StringBuilder();
 		for (final float token : tokens)
 			builder.append(token + delim);
-		return builder.toString().trim();
+		
+		if(builder.length() >= delim.length())
+			builder.delete(builder.length() - delim.length(), builder.length());
+		
+		return builder.toString();
 	}
 
 	/**
@@ -1259,7 +1273,11 @@ public class StringUtils {
 		final StringBuilder builder = new StringBuilder();
 		for (final int token : tokens)
 			builder.append(token + delim);
-		return builder.toString().trim();
+
+		if(builder.length() >= delim.length())
+			builder.delete(builder.length() - delim.length(), builder.length());
+		
+		return builder.toString();
 	}
 
 	public static String untokenizeEnglish(final String[] tokens) {
@@ -1314,6 +1332,21 @@ public class StringUtils {
 			builder.append(token + " ");
 		return builder.toString().trim();
 	}
+	
+	public static <T> String untokenize(final T[] tokens) {
+		return untokenize(tokens, " ");
+	}
+	
+	public static <T> String untokenize(final T[] tokens, String delim) {
+		final StringBuilder builder = new StringBuilder();
+		for (final T token : tokens)
+			builder.append(token + delim);
+
+		if(builder.length() >= delim.length())
+			builder.delete(builder.length() - delim.length(), builder.length());
+		
+		return builder.toString();
+	}
 
 	public static <T> String untokenize(final Iterable<T> tokens) {
 		return untokenize(tokens, " ");
@@ -1323,7 +1356,11 @@ public class StringUtils {
 		final StringBuilder builder = new StringBuilder();
 		for (final T token : tokens)
 			builder.append(token + delim);
-		return builder.toString().trim();
+
+		if(builder.length() >= delim.length())
+			builder.delete(builder.length() - delim.length(), builder.length());
+		
+		return builder.toString();
 	}
 
 	/**
@@ -1382,7 +1419,11 @@ public class StringUtils {
 		final StringBuilder builder = new StringBuilder();
 		for (final String token : tokens)
 			builder.append(token + delim);
-		return builder.toString().trim();
+
+		if(builder.length() >= delim.length())
+			builder.delete(builder.length() - delim.length(), builder.length());
+		
+		return builder.toString();
 	}
 
 	public static String whitespaceToSpace(String str, boolean removeNewLines) {

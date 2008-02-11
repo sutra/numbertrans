@@ -58,7 +58,7 @@ public class MathUtils {
 		}
 		return max;
 	}
-	
+
 	public static int max(int[] list) {
 		int max = Integer.MIN_VALUE;
 		for (final int n : list) {
@@ -66,7 +66,7 @@ public class MathUtils {
 		}
 		return max;
 	}
-	
+
 	public static int min(int[] list) {
 		int min = Integer.MAX_VALUE;
 		for (final int n : list) {

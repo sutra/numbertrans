@@ -34,109 +34,114 @@ import info.jonclark.util.FormatUtils;
 import info.jonclark.util.TimeLength;
 
 public class RemainingTimeEstimator {
-    private final CircularBuffer<Long> eventLog;
+	private final CircularBuffer<Long> eventLog;
 
-    /**
-         * Note: Try to choose an event window that is long enough such that
-         * instantaneous jitter is eliminated while making the window small
-         * enough that a single long pause does not skew the results.
-         * 
-         * @param nEventWindow
-         */
-    public RemainingTimeEstimator(int nEventWindow) {
-	assert nEventWindow >= 3 : "Event window must be at least 3 to produce good results";
+	/**
+	 * Note: Try to choose an event window that is long enough such that
+	 * instantaneous jitter is eliminated while making the window small enough
+	 * that a single long pause does not skew the results.
+	 * 
+	 * @param nEventWindow
+	 */
+	public RemainingTimeEstimator(int nEventWindow) {
+		assert nEventWindow >= 3 : "Event window must be at least 3 to produce good results";
 
-	this.eventLog = new CircularBuffer<Long>(nEventWindow);
-    }
-
-    public void recordEvent() {
-	// Note: Autoboxing going on here...
-	eventLog.add(System.currentTimeMillis());
-    }
-
-    private long getSpan() {
-	if (eventLog.size() >= 2) {
-	    return eventLog.getLast() - eventLog.getFirst();
-	} else {
-	    return 0;
-	}
-    }
-
-    private double getSeconds() {
-	long span = getSpan();
-	return (double) span / 1000.0;
-    }
-
-    public String getEventsPerSecond() {
-	return getEventsPerSecond(eventLog.size() - 1);
-    }
-
-    /**
-         * @param nEvents
-         *                The number of events that have occurred IN THE CURRENT
-         *                EVENT WINDOW
-         * @return
-         */
-    public String getEventsPerSecond(int nEvents) {
-	if (getSeconds() > 0)
-	    return FormatUtils.FORMAT_2DECIMALS.format(nEvents / getSeconds());
-	else
-	    return "Undefined";
-    }
-
-    public String getSecondsPerEvent() {
-	return getSecondsPerEvent(eventLog.size() - 1);
-    }
-
-    /**
-         * @param nEvents
-         *                The number of events that have occurred IN THE CURRENT
-         *                EVENT WINDOW
-         * @return
-         */
-    public String getSecondsPerEvent(int nEvents) {
-	if (nEvents > 1)
-	    return FormatUtils.FORMAT_2DECIMALS.format(getSeconds() / nEvents);
-	else
-	    return "Undefined";
-    }
-
-    public TimeLength getRemainingTime(int nEventsRemaining) {
-	long span = getSpan();
-	int nRecentEventsDone = eventLog.size() - 1;
-
-	// timePerEvent = span / nRecentEventsDone
-	// remainingTime = timePerEvent * nEventsRemaining
-
-	long remainingTime;
-	if (nRecentEventsDone > 0) {
-	    remainingTime = span * nEventsRemaining / nRecentEventsDone;
-	} else {
-	    remainingTime = 0;
+		this.eventLog = new CircularBuffer<Long>(nEventWindow);
 	}
 
-	return new TimeLength(remainingTime);
-    }
-
-    public long getEstimatedCompetionTime(int nEventsRemaining) {
-	final TimeLength length = getRemainingTime(nEventsRemaining);
-	long completion = System.currentTimeMillis() + length.getInMillis();
-	return completion;
-    }
-
-    public String getEstimatedCompetionTimeFormatted(int nEventsRemaining) {
-	final long completion = getEstimatedCompetionTime(nEventsRemaining);
-	return FormatUtils.formatFullDate(new Date(completion));
-    }
-
-    public static void main(String... args) throws Exception {
-	final RemainingTimeEstimator est = new RemainingTimeEstimator(5);
-	int n = 30;
-	for (int i = 0; i < n; i++) {
-	    est.recordEvent();
-	    System.out.println(n - i + ": " + est.getRemainingTime(n - i));
-	    System.out.println(n - i + ": " + est.getEstimatedCompetionTimeFormatted(n - i));
-	    Thread.sleep(1000);
+	public void recordEvent() {
+		// Note: Autoboxing going on here...
+		eventLog.add(System.currentTimeMillis());
 	}
-    }
+
+	private long getSpan() {
+		if (eventLog.size() >= 2) {
+			return eventLog.getLast() - eventLog.getFirst();
+		} else {
+			return 0;
+		}
+	}
+
+	private double getSeconds() {
+		long span = getSpan();
+		return (double) span / 1000.0;
+	}
+
+	public String getEventsPerSecond() {
+		return getEventsPerSecond(eventLog.size() - 1);
+	}
+
+	/**
+	 * @param nEvents
+	 *            The number of events that have occurred IN THE CURRENT EVENT
+	 *            WINDOW
+	 * @return
+	 */
+	public String getEventsPerSecond(int nEvents) {
+		if (getSeconds() > 0)
+			return FormatUtils.FORMAT_2DECIMALS.format(nEvents / getSeconds());
+		else
+			return "Undefined";
+	}
+
+	public String getSecondsPerEvent() {
+		return getSecondsPerEvent(eventLog.size() - 1);
+	}
+
+	/**
+	 * @param nEvents
+	 *            The number of events that have occurred IN THE CURRENT EVENT
+	 *            WINDOW
+	 * @return
+	 */
+	public String getSecondsPerEvent(int nEvents) {
+		if (nEvents > 1)
+			return FormatUtils.FORMAT_2DECIMALS.format(getSeconds() / nEvents);
+		else
+			return "Undefined";
+	}
+
+	public TimeLength getRemainingTime(int nEventsRemaining) {
+		long span = getSpan();
+		int nRecentEventsDone = eventLog.size() - 1;
+
+		// timePerEvent = span / nRecentEventsDone
+		// remainingTime = timePerEvent * nEventsRemaining
+
+		long remainingTime;
+		if (nRecentEventsDone > 0) {
+			remainingTime = span * nEventsRemaining / nRecentEventsDone;
+		} else {
+			remainingTime = 0;
+		}
+
+		return new TimeLength(remainingTime);
+	}
+
+	public long getEstimatedCompetionTime(int nEventsRemaining) {
+		final TimeLength length = getRemainingTime(nEventsRemaining);
+		long completion = System.currentTimeMillis() + length.getInMillis();
+		return completion;
+	}
+
+	public String getEstimatedCompetionTimeFormatted(int nEventsRemaining) {
+		final TimeLength length = getRemainingTime(nEventsRemaining);
+		long completion = System.currentTimeMillis() + length.getInMillis();
+		if (length.getInDays() > 1) {
+			return FormatUtils.formatFullDate(new Date(completion));
+		} else {
+			return FormatUtils.formatTime(new Date(completion));
+		}
+	}
+
+	public static void main(String... args) throws Exception {
+		final RemainingTimeEstimator est = new RemainingTimeEstimator(5);
+		int n = 30;
+		for (int i = 0; i < n; i++) {
+			est.recordEvent();
+			System.out.println(n - i + ": " + est.getRemainingTime(n - i));
+			System.out.println(n - i + ": " + est.getEstimatedCompetionTimeFormatted(n - i));
+			Thread.sleep(1000);
+		}
+	}
 }

@@ -556,6 +556,13 @@ public class ArrayUtils {
 			n[i] = list.get(i);
 		return n;
 	}
+	
+	public static double[] toArray(List<Double> list) {
+		double[] n = new double[list.size()];
+		for (int i = 0; i < list.size(); i++)
+			n[i] = list.get(i);
+		return n;
+	}
 
 	public static void main(String... args) {
 		double[] x = new double[] { 1, 3, 2, 4 };
